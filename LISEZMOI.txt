@@ -1,0 +1,31 @@
+BASTIONS – mise en ligne sur GitHub Pages
+==========================================
+
+Contenu du dossier (à déposer tel quel, à la racine du dépôt) :
+  index.html              le jeu (classement en ligne déjà relié au tableau Google Sheets)
+  manifest.webmanifest    nom, couleurs et icônes de l'application
+  icon-192.png, icon-512.png, icon-maskable-512.png   icônes Android
+  sw.js                   mise en cache pour jouer hors ligne
+  LISEZMOI.txt            ce fichier (facultatif sur GitHub)
+
+1. Mise en ligne
+   - Crée un compte sur github.com, puis un dépôt PUBLIC nommé par exemple « bastions ».
+   - « Add file > Upload files » : dépose tous les fichiers ci-dessus, puis « Commit changes ».
+   - « Settings > Pages » : Source « Deploy from a branch », branche « main », dossier « / (root) », « Save ».
+   - Après une à deux minutes, le jeu est en ligne à l'adresse affichée,
+     du type https://ton-pseudo.github.io/bastions/
+
+2. Installer l'icône sur le téléphone
+   - Android (Chrome) : ouvre l'adresse, menu ⋮ puis « Installer l'application »
+     (ou « Ajouter à l'écran d'accueil »).
+   - iPhone (Safari) : ouvre l'adresse, bouton Partager puis « Sur l'écran d'accueil ».
+   Le jeu s'ouvre ensuite en plein écran depuis l'icône Bastions, et reste jouable hors ligne.
+
+3. Mettre à jour le jeu
+   - Redépose le nouveau index.html au même endroit (même nom).
+   - Les joueurs reçoivent la nouvelle version au lancement suivant
+     (une fois en ligne, le jeu se met à jour en arrière-plan).
+   - Si tu modifies sw.js, change aussi la ligne « const CACHE = 'bastions-v1' » (v2, v3…).
+
+Les records restent dans ton tableau Google Sheets : rien à faire sur GitHub de ce côté.
+Chaque appareil garde sa propre progression (campagne, étoiles, pseudo, historique des défis).
