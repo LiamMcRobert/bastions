@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_42)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_45)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -123,7 +123,7 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid .land{position:absolute;left:0;right:0;bottom:0;height:5px}
 .idline{font-size:13px;color:var(--muted);margin-top:4px}
 .idline code{font:700 14px ui-monospace,Menlo,Consolas,monospace;color:var(--panel-ink);user-select:all;-webkit-user-select:all}
-#defiIdIn,#scoreUrl{width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
+#defiIdIn{width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
   color:inherit;font:16px ui-monospace,Menlo,Consolas,monospace;padding:0 12px}
 
 .pack{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -160,6 +160,19 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .starsum{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:800}
 .starsum svg{width:22px;height:22px;fill:#f2b705;stroke:#a87a00;stroke-width:1.4;stroke-linejoin:round}
 #pseudo{flex:1;max-width:62%;min-height:44px;border-radius:10px;border:2px solid var(--line);background:var(--field);color:inherit;font:inherit;font-size:16px;padding:0 10px}
+#pre{z-index:8}
+#pre h2{font-size:24px;margin-bottom:10px}
+#pre .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+#pre .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field)}
+#pre .specs{display:flex;gap:8px;margin:0 0 12px}
+#pre .specs span{display:flex;width:30px;height:30px}
+#pre .specs svg{width:100%;height:100%;fill:var(--muted);opacity:.35}
+#pre .specs span.on svg{fill:var(--accent);opacity:1}
+.prebox{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px}
+.prebox div{background:var(--field);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.prebox span{font-size:12px;font-weight:700;color:var(--muted)}
+.prebox strong{font-size:22px;font-weight:800;display:flex;flex-direction:column;line-height:1.15}
+.prebox small{font-size:12px;font-weight:600;color:var(--muted)}
 #profiles{list-style:none;padding:0;margin:4px 0 6px}
 #profiles li{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:16px}
 .msg{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:6;
@@ -379,10 +392,6 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <span class="starsum"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z"/></svg><span id="starSum">0</span></span></div>
         <label class="setrow" for="pseudo"><span class="lbl" style="margin:0">Pseudo</span>
           <input id="pseudo" maxlength="20" autocomplete="nickname" placeholder="Anonyme" aria-label="Pseudo, envoyé avec tes meilleurs temps"></label>
-        <p class="lbl">Classement en ligne</p>
-        <p class="sub" style="margin:2px 0 0">Adresse de l’application Web Apps Script reliée au tableau Google Sheets, déjà renseignée. Si le champ est vidé, l’adresse d’origine est reprise au prochain lancement.</p>
-        <input id="scoreUrl" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
-        <button class="ghost" id="btnScoreTest">Tester la connexion</button>
         <label class="tgl"><input type="checkbox" id="optSound"><span><strong>Musique</strong>Dans les menus et pendant les parties (même réglage que le bouton 🔊).</span></label>
         <p class="lbl">Vitesse du jeu</p>
         <div class="seg" id="segSpeed"><button data-v="0">×1</button><button data-v="1">×1,5</button><button data-v="2">×2</button></div>
@@ -392,6 +401,9 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
         <p class="sub" style="margin:2px 0 0">Remet l’avancement de la campagne à zéro. Touche deux fois le bouton pour confirmer.</p>
         <div id="resetList"></div>
+        <p class="lbl" style="margin-top:20px">Classement en ligne</p>
+        <p class="sub" style="margin:2px 0 0">Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.</p>
+        <button class="ghost" id="btnScoreTest">Tester la connexion</button>
       </section>
 
       <section id="tab-free" class="hidden">
@@ -453,6 +465,22 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         </ul>
       </section>
 
+    </div>
+  </div>
+
+  <!-- ===== Avant de lancer une partie ===== -->
+  <div id="pre" class="overlay hidden">
+    <div class="panel">
+      <h2 id="preTitle"></h2>
+      <div class="chips" id="preChips"></div>
+      <div class="specs" id="preSpecs"></div>
+      <div class="prebox">
+        <div><span>Record en ligne</span><strong id="preRecord"></strong></div>
+        <div><span>Ton meilleur</span><strong id="preMine"></strong></div>
+      </div>
+      <p class="sub" id="preNote"></p>
+      <button id="btnPreGo" class="primary">Lancer la partie</button>
+      <button id="btnPreBack" class="ghost">Retour</button>
     </div>
   </div>
 
@@ -1131,12 +1159,12 @@ function resumeAttempt(entry) {
   playDefi(entry, entry.times.length);
 }
 const canResume = e => (e.status === 'échoué' || e.status === 'abandonné') && e.times.length < e.challenge.games.length;
-function startFree() { startAttempt(newChallenge(), 'créé'); }
+function startFree() { preDefi(newChallenge(), 'créé', 'Nouveau défi'); }
 function playById(raw) {
   const ch = decodeChallenge(raw), err = $('defiErr');
   if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : D2331-1kz9ab.'; err.classList.remove('hidden'); return; }
   err.classList.add('hidden'); $('defiIdIn').value = '';
-  startAttempt(ch, 'importé');
+  preDefi(ch, 'importé', 'Défi reçu');
 }
 async function copyText(txt, what) {
   try { await navigator.clipboard.writeText(txt); toast((what || 'Texte') + ' copié'); return; } catch (e) { /* repli ci-dessous */ }
@@ -1227,10 +1255,10 @@ function onDefiClick(e) {
   }
   const rs = e.target.closest('[data-resume]'), rp = e.target.closest('[data-replay]');
   const sh = e.target.closest('[data-share]'), dy = e.target.closest('[data-daily]');
-  if (rs) { const x = findEntry(rs.dataset.resume); if (x && canResume(x)) resumeAttempt(x); }
-  if (rp) { const x = findEntry(rp.dataset.replay); if (x) startAttempt(x.challenge, x.source); }
+  if (rs) { const x = findEntry(rs.dataset.resume); if (x && canResume(x)) preDefi(x.challenge, x.source, null, x); }
+  if (rp) { const x = findEntry(rp.dataset.replay); if (x) preDefi(x.challenge, x.source); }
   if (sh) shareId(sh.dataset.share);
-  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) startAttempt(ch, 'du jour'); }
+  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, 'du jour', 'Défi du jour, ' + TIERS[ch.difficulty].name); }
 }
 $('histList').addEventListener('click', onDefiClick);
 $('dailyList').addEventListener('click', onDefiClick);
@@ -1241,9 +1269,8 @@ $('pseudo').addEventListener('input', e => { pseudo = e.target.value.slice(0, 20
 /* ================= Classement en ligne : Google Sheets via une application Web Apps Script ================= */
 // Colonne A : identifiant de la partie ; B : pseudo du meilleur joueur ; C : meilleur temps (secondes de jeu).
 // Une ligne n'est créée qu'après une première victoire sur cet identifiant.
-// Adresse du classement intégrée : fonctionne dès la première partie ; un joueur peut la remplacer dans Personnalisation
-const DEFAULT_SCORE_URL = 'https://script.google.com/macros/s/AKfycbxNUzGZ45OIkDKiFT2bddHoymcoQhzUWkSA9nYxGP6E8_2K6I9rWx-2t59QCqXey1s/exec';
-let scoreUrl = String(store.get('bastions.scoreUrl', '') || '').trim() || DEFAULT_SCORE_URL;
+// Adresse du classement : fixe, intégrée au jeu (elle n'est plus modifiable dans Personnalisation)
+const scoreUrl = 'https://script.google.com/macros/s/AKfycbxNUzGZ45OIkDKiFT2bddHoymcoQhzUWkSA9nYxGP6E8_2K6I9rWx-2t59QCqXey1s/exec';
 const remote = {};                                 // identifiant → { pseudo, time } connus du tableau
 async function fetchRecords(ids) {
   ids = [...new Set(ids)].filter(Boolean);
@@ -1286,13 +1313,60 @@ function showOnline(id, time) {
       : 'Record en ligne : ' + r.record.pseudo + ', ' + fmtTime(r.record.time) + '.';
   });
 }
-$('scoreUrl').value = scoreUrl;
-$('scoreUrl').addEventListener('change', e => { scoreUrl = e.target.value.trim(); store.set('bastions.scoreUrl', scoreUrl); });
 $('btnScoreTest').onclick = async () => {
-  scoreUrl = $('scoreUrl').value.trim(); store.set('bastions.scoreUrl', scoreUrl);
-  if (!scoreUrl) { toast('Colle d’abord l’adresse de l’application Web'); return; }
-  toast((await fetchRecords([levelId(0, 1)])) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie l’adresse et la connexion');
+  toast('Test en cours…');
+  toast((await fetchRecords([levelId(0, 1)])) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie ta connexion Internet');
 };
+
+/* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
+let preStart = null;
+function showPre({ title, chips, specials, id, mine, note, start }) {
+  $('preTitle').textContent = title;
+  $('preChips').innerHTML = chips.map(c => `<span>${escapeHtml(c)}</span>`).join('');
+  $('preSpecs').innerHTML = specIcons({ specials });
+  $('preMine').innerHTML = mine;
+  $('preNote').textContent = note || '';
+  const rec = () => remote[id] ? fmtTime(remote[id].time) + '<small>' + escapeHtml(remote[id].pseudo) + '</small>' : null;
+  $('preRecord').innerHTML = rec() || 'Chargement…';
+  preStart = start;
+  $('pre').classList.remove('hidden');
+  fetchRecords([id]).then(ok => {                  // le record s'affiche dès que le tableau a répondu
+    if (preStart === start) $('preRecord').innerHTML = rec() || (ok ? 'Aucun record' : 'Indisponible');
+  });
+}
+function hidePre() { $('pre').classList.add('hidden'); preStart = null; }
+$('btnPreGo').onclick = () => { const go = preStart; hidePre(); if (go) go(); };
+$('btnPreBack').onclick = hidePre;
+// Campagne
+function preCampaign(n) {
+  const L = campaignPlan()[n - 1], t = campBest()[L.id];
+  showPre({
+    title: TIERS[L.ti].name + ', niveau ' + L.k + '/' + TIER_LEVELS,
+    chips: ['1v' + L.opp, TIERS[L.ti].name, LANDS[L.land].name],
+    specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER : [L.variant],
+    id: L.id,
+    mine: t == null ? 'Pas encore gagné'
+      : fmtTime(t) + '<small>' + (t < STAR_TIME ? '★ étoile obtenue' : 'pas encore d’étoile') + '</small>',
+    note: 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
+    start: () => startCampaign(n)
+  });
+}
+// Défi (nouveau, reçu, du jour, rejoué ou repris)
+function preDefi(ch, source, title, entry) {
+  const best = summary(ch.id).mine, n = ch.games.length;
+  showPre({
+    title: title || 'Défi ' + ch.id,
+    chips: ['1v' + ch.games[0].opponents, TIERS[ch.difficulty].name, n + ' manche' + (n > 1 ? 's' : '')],
+    specials: ch.specials,
+    id: ch.id,
+    mine: !best ? 'Pas encore joué'
+      : best.status === 'réussi' ? fmtTime(best.total) + '<small>défi réussi</small>'
+      : best.times.length + '/' + n + '<small>manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + '</small>',
+    note: entry ? 'Reprise à la manche ' + (entry.times.length + 1) + ' : les temps déjà acquis sont conservés.' : 'Identifiant à partager : ' + ch.id,
+    start: () => entry ? resumeAttempt(entry) : startAttempt(ch, source)
+  });
+}
+
 
 
 
@@ -2259,17 +2333,17 @@ $('tabs').addEventListener('click', e => {
 $('btnFree').onclick = startFree;
 $('campGrid').addEventListener('click', e => {
   const b = e.target.closest('button[data-n]');
-  if (b && !b.disabled) startCampaign(+b.dataset.n);
+  if (b && !b.disabled) preCampaign(+b.dataset.n);
 });
 $('btnNext').onclick = () => {
-  if (current.kind === 'campaign') startCampaign(current.index + 1);
+  if (current.kind === 'campaign') preCampaign(current.index + 1);
   else if (current.kind === 'defi') {
     if (current.entry.status === 'échoué') resumeAttempt(current.entry);   // rejouer la partie perdue
     else playDefi(current.entry, current.index + 1);
   }
 };
 $('btnAgain').onclick = () => current.kind === 'defi'
-  ? startAttempt(current.entry.challenge, current.entry.source) : buildGame(current.cfg);
+  ? preDefi(current.entry.challenge, current.entry.source) : preCampaign(current.index);
 $('btnLevels').onclick = () => toMenu(current.kind === 'defi' ? 'free' : 'campaign');
 $('btnMenu').onclick = () => toMenu(current && current.kind === 'defi' ? 'free' : 'campaign');
 $('btnPause').onclick = () => {
