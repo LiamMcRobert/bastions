@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, issu de 20261025_40_bastions_jeu_tours.html)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_42)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
-                classement en ligne optionnel (Google Sheets via Apps Script) + import de packs de 50 niveaux (JSON)
+                classement en ligne (Google Sheets via Apps Script)
      Usage    : Ouvrir dans Chrome/Safari sur mobile ou tablette.
                 Aucune bibliothèque externe, fonctionne hors ligne.
-                Progression et packs gardés dans le navigateur (localStorage).
+                Progression gardée dans le navigateur (localStorage).
                 Musiques intégrées (MP3 en base64, licence CC0) : « Minstrel Dance » (RandomMind) dans les menus,
                 « Medieval: Battle » (RandomMind) ou « Epic Boss Battle » (Juhani Junkala) en partie.
      ============================================================ -->
@@ -101,11 +101,6 @@ h3{margin:8px 0 4px;font-size:20px}
 .primary{width:100%;min-height:52px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-size:18px;font-weight:700;margin-top:12px}
 .ghost{width:100%;min-height:48px;margin-top:8px;border-radius:14px;border:2px solid var(--line);
   background:transparent;font-size:16px;font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:6px}
-.grid button{min-height:48px;border-radius:10px;border:2px solid var(--line);background:transparent;font-size:16px;font-weight:700}
-.grid button.done{background:var(--accent);border-color:var(--accent);color:#fff}
-.grid button.cur{border-color:var(--accent);border-width:3px}
-.grid button:disabled{opacity:.3}
 .camp{display:flex;flex-direction:column}
 .tierhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:16px 0 6px}
 .tierhead:first-child{margin-top:4px}
@@ -394,49 +389,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="lbl">Tours</p>
         <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne.</p>
         <div class="cards" id="skinGrid"></div>
-        <p class="lbl" style="margin-top:20px">Packs de niveaux</p>
-        <div id="packHome">
-          <div id="packList"></div>
-          <p class="lbl">Importer un pack de 50 niveaux</p>
-          <button class="primary" id="btnFile">Choisir un fichier .json</button>
-          <input type="file" id="file" accept=".json,application/json" hidden>
-          <textarea id="paste" placeholder="Ou colle ici le contenu JSON du pack"></textarea>
-          <button class="ghost" id="btnPaste">Importer le texte collé</button>
-          <p class="err hidden" id="importErr"></p>
-          <details>
-            <summary>Format d’un pack</summary>
-            <p>Un fichier JSON avec exactement 50 niveaux. Chaque niveau est soit généré à partir de paramètres, soit décrit tour par tour avec <code>towers</code> (coordonnées de 0 à 1, propriétaire −1 = neutre, 0 = toi, 1 à 3 = adversaires).</p>
-<pre>{
-  "format": "bastions-pack",
-  "name": "Mon pack",
-  "author": "Guillaume",
-  "levels": [
-    { "name": "Ouverture",
-      "opponents": 1, "neutrals": 8,
-      "neutralStock": [3, 15],
-      "playerStart": 8, "aiStart": 5,
-      "aiLevel": 0.2, "seed": 42,
-      "profiles": ["defensif"] },
-    { "name": "Carte fixe", "aiLevel": 0.6,
-      "profiles": ["agressif"],
-      "towers": [
-        { "x": 0.5, "y": 0.92, "owner": 0, "stock": 5 },
-        { "x": 0.5, "y": 0.08, "owner": 1, "stock": 5 },
-        { "x": 0.5, "y": 0.5, "owner": -1, "stock": 25 }
-      ] }
-  ]
-}</pre>
-            <p>Profils possibles : agressif, intermediaire, defensif (tirés au hasard si absents). aiLevel va de 0 (IA lente et hésitante) à 1 (IA rapide et précise) ; il fixe aussi le délai de réaction de l’IA : 3 s jusqu’à 0,1, puis 2 s à 0,3, 1 s à 0,5 et aucun délai à partir de 0,75.</p>
-          </details>
-        </div>
-        <div id="packView" class="hidden">
-          <button class="ghost" id="packBack" style="margin-top:0">Retour à la liste des packs</button>
-          <h3 id="packTitle"></h3>
-          <p class="sub" id="packInfo"></p>
-          <div class="grid" id="packGrid"></div>
-        </div>
         <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
-        <p class="sub" style="margin:2px 0 0">Remet l’avancement à zéro. Les packs importés sont conservés. Touche deux fois le bouton pour confirmer.</p>
+        <p class="sub" style="margin:2px 0 0">Remet l’avancement de la campagne à zéro. Touche deux fois le bouton pour confirmer.</p>
         <div id="resetList"></div>
       </section>
 
@@ -490,12 +444,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
           <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 1:40 donne une étoile.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 15 skins de tours se débloquent avec les étoiles (toutes à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne, et on y importe des packs de niveaux.</li>
+          <li>Personnalisation : 15 skins de tours se débloquent avec les étoiles (toutes à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne.</li>
           <li>Défis : deux défis du jour, des défis à créer, et des défis à partager par leur identifiant. Le meilleur temps de chaque partie peut être envoyé dans un tableau Google Sheets partagé.</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
-          <li>Ta progression et tes packs restent enregistrés dans ce navigateur.</li>
+          <li>Ta progression reste enregistrée dans ce navigateur.</li>
         </ul>
       </section>
 
@@ -529,7 +483,6 @@ const DARK   = ['#1b438a', '#8a231d', '#17643a', '#8a6a00'];
 const NEUTRAL = '#8e949c', NEUTRAL_DARK = '#4e535a';
 const NAMES = ['Bleu', 'Rouge', 'Vert', 'Jaune'];
 const MAX_STOCK = 50, MAX_PATHS = 3, TAU = Math.PI * 2;
-const PACK_SIZE = 50, MAX_TOWERS = 40;
 const TIER_LEVELS = 15, CAMPAIGN_SIZE = 5 * TIER_LEVELS;   // 5 difficultés × 15 niveaux
 const STAR_TIME = 100, UNLOCK_WINS = 8;        // étoile : victoire en moins de 1:40 ; 8 victoires débloquent la difficulté suivante
 const ASPECT = 1.7;   // proportion de référence (portrait) pour espacer les tours générées
@@ -564,23 +517,16 @@ const PROFILES = {
   equilibre: { label: 'intermédiaire', threshold: 20, maxPaths: 2, retreat: 0.9, neutralW: 1.0,  humanW: 1.0 },
   defensif:  { label: 'défensif',      threshold: 30, maxPaths: 2, retreat: 0.6, neutralW: 0.85, humanW: 1.25 }
 };
-const PROFILE_ALIASES = { agressif: 'agressif', aggressive: 'agressif', intermediaire: 'equilibre',
-  'intermédiaire': 'equilibre', equilibre: 'equilibre', balanced: 'equilibre', defensif: 'defensif',
-  'défensif': 'defensif', defensive: 'defensif' };
 
 /* ================= Stockage local ================= */
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
-let progress = store.get('bastions.progress', { campaign: 1, packs: {} });
-if (!progress || typeof progress !== 'object') progress = { campaign: 1, packs: {} };
-progress.packs = progress.packs || {};
+let progress = store.get('bastions.progress', {});
+if (!progress || typeof progress !== 'object') progress = {};
 progress.camp = progress.camp && progress.camp.best ? progress.camp : { best: {} };   // meilleurs temps de campagne
-let packs = store.get('bastions.packs', []);
-if (!Array.isArray(packs)) packs = [];
 const saveProgress = () => store.set('bastions.progress', progress);
-const savePacks = () => store.set('bastions.packs', packs);
 
 /* ================= Bâtiments spéciaux (partie libre) ================= */
 const KINDS = {
@@ -681,7 +627,6 @@ function campaignLevel(n) {
     tier: tier.name,
     pool: L.ti === 0 ? ['defensif', 'equilibre'] : null,
     profiles: null,
-    towers: null,
     specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER.slice() : [L.variant],   // une seule option → 2 exemplaires
     specialG: SPECIAL_G[L.ti],
     specialPop: SPECIAL_POP[L.ti],
@@ -692,80 +637,6 @@ function campaignLevel(n) {
 const campBest = () => (progress.camp = progress.camp || { best: {} }).best;
 function tierWins(ti) { const b = campBest(); let w = 0; for (let k = 1; k <= TIER_LEVELS; k++) if (b[levelId(ti, k)] != null) w++; return w; }
 const tierUnlocked = ti => ti === 0 || tierWins(ti - 1) >= UNLOCK_WINS;
-
-/* ================= Validation des packs ================= */
-const isNum = v => typeof v === 'number' && isFinite(v);
-const clampInt = (v, a, b) => Math.max(a, Math.min(b, Math.round(v)));
-
-function normLevel(l, i) {
-  const where = 'Niveau ' + (i + 1) + ' : ';
-  if (!l || typeof l !== 'object') throw new Error(where + 'ce n’est pas un objet.');
-  const cfg = { name: typeof l.name === 'string' && l.name.trim() ? l.name.trim().slice(0, 40) : 'Niveau ' + (i + 1),
-    seed: isNum(l.seed) ? Math.abs(Math.round(l.seed)) : (i + 1) * 104729,
-    aiLevel: isNum(l.aiLevel) ? Math.max(0, Math.min(1, l.aiLevel)) : 0.5,
-    pool: null, profiles: null, towers: null };
-
-  if (l.towers !== undefined) {
-    if (!Array.isArray(l.towers)) throw new Error(where + '« towers » doit être une liste.');
-    if (l.towers.length < 2 || l.towers.length > MAX_TOWERS) throw new Error(where + 'entre 2 et ' + MAX_TOWERS + ' tours attendues.');
-    const counts = [0, 0, 0, 0];
-    cfg.towers = l.towers.map((t, k) => {
-      if (!t || !isNum(t.x) || !isNum(t.y) || t.x < 0 || t.x > 1 || t.y < 0 || t.y > 1)
-        throw new Error(where + 'tour ' + (k + 1) + ', x et y doivent être entre 0 et 1.');
-      const owner = isNum(t.owner) ? Math.round(t.owner) : -1;
-      if (owner < -1 || owner > 3) throw new Error(where + 'tour ' + (k + 1) + ', propriétaire entre −1 et 3.');
-      if (owner >= 0) counts[owner]++;
-      return { x: t.x, y: t.y, owner, stock: isNum(t.stock) ? clampInt(t.stock, 0, MAX_STOCK) : 5 };
-    });
-    if (counts[0] !== 1) throw new Error(where + 'il faut exactement une tour à toi (owner 0).');
-    let opp = 0;
-    for (let o = 1; o <= 3; o++) {
-      if (counts[o] > 1) throw new Error(where + 'l’adversaire ' + o + ' doit avoir une seule tour de départ.');
-      if (counts[o] === 1) { if (opp !== o - 1) throw new Error(where + 'numérote les adversaires 1, 2, 3 sans trou.'); opp = o; }
-    }
-    if (!opp) throw new Error(where + 'il faut au moins un adversaire (owner 1).');
-    cfg.opponents = opp;
-  } else {
-    if (!isNum(l.opponents) || l.opponents < 1 || l.opponents > 3)
-      throw new Error(where + '« opponents » doit valoir 1, 2 ou 3 (ou fournis « towers »).');
-    cfg.opponents = Math.round(l.opponents);
-    cfg.neutrals = isNum(l.neutrals) ? clampInt(l.neutrals, 0, MAX_TOWERS - 4) : 6 + cfg.opponents * 2;
-    let ns = Array.isArray(l.neutralStock) && l.neutralStock.length === 2 && l.neutralStock.every(isNum)
-      ? l.neutralStock.map(v => clampInt(v, 0, MAX_STOCK)) : [3, 20];
-    if (ns[0] > ns[1]) ns = [ns[1], ns[0]];
-    cfg.neutralStock = ns;
-    cfg.playerStart = isNum(l.playerStart) ? clampInt(l.playerStart, 0, MAX_STOCK) : 5;
-    cfg.aiStart = isNum(l.aiStart) ? clampInt(l.aiStart, 0, MAX_STOCK) : 5;
-  }
-  if (l.profiles !== undefined) {
-    if (!Array.isArray(l.profiles) || l.profiles.length !== cfg.opponents)
-      throw new Error(where + '« profiles » doit contenir un profil par adversaire.');
-    cfg.profiles = l.profiles.map(p => {
-      const k = PROFILE_ALIASES[String(p).toLowerCase()];
-      if (!k) throw new Error(where + 'profil inconnu « ' + p + ' ».');
-      return k;
-    });
-  }
-  return cfg;
-}
-
-function validatePack(raw) {
-  let data;
-  try { data = typeof raw === 'string' ? JSON.parse(raw) : raw; }
-  catch (e) { throw new Error('Le texte n’est pas du JSON valide (' + e.message + ').'); }
-  if (!data || typeof data !== 'object') throw new Error('Le pack doit être un objet JSON.');
-  if (data.format !== 'bastions-pack') throw new Error('Champ « format » attendu : "bastions-pack".');
-  if (!Array.isArray(data.levels)) throw new Error('Champ « levels » manquant.');
-  if (data.levels.length !== PACK_SIZE)
-    throw new Error('Un pack doit contenir exactement ' + PACK_SIZE + ' niveaux (trouvés : ' + data.levels.length + ').');
-  const levels = data.levels.map(normLevel);
-  return {
-    id: 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36),
-    name: typeof data.name === 'string' && data.name.trim() ? data.name.trim().slice(0, 50) : 'Pack sans nom',
-    author: typeof data.author === 'string' ? data.author.trim().slice(0, 40) : '',
-    levels
-  };
-}
 
 /* ================= État du jeu ================= */
 const $ = id => document.getElementById(id);
@@ -781,8 +652,7 @@ const RIPOSTE_EFF = 0.5;           // une riposte neutre est deux fois moins eff
 const RIPOSTE_MAX = 15;            // fin de riposte après 15 s sans nouvelle attaque de l'agresseur
 let state = 'menu', paused = false, hintShown = false;
 let drag = null, inc = null, chipTimer = 0, INK = '#1f2328';
-let current = null;      // { kind: 'campaign'|'pack'|'free', index, packId, cfg, label }
-let openPackId = null;
+let current = null;      // { kind: 'campaign'|'defi', index, cfg, label, entry (défi) }
 
 const level = t => Math.min(KINDS[t.kind].maxLv, Math.floor(t.stock / 10) + 1);
 const rad = t => {
@@ -1063,9 +933,7 @@ function buildGame(cfg) {
       lvl: cfg.aiLevel, next: 2.5 - cfg.aiLevel + aiDelay(cfg.aiLevel) + rng() * 1.5 });
   }
   let pts;
-  if (cfg.towers) {
-    pts = cfg.towers.map(t => ({ nx: t.x, ny: t.y, owner: t.owner, stock: t.stock }));
-  } else {
+  {                                                // carte générée à partir de la graine
     const np = cfg.opponents + 1;
     pts = [];
     // Dispositions validées par des tests ordinateur contre ordinateur (écran portrait) :
@@ -1144,11 +1012,6 @@ function positionHint() {
 function startCampaign(n) {
   const L = campaignPlan()[n - 1];
   current = { kind: 'campaign', index: n, cfg: campaignLevel(n), label: TIER_SHORT[L.ti] + ' ' + L.k };
-  buildGame(current.cfg);
-}
-function startPack(packId, idx) {
-  const p = packs.find(x => x.id === packId); if (!p) return;
-  current = { kind: 'pack', packId, index: idx, cfg: p.levels[idx - 1], label: 'Pack ' + idx };
   buildGame(current.cfg);
 }
 /* ================= Défis : séries de 1 à 5 parties chronométrées, partagées par identifiant ================= */
@@ -1240,7 +1103,7 @@ function defiCfg(ch, i) {
   const g = ch.games[i], ti = ch.difficulty, tier = TIERS[ti];
   return { name: 'Défi, partie ' + (i + 1) + '/' + ch.games.length, seed: g.seed, opponents: g.opponents,
     neutrals: g.neutrals, neutralStock: [3, 22], playerStart: tier.playerStart, aiStart: tier.aiStart,
-    aiLevel: tier.aiLevel, pool: null, profiles: null, towers: null,
+    aiLevel: tier.aiLevel, pool: null, profiles: null,
     specials: ch.specials.slice(), specialG: SPECIAL_G[ti], specialPop: SPECIAL_POP[ti] };
 }
 // Nouvel essai ; pour un défi déjà joué, on ne conserve que ton meilleur essai
@@ -2178,7 +2041,6 @@ function toast(msg) {
 function nextExists() {
   if (!current) return false;
   if (current.kind === 'campaign') return current.index % TIER_LEVELS !== 0;   // suivant dans la même difficulté
-  if (current.kind === 'pack') return current.index < PACK_SIZE;
   if (current.kind === 'defi') return current.index + 1 < current.entry.challenge.games.length && current.entry.status === 'en cours';
   return false;
 }
@@ -2195,11 +2057,6 @@ function endGame(win) {
     if (prev != null && clock >= prev) text += ' Ton meilleur temps : ' + fmtTime(prev) + '.';
     if (nextLocked && tierUnlocked(ti + 1)) text += ' Difficulté « ' + TIERS[ti + 1].name + ' » débloquée !';
     onlineId = id; onlineTime = clock;
-  } else if (win && current.kind === 'pack') {
-    const u = progress.packs[current.packId] || 1;
-    if (u <= current.index) progress.packs[current.packId] = Math.min(PACK_SIZE + 1, current.index + 1);
-    saveProgress();
-    if (current.index === PACK_SIZE) text = 'Pack terminé : les 50 niveaux sont conquis.';
   } else if (current.kind === 'defi') {
     const e = current.entry, n = e.challenge.games.length;
     if (win) { e.times.push(clock + (e.pending || 0)); e.pending = 0; if (e.times.length === n) e.status = 'réussi'; }
@@ -2244,20 +2101,7 @@ function showTab(name) {
   ['campaign', 'free', 'custom', 'rules'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
   if (name === 'campaign') renderCampaign();
   if (name === 'free') renderDefiTab();
-  if (name === 'custom') { renderCustom(); openPackId ? renderPackView() : renderPackList(); renderReset(); }
-}
-function gridButtons(total, unlocked, onPick) {
-  const frag = document.createDocumentFragment();
-  for (let n = 1; n <= total; n++) {
-    const b = document.createElement('button');
-    b.textContent = n;
-    if (n < unlocked) b.className = 'done';
-    else if (n === unlocked) b.className = 'cur';
-    else b.disabled = true;
-    b.onclick = () => onPick(n);
-    frag.appendChild(b);
-  }
-  return frag;
+  if (name === 'custom') { renderCustom(); renderReset(); }
 }
 /* Filigranes des bâtiments spéciaux et étoile (contour) */
 const STAR_PATH = 'M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z';
@@ -2296,49 +2140,8 @@ function renderCampaign() {
     + 'Filigrane : bâtiment spécial présent ; bande de couleur : paysage.';
 }
 
-function renderPackList() {
-  $('packHome').classList.remove('hidden'); $('packView').classList.add('hidden');
-  const list = $('packList');
-  if (!packs.length) { list.innerHTML = '<p class="empty">Aucun pack importé pour l’instant.</p>'; return; }
-  list.innerHTML = packs.map(p => {
-    const done = Math.min(PACK_SIZE, (progress.packs[p.id] || 1) - 1);
-    return `<div class="pack"><div class="info"><strong>${escapeHtml(p.name)}</strong>
-      <span>${p.author ? 'par ' + escapeHtml(p.author) + ', ' : ''}${done} / 50 terminés</span></div>
-      <button class="play" data-open="${p.id}">Jouer</button>
-      <button class="del" data-del="${p.id}" aria-label="Supprimer le pack">Suppr.</button></div>`;
-  }).join('');
-}
-function renderPackView() {
-  const p = packs.find(x => x.id === openPackId);
-  if (!p) { openPackId = null; renderPackList(); return; }
-  $('packHome').classList.add('hidden'); $('packView').classList.remove('hidden');
-  const u = progress.packs[p.id] || 1;
-  $('packTitle').textContent = p.name;
-  $('packInfo').textContent = (p.author ? 'Par ' + p.author + '. ' : '') + Math.min(PACK_SIZE, u - 1) + ' niveaux terminés sur 50.';
-  const g = $('packGrid'); g.innerHTML = '';
-  g.appendChild(gridButtons(PACK_SIZE, u, n => startPack(p.id, n)));
-}
-function importPack(raw) {
-  const err = $('importErr');
-  try {
-    const p = validatePack(raw);
-    const same = packs.findIndex(x => x.name === p.name);
-    if (same >= 0) { p.id = packs[same].id; packs[same] = p; } else packs.push(p);
-    const ok = savePacks();
-    err.classList.add('hidden'); $('paste').value = '';
-    renderPackList();
-    toast(same >= 0 ? 'Pack « ' + p.name + ' » mis à jour' : 'Pack « ' + p.name + ' » importé');
-    if (!ok) toast('Pack chargé, mais il ne pourra pas être conservé dans ce navigateur');
-  } catch (e) {
-    err.textContent = 'Import impossible. ' + e.message;
-    err.classList.remove('hidden');
-  }
-}
 function renderReset() {
-  const rows = [{ key: 'campaign', name: 'Campagne', info: Object.keys(campBest()).length + ' / ' + CAMPAIGN_SIZE + ' niveaux gagnés' }]
-    .concat(packs.map(p => ({ key: p.id, name: p.name,
-      info: Math.min(PACK_SIZE, (progress.packs[p.id] || 1) - 1) + ' / 50 terminés' })));
-  if (packs.length) rows.push({ key: '*', name: 'Tout l’avancement', info: 'Campagne et tous les packs' });
+  const rows = [{ key: 'campaign', name: 'Campagne', info: Object.keys(campBest()).length + ' / ' + CAMPAIGN_SIZE + ' niveaux gagnés' }];
   $('resetList').innerHTML = rows.map(r =>
     `<div class="pack"><div class="info"><strong>${escapeHtml(r.name)}</strong><span>${r.info}</span></div>
       <button class="del" data-reset="${escapeHtml(r.key)}">Réinitialiser</button></div>`).join('');
@@ -2346,10 +2149,7 @@ function renderReset() {
 $('resetList').addEventListener('click', e => {
   const b = e.target.closest('[data-reset]'); if (!b) return;
   if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Confirmer'; return; }
-  const k = b.dataset.reset;
-  if (k === 'campaign' || k === '*') progress.camp = { best: {} };
-  if (k === '*') progress.packs = {};
-  else if (k !== 'campaign') delete progress.packs[k];
+  progress.camp = { best: {} };
   saveProgress(); applyCustom(); buildBg(); renderReset(); renderCustom(); toast('Avancement réinitialisé');
 });
 function toMenu(tab) {
@@ -2457,39 +2257,12 @@ $('tabs').addEventListener('click', e => {
   [...$(id).children].forEach(x => x.classList.toggle('on', x === b));
 }));
 $('btnFree').onclick = startFree;
-$('packList').addEventListener('click', e => {
-  const o = e.target.closest('[data-open]'), d = e.target.closest('[data-del]');
-  if (o) { openPackId = o.dataset.open; renderPackView(); }
-  if (d) {
-    if (d.dataset.armed) {
-      packs = packs.filter(p => p.id !== d.dataset.del);
-      delete progress.packs[d.dataset.del];
-      savePacks(); saveProgress(); renderPackList(); renderReset(); toast('Pack supprimé');
-    } else { d.dataset.armed = '1'; d.textContent = 'Confirmer'; }
-  }
-});
 $('campGrid').addEventListener('click', e => {
   const b = e.target.closest('button[data-n]');
   if (b && !b.disabled) startCampaign(+b.dataset.n);
 });
-$('packBack').onclick = () => { openPackId = null; renderPackList(); };
-$('btnFile').onclick = () => $('file').click();
-$('file').addEventListener('change', e => {
-  const f = e.target.files && e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = () => importPack(String(r.result));
-  r.onerror = () => { $('importErr').textContent = 'Lecture du fichier impossible.'; $('importErr').classList.remove('hidden'); };
-  r.readAsText(f);
-  e.target.value = '';
-});
-$('btnPaste').onclick = () => {
-  const v = $('paste').value.trim();
-  if (!v) { $('importErr').textContent = 'Colle d’abord le contenu JSON du pack.'; $('importErr').classList.remove('hidden'); return; }
-  importPack(v);
-};
 $('btnNext').onclick = () => {
   if (current.kind === 'campaign') startCampaign(current.index + 1);
-  else if (current.kind === 'pack') startPack(current.packId, current.index + 1);
   else if (current.kind === 'defi') {
     if (current.entry.status === 'échoué') resumeAttempt(current.entry);   // rejouer la partie perdue
     else playDefi(current.entry, current.index + 1);
@@ -2497,8 +2270,8 @@ $('btnNext').onclick = () => {
 };
 $('btnAgain').onclick = () => current.kind === 'defi'
   ? startAttempt(current.entry.challenge, current.entry.source) : buildGame(current.cfg);
-$('btnLevels').onclick = () => toMenu(current.kind === 'pack' ? 'custom' : current.kind === 'defi' ? 'free' : 'campaign');
-$('btnMenu').onclick = () => toMenu(current && current.kind === 'pack' ? 'custom' : current && current.kind === 'defi' ? 'free' : 'campaign');
+$('btnLevels').onclick = () => toMenu(current.kind === 'defi' ? 'free' : 'campaign');
+$('btnMenu').onclick = () => toMenu(current && current.kind === 'defi' ? 'free' : 'campaign');
 $('btnPause').onclick = () => {
   if (state !== 'play') return;
   paused = !paused; drag = null;
@@ -2662,7 +2435,7 @@ $('btnPlay').onclick = () => {
 };
 /* Mise en cache pour le jeu hors ligne (uniquement en HTTPS, donc sur GitHub Pages) */
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-window.__bastions = { validatePack, campaignLevel, startCampaign, startPack };   // utilitaires de test
+window.__bastions = { campaignLevel, startCampaign };   // utilitaires de test
 })();
 </script>
 </body>
