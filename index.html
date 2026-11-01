@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_55)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_60)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -112,10 +112,14 @@ h3{margin:8px 0 4px;font-size:20px}
   font-size:16px;font-weight:800;overflow:hidden;padding:0 0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .tiergrid button{border-width:3px}
 .tiergrid button.won{border-color:#2a9d55;background:rgba(42,157,85,.16)}
-.tiergrid button.rec{border-color:#e2b007;box-shadow:0 0 8px rgba(242,193,78,.85);
-  background:linear-gradient(110deg,rgba(242,193,78,.25) 30%,rgba(255,247,200,.85) 50%,rgba(242,193,78,.25) 70%) 0 0/300% 100%;
-  animation:shine 3s linear infinite}
-.tiergrid button.rec .pf svg{stroke:#a87a00}
+.tiergrid button.r1{border-color:#f2b705;box-shadow:0 0 8px rgba(242,183,5,.7);
+  background:linear-gradient(110deg,rgba(242,183,5,.22) 30%,rgba(255,214,102,.6) 50%,rgba(242,183,5,.22) 70%) 0 0/300% 100%;animation:shine 3s linear infinite}
+.tiergrid button.r2{border-color:#9aa6b2;box-shadow:0 0 7px rgba(154,166,178,.7);
+  background:linear-gradient(110deg,rgba(170,180,192,.22) 30%,rgba(240,244,248,.85) 50%,rgba(170,180,192,.22) 70%) 0 0/300% 100%;animation:shine 3s linear infinite}
+.tiergrid button.r3{border-color:#b8733a;box-shadow:0 0 7px rgba(184,115,58,.6);
+  background:linear-gradient(110deg,rgba(184,115,58,.2) 30%,rgba(240,190,140,.6) 50%,rgba(184,115,58,.2) 70%) 0 0/300% 100%;animation:shine 3s linear infinite}
+.tiergrid button.r1 .pf svg{stroke:#a87a00}
+.tiergrid .pf svg{stroke:#f2b705}
 @keyframes shine{from{background-position:100% 0}to{background-position:-200% 0}}
 .tiergrid button.lost{border-color:#d8433b;background:rgba(216,67,59,.12)}
 .tiergrid button:disabled{opacity:.3}
@@ -124,7 +128,7 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid .wm.all{inset:3px 1px}
 .tiergrid .wm.all svg{width:33.4%}
 .tiergrid .pf{position:absolute;inset:1px;pointer-events:none;display:flex}
-.tiergrid .pf svg{width:100%;height:100%;fill:none;stroke:#e2b007;stroke-width:1.4;stroke-linejoin:round}
+.tiergrid .pf svg{width:100%;height:100%;fill:none;stroke-width:1.4;stroke-linejoin:round}
 .tiergrid .n,.tiergrid .t{position:relative}
 .tiergrid .t{font-size:10px;font-weight:700;opacity:.85}
 .tiergrid .land{position:absolute;left:0;right:0;bottom:0;height:5px}
@@ -180,6 +184,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .prebox span{font-size:12px;font-weight:700;color:var(--muted)}
 .prebox strong{font-size:22px;font-weight:800;display:flex;flex-direction:column;line-height:1.15}
 .prebox small{font-size:12px;font-weight:600;color:var(--muted)}
+.prebox small.podium{font-size:13px;font-weight:700;color:var(--panel-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #profiles{list-style:none;padding:0;margin:4px 0 6px}
 #profiles li{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:16px}
 .msg{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:6;
@@ -211,15 +216,21 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .quote{margin:2px 0 14px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--field);
   border-radius:8px;font-style:italic;font-size:15px;line-height:1.4}
 .hist{border:3px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-.hist.win{border-color:#e2b007;box-shadow:0 0 10px rgba(242,193,78,.75);
-  background:linear-gradient(110deg,transparent 35%,rgba(255,240,180,.55) 50%,transparent 65%) 0 0/300% 100%;animation:shine 3.5s linear infinite}
+.hist.r1{border-color:#f2b705;box-shadow:0 0 10px rgba(242,183,5,.6);
+  background:linear-gradient(110deg,transparent 35%,rgba(255,214,102,.45) 50%,transparent 65%) 0 0/300% 100%;animation:shine 3.5s linear infinite}
+.hist.r2{border-color:#9aa6b2;box-shadow:0 0 10px rgba(154,166,178,.55);
+  background:linear-gradient(110deg,transparent 35%,rgba(240,244,248,.7) 50%,transparent 65%) 0 0/300% 100%;animation:shine 3.5s linear infinite}
+.hist.r3{border-color:#b8733a;box-shadow:0 0 10px rgba(184,115,58,.5);
+  background:linear-gradient(110deg,transparent 35%,rgba(240,190,140,.5) 50%,transparent 65%) 0 0/300% 100%;animation:shine 3.5s linear infinite}
 .hist.lose{border-color:#d8433b}
 .hist.won{border-color:#2a9d55}
 .hist.won .badge{background:#2a9d55}
 .hist .when{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .hist .when strong{font-size:18px;font-weight:800;color:var(--panel-ink)}
 .hist .badge{font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;color:#fff;background:var(--muted);white-space:nowrap}
-.hist.win .badge{background:linear-gradient(#f2c14e,#c99a00);color:#3a2a00}
+.hist.r1 .badge{background:linear-gradient(#f7cf4a,#c99400);color:#3a2a00}
+.hist.r2 .badge{background:linear-gradient(#dfe5ec,#9aa6b2);color:#25303b}
+.hist.r3 .badge{background:linear-gradient(#e2a46e,#a8642e);color:#fff}
 .hist.lose .badge{background:#d8433b}
 .hist .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
 .hist .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field);color:var(--panel-ink)}
@@ -233,7 +244,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .hist .hbtns button.del{color:var(--danger)}
 .hist textarea{min-height:120px;margin-top:8px}
 .quote cite{display:block;font-style:normal;font-weight:700;font-size:13px;margin-top:6px;color:var(--muted)}
-@media (prefers-reduced-motion: reduce){ .tiergrid button.rec,.hist.win{animation:none} }
+@media (prefers-reduced-motion: reduce){ .tiergrid button.r1,.tiergrid button.r2,.tiergrid button.r3,.hist.r1,.hist.r2,.hist.r3{animation:none} }
 @media (prefers-reduced-motion: reduce){ .chip,#toast,.msg{transition:none} }
 </style>
 </head>
@@ -457,14 +468,14 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         </div>
         <p class="lbl" style="margin-top:20px">Jouer le défi d’une autre personne</p>
         <p class="sub" style="margin:2px 0 0">Saisis l’identifiant reçu : mêmes cartes, mêmes réglages.</p>
-        <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. D2331-1kz9ab" aria-label="Identifiant du défi">
+        <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. E2331-1kz9ab" aria-label="Identifiant du défi">
         <button class="ghost" id="btnDefiId">Jouer ce défi</button>
         <p class="err hidden" id="defiErr"></p>
         <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
         </div>
         <div id="defiHist" class="hidden">
           <button class="ghost" id="btnHistBack" style="margin-top:0">Retour au défi</button>
-          <p class="sub" style="margin-top:10px">Temps en secondes de jeu : ils ne dépendent pas de la vitesse ×1, ×1,5 ou ×2.</p>
+          <p class="sub" style="margin-top:10px">Temps comptés à la vitesse ×1 : jouer en ×1,5 ou ×2 ne les change pas.</p>
           <div id="histList"></div>
           <button class="ghost" id="btnHistReset" style="margin-top:14px">Réinitialiser l’historique</button>
         </div>
@@ -477,6 +488,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Une tour qui envoie ne remplit plus son stock ; seuls les renforts reçus l’augmentent.</li>
           <li>Touche un chemin bleu pour le supprimer. Touche une tour bleue pour couper tous ses chemins, ou barre un chemin d’un trait.</li>
           <li>Le bouton ×1 en haut à droite accélère le jeu (×1,5 puis ×2). Le bouton 🔊 coupe ou remet la musique (menus et parties).</li>
+          <li>Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.</li>
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
           <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 1:40 donne une étoile.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
@@ -499,7 +511,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <div class="chips" id="preChips"></div>
       <div class="specs" id="preSpecs"></div>
       <div class="prebox">
-        <div><span>Record en ligne</span><strong id="preRecord"></strong></div>
+        <div><span>Top 3 en ligne</span><strong id="preRecord"></strong></div>
         <div><span>Ton meilleur</span><strong id="preMine"></strong></div>
       </div>
       <p class="sub" id="preNote"></p>
@@ -557,8 +569,10 @@ const TIERS = [
 ];
 /* Retard ajouté aux décisions de l'IA (temps de jeu) selon aiLevel :
    3 s (Très facile, 0,1) → 2 s (Facile, 0,3) → 1 s (Normal, 0,5) → 0 s (Difficile et au-delà, 0,75) */
+// Délai supplémentaire d'1 s (temps de jeu, soit 1 s réelle en ×2) pour toutes les difficultés sauf Très difficile
+const aiDelay = l => aiDelayBase(l) + (l < 0.85 ? 1 : 0);
 const DELAY_PTS = [[0.1, 3], [0.3, 2], [0.5, 1], [0.75, 0]];
-function aiDelay(l) {
+function aiDelayBase(l) {
   if (l <= DELAY_PTS[0][0]) return DELAY_PTS[0][1];
   for (let i = 1; i < DELAY_PTS.length; i++) {
     const [a, da] = DELAY_PTS[i - 1], [b, db] = DELAY_PTS[i];
@@ -580,6 +594,10 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
+// Version des données : les niveaux ayant été regénérés, les avancements d'avant sont remis à zéro une fois
+const DATA_VERSION = 2;
+const dataReset = store.get('bastions.dataVersion', 1) !== DATA_VERSION;
+if (dataReset) { store.set('bastions.progress', {}); store.set('bastions.defis', []); store.set('bastions.dataVersion', DATA_VERSION); }
 let progress = store.get('bastions.progress', {});
 if (!progress || typeof progress !== 'object') progress = {};
 progress.camp = progress.camp && progress.camp.best ? progress.camp : { best: {} };   // meilleurs temps de campagne
@@ -597,6 +615,8 @@ const SPECIAL_ORDER = ['super', 'barracks', 'artillery'];
 const SPECIAL_G = [0.45, 0.6, 1.0, 1.3, 1.45, 1.6];
 // Population de départ des bâtiments spéciaux selon la difficulté (−30 %, −20 %, −10 %, puis complète)
 const SPECIAL_POP = [0.7, 0.8, 0.9, 1, 1, 1];
+const STOCK_BIAS = [1, 0.5, 0, -0.5, -1];          // garnisons faibles : près du joueur (+1) … près des ordinateurs (-1)
+const SPECIAL_BONUS = 1.2;                         // bonus de production des bâtiments spéciaux
 const ARMOR = 10;                                 // un blindé vaut 10 unités
 /* Valeur stratégique des bâtiments spéciaux pour l'IA : le coût d'attaque est divisé par ce facteur.
    L'agressif vise surtout la caserne, le défensif surtout la tour de tir. */
@@ -634,7 +654,7 @@ const OPP_MIX = [                                  // nombre d'adversaires des 1
 ];
 const FINAL_OPP = [1, 2, 2, 3, 3];                 // 15e niveau de chaque difficulté
 const TIER_SHORT = ['T. facile', 'Facile', 'Normal', 'Difficile', 'T. difficile'];
-const levelId = (ti, k) => 'C1-' + ti + String(k).padStart(2, '0');   // identifiant unique d'un niveau
+const levelId = (ti, k) => 'C2-' + ti + String(k).padStart(2, '0');   // identifiant unique d'un niveau
 function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 let CAMP_PLAN = null;
 // [STRAT] plan calculé une seule fois (graines fixes) : la campagne est identique pour tous les joueurs
@@ -687,10 +707,11 @@ function campaignLevel(n) {
     specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER.slice() : [L.variant],   // une seule option → 2 exemplaires
     specialG: SPECIAL_G[L.ti],
     specialPop: SPECIAL_POP[L.ti],
+    stockBias: STOCK_BIAS[L.ti],
     land: L.land
   };
 }
-// Progression : meilleur temps (secondes de jeu) de chaque niveau gagné, par identifiant
+// Progression : meilleur temps de score (secondes à la vitesse ×1) de chaque niveau gagné, par identifiant
 const campBest = () => (progress.camp = progress.camp || { best: {} }).best;
 function tierWins(ti) { const b = campBest(); let w = 0; for (let k = 1; k <= TIER_LEVELS; k++) if (b[levelId(ti, k)] != null) w++; return w; }
 const tierUnlocked = ti => ti === 0 || tierWins(ti - 1) >= UNLOCK_WINS;
@@ -705,6 +726,8 @@ let towers = [], units = [], players = [], contours = [], shots = [], bursts = [
 let obstacles = [], links = [];   // obstacles du décor (ellipses) et chemins autorisés entre tours
 let lostTower = false;             // le joueur a perdu une tour (victoire parfaite impossible)
 let clock = 0;                     // temps de jeu écoulé, en secondes
+// Temps de score : temps réel qu'aurait duré la partie à la vitesse ×1 (le temps de jeu y avance deux fois moins vite)
+const scoreClock = () => clock / GAME_SPEED;
 const RIPOSTE_EFF = 0.5;           // une riposte neutre est deux fois moins efficace qu'une tour occupée
 const RIPOSTE_MAX = 15;            // fin de riposte après 15 s sans nouvelle attaque de l'agresseur
 let state = 'menu', paused = false, hintShown = false;
@@ -1006,8 +1029,18 @@ function buildGame(cfg) {
     const sp = cfg.specials || [];
     if (sp.length) {
       const list = sp.length === 1 ? [sp[0], sp[0]] : sp.slice();
-      const P = pts[0], g = cfg.specialG == null ? 1 : cfg.specialG, BAND = 0.25;
-      const cy = Math.max(0.06 + BAND / 2, Math.min(0.94 - BAND / 2, P.ny + (0.5 - P.ny) * g));
+      const P = pts[0], g = cfg.specialG == null ? 1 : cfg.specialG, BAND = 0.25, bases = pts.slice();
+      // [STRAT] point à égale distance de tous les joueurs (proportions de l'écran prises en compte) :
+      // descente de gradient sur l'écart entre les distances, depuis le centre de gravité des bases
+      let ex = bases.reduce((a, p) => a + p.nx, 0) / bases.length, ey = bases.reduce((a, p) => a + p.ny, 0) / bases.length;
+      for (let it = 0; it < 300; it++) {
+        const ds = bases.map(p => Math.hypot(p.nx - ex, (p.ny - ey) * ASPECT)), m = ds.reduce((a, b) => a + b, 0) / ds.length;
+        let gx = 0, gy = 0;
+        bases.forEach((p, i) => { const k = (ds[i] - m) / (ds[i] || 1e-6); gx += k * (ex - p.nx); gy += k * (ey - p.ny) * ASPECT * ASPECT; });
+        ex -= 0.05 * gx; ey -= 0.05 * gy;
+      }
+      // bande centrée sur ce point, rapprochée du joueur (g < 1) ou des ordinateurs (g > 1) selon la difficulté
+      const cy = Math.max(0.06 + BAND / 2, Math.min(0.94 - BAND / 2, P.ny + (ey - P.ny) * g));
       for (const kind of list) {
         // [STRAT] parmi quelques tirages, on garde le point le plus éloigné des tours déjà posées
         let best = null, bestD = -1;
@@ -1030,6 +1063,17 @@ function buildGame(cfg) {
       const nx = 0.03 + rng() * 0.94, ny = 0.03 + rng() * 0.94;
       if (pts.every(p => Math.hypot(p.nx - nx, (p.ny - ny) * ASPECT) >= sep))
         pts.push({ nx, ny, owner: -1, stock: smin + Math.floor(rng() * (smax - smin + 1)) });
+    }
+    // Garnisons neutres : les plus faibles près du joueur en Très facile et Facile, réparties au hasard en Normal,
+    // près des ordinateurs en Difficile et Très difficile (biais progressif de +1 à -1)
+    const bias = cfg.stockBias || 0, neu = pts.filter(p => p.owner === -1 && !p.kind);
+    if (bias && neu.length > 1) {
+      const P0 = pts[0], ais = pts.filter(p => p.owner > 0);
+      const prox = p => { const dp = Math.hypot(p.nx - P0.nx, (p.ny - P0.ny) * ASPECT);
+        const da = Math.min(...ais.map(a => Math.hypot(p.nx - a.nx, (p.ny - a.ny) * ASPECT))); return dp / (dp + da); };
+      const stocks = neu.map(p => p.stock).sort((a, b) => a - b);
+      neu.map(p => ({ p, k: bias * prox(p) + (1 - Math.abs(bias)) * rng() }))
+        .sort((a, b) => a.k - b.k).forEach((o, i) => { o.p.stock = stocks[i]; });
     }
   }
   towers = pts.map((p, i) => {
@@ -1078,7 +1122,7 @@ const STATUS_LABEL = { 'en cours': 'En cours', 'réussi': 'Réussi', 'échoué':
 let defiHist = store.get('bastions.defis', []);
 if (!Array.isArray(defiHist)) defiHist = [];
 // défis enregistrés avant le format à identifiant : on ne garde que ceux encore compatibles
-defiHist = defiHist.filter(x => x && x.challenge && /^D\d/.test(x.challenge.id || ''));
+defiHist = defiHist.filter(x => x && x.challenge && /^E\d/.test(x.challenge.id || ''));
 const saveHist = () => store.set('bastions.defis', defiHist);
 const fmtTime = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const uid = p => p + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
@@ -1090,16 +1134,16 @@ let pseudo = String(store.get('bastions.pseudo', '') || '').slice(0, 20);
 const myPseudo = () => pseudo.trim() || 'Anonyme';
 
 /* Identifiant d'un défi : il décrit entièrement les parties.
-   Format D<difficulté><manches><adversaires><bâtiments>-<graine en base 36>, ex. D2331-1kz9ab
+   Format E<difficulté><manches><adversaires><bâtiments>-<graine en base 36>, ex. E2331-1kz9ab
    bâtiments : 1 = super-tour, 2 = caserne, 4 = tour de tir (additionnés) */
-const ID_RE = /^D([0-4])([1-5])([1-3])([0-7])-([0-9a-z]{1,8})$/;
+const ID_RE = /^E([0-4])([1-5])([1-3])([0-7])-([0-9a-z]{1,8})$/;
 const SPEC_BITS = { super: 1, barracks: 2, artillery: 4 };
 function encodeChallenge(diff, n, opp, specials, seed) {
   const mask = specials.reduce((m, k) => m | SPEC_BITS[k], 0);
-  return 'D' + diff + n + opp + mask + '-' + (seed >>> 0).toString(36);
+  return 'E' + diff + n + opp + mask + '-' + (seed >>> 0).toString(36);
 }
 function decodeChallenge(id) {
-  const m = ID_RE.exec(String(id || '').trim().toLowerCase().replace(/^d/, 'D'));
+  const m = ID_RE.exec(String(id || '').trim().toLowerCase().replace(/^e/, 'E'));
   if (!m) return null;
   const diff = +m[1], n = +m[2], opp = +m[3], mask = +m[4], seed = parseInt(m[5], 36);
   if (!isFinite(seed)) return null;
@@ -1150,8 +1194,8 @@ function summary(chId) {
   return { list, mine, mineAttempt, latest: list[list.length - 1] };
 }
 // Ton meilleur temps est-il le record en ligne (ou n'y a-t-il pas encore de record connu) ?
-// Record absolu : ton meilleur temps égale le record du tableau en ligne
-const holdsRecord = (id, mine) => !!mine && mine.status === 'réussi' && !!remote[id] && mine.total <= remote[id].time + 0.05;
+// Cadre d'une partie : or, argent ou bronze selon ta place dans le top 3 ; vert si victoire hors top 3
+const rankClass = (id, won) => { const r = myRank(id); return r >= 0 ? ' ' + RANK_CLASS[r] : won ? ' won' : ''; };
 
 function newChallenge() {
   const n = +$('segOpp').querySelector('.on').dataset.v;
@@ -1164,10 +1208,10 @@ function defiCfg(ch, i) {
   return { name: 'Défi, partie ' + (i + 1) + '/' + ch.games.length, seed: g.seed, opponents: g.opponents,
     neutrals: g.neutrals, neutralStock: [3, 22], playerStart: tier.playerStart, aiStart: tier.aiStart,
     aiLevel: tier.aiLevel, pool: null, profiles: null,
-    specials: ch.specials.slice(), specialG: SPECIAL_G[ti], specialPop: SPECIAL_POP[ti] };
+    specials: ch.specials.slice(), specialG: SPECIAL_G[ti], specialPop: SPECIAL_POP[ti], stockBias: STOCK_BIAS[ti] };
 }
 // Nouvel essai ; pour un défi déjà joué, on ne conserve que ton meilleur essai
-// (temps en secondes de jeu, indépendants de la vitesse ×1/×1,5/×2)
+// (temps de score en secondes à la vitesse ×1, indépendants de la vitesse choisie)
 function startAttempt(ch, source) {
   if (current && current.kind === 'defi' && current.entry.status === 'en cours') current.entry.status = 'abandonné';
   const prev = summary(ch.id);
@@ -1194,7 +1238,7 @@ const canResume = e => (e.status === 'échoué' || e.status === 'abandonné') &&
 function startFree() { preDefi(newChallenge(), 'créé', 'Nouveau défi'); }
 function playById(raw) {
   const ch = decodeChallenge(raw), err = $('defiErr');
-  if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : D2331-1kz9ab.'; err.classList.remove('hidden'); return; }
+  if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : E2331-1kz9ab.'; err.classList.remove('hidden'); return; }
   err.classList.add('hidden'); $('defiIdIn').value = '';
   preDefi(ch, 'importé', 'Défi reçu');
 }
@@ -1214,12 +1258,12 @@ async function shareId(id) {
 }
 const specIcons = ch => SPECIAL_ORDER.map(k => { const on = ch.specials.includes(k), lab = SPECIAL_LABEL[k] + (on ? ' activée' : ' non activée');
   return `<span class="${on ? 'on' : ''}" title="${lab}" role="img" aria-label="${lab}">${ICONS[k]}</span>`; }).join('');
-const recordTxt = id => remote[id] ? 'Record en ligne : ' + escapeHtml(remote[id].pseudo) + ', ' + fmtTime(remote[id].time) + '. ' : '';
+const recordTxt = id => remote[id] && remote[id].length ? 'Top 3 : ' + escapeHtml(topLine(remote[id])) + '. ' : '';
 // Défis du jour : deux cartes en tête de l'onglet
 function renderDaily() {
   $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => {
     const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
-    const cls = won ? (holdsRecord(ch.id, best) ? ' win' : ' won') : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
+    const cls = won ? rankClass(ch.id, true) : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
     const d = day.split('-').reverse().join('/');
     return `<div class="hist${cls}">
       <div class="when"><strong>Défi du jour, ${label}</strong><span class="badge">${d}</span></div>
@@ -1245,7 +1289,7 @@ function renderHist() {
     const when = isNaN(d) ? 'Date inconnue'
       : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     let cls = '', badge = STATUS_LABEL[last.status] || last.status;
-    if (best && best.status === 'réussi') { const hold = holdsRecord(id, best); cls = hold ? ' win' : ' won'; badge = hold ? 'Record absolu' : 'Réussi'; }
+    if (best && best.status === 'réussi') { const r = myRank(id); cls = rankClass(id, true); badge = r >= 0 ? MEDALS[r] + ' ' + RANK_LABEL[r] : 'Réussi'; }
     else if (S.list.some(x => x.status === 'échoué')) { cls = ' lose'; badge = 'Échoué'; }
     const mineTxt = best ? 'Ton meilleur essai : ' + (best.status === 'réussi' ? 'réussi en ' + fmtTime(best.total)
       : best.times.length + '/' + n + ' manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + ', ' + fmtTime(best.total))
@@ -1304,11 +1348,16 @@ $('pseudo').value = pseudo;
 $('pseudo').addEventListener('input', e => { pseudo = e.target.value.slice(0, 20); store.set('bastions.pseudo', pseudo); });
 
 /* ================= Classement en ligne : Google Sheets via une application Web Apps Script ================= */
-// Colonne A : identifiant de la partie ; B : pseudo du meilleur joueur ; C : meilleur temps (secondes de jeu).
-// Une ligne n'est créée qu'après une première victoire sur cet identifiant.
+// Colonne A : identifiant de la partie ; B à D : pseudos des 3 meilleurs ; E à G : leurs temps (secondes, vitesse ×1).
+// Une ligne n'est créée qu'après une première victoire sur cet identifiant. Un joueur n'occupe qu'une place.
 // Adresse du classement : fixe, intégrée au jeu (elle n'est plus modifiable dans Personnalisation)
 const scoreUrl = 'https://script.google.com/macros/s/AKfycbxNUzGZ45OIkDKiFT2bddHoymcoQhzUWkSA9nYxGP6E8_2K6I9rWx-2t59QCqXey1s/exec';
-const remote = {};                                 // identifiant → { pseudo, time } connus du tableau
+const remote = {};                                 // identifiant → top 3 [{ pseudo, time }] connu du tableau
+const cleanTop = top => (Array.isArray(top) ? top : []).filter(r => r && r.pseudo && isFinite(+r.time))
+  .map(r => ({ pseudo: String(r.pseudo).slice(0, 20), time: +r.time })).sort((a, b) => a.time - b.time).slice(0, 3);
+// Ta place dans le top 3 (0, 1 ou 2), d'après ton pseudo ; -1 si tu n'y figures pas
+const myRank = id => remote[id] ? remote[id].findIndex(r => r.pseudo.toLowerCase() === myPseudo().toLowerCase()) : -1;
+const MEDALS = ['🥇', '🥈', '🥉'], RANK_CLASS = ['r1', 'r2', 'r3'], RANK_LABEL = ['1er', '2e', '3e'];
 async function fetchRecords(ids) {
   ids = [...new Set(ids)].filter(Boolean);
   if (!scoreUrl || !ids.length) return false;
@@ -1316,40 +1365,34 @@ async function fetchRecords(ids) {
     const res = await fetch(scoreUrl + (scoreUrl.includes('?') ? '&' : '?') + 'ids=' + encodeURIComponent(ids.join(',')));
     const data = await res.json();
     if (!data || !data.ok || !data.scores) return false;
-    for (const id of ids) {
-      const r = data.scores[id];
-      if (r && isFinite(+r.time)) remote[id] = { pseudo: String(r.pseudo || 'Anonyme').slice(0, 20), time: +r.time };
-    }
+    for (const id of ids) { const r = data.scores[id]; if (r && r.top) remote[id] = cleanTop(r.top); }
     return true;
   } catch (e) { return false; }
 }
-// Envoi seulement s'il n'existe pas encore de temps pour cet identifiant, ou si le nouveau est meilleur
-// (le script du tableau refait la même vérification)
+// Chaque victoire est envoyée : le script garde ton meilleur temps et le classe dans le top 3
 async function submitScore(id, time) {
   if (!scoreUrl || !id) return null;
-  await fetchRecords([id]);
-  const cur = remote[id];
-  if (cur && !(time < cur.time)) return { updated: false, record: cur };
   try {
     const res = await fetch(scoreUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ id, pseudo: myPseudo(), time: Math.round(time * 10) / 10 }) });
     const data = await res.json();
-    if (!data || !data.ok || !data.record) return null;
-    remote[id] = { pseudo: String(data.record.pseudo).slice(0, 20), time: +data.record.time };
-    return { updated: !!data.updated, record: remote[id] };
+    if (!data || !data.ok) return null;
+    remote[id] = cleanTop(data.top);
+    return { updated: !!data.updated, rank: myRank(id), top: remote[id] };
   } catch (e) { return null; }
 }
+const topLine = top => top.map((r, i) => MEDALS[i] + ' ' + r.pseudo + ' ' + fmtTime(r.time)).join(', ');
 // Ligne « classement en ligne » de l'écran de fin
 function showOnline(id, time) {
   const el = $('overOnline');
-  if (!scoreUrl) { el.textContent = ''; return; }
   el.textContent = 'Classement en ligne : envoi…';
   submitScore(id, time).then(r => {
-    if (!r) { el.textContent = 'Classement en ligne indisponible (hors ligne ou adresse incorrecte).'; return; }
-    el.textContent = r.updated ? 'Nouveau record en ligne : ' + r.record.pseudo + ', ' + fmtTime(r.record.time) + ' !'
-      : 'Record en ligne : ' + r.record.pseudo + ', ' + fmtTime(r.record.time) + '.';
+    if (!r) { el.textContent = 'Classement en ligne indisponible (hors ligne).'; return; }
+    el.textContent = (r.rank >= 0 ? 'Tu es ' + RANK_LABEL[r.rank] + ' du classement' + (r.updated ? ' !' : ' (ton meilleur temps est conservé).')
+      : 'Hors du top 3.') + ' Top 3 : ' + topLine(r.top) + '.';
   });
 }
+
 $('btnScoreTest').onclick = async () => {
   toast('Test en cours…');
   toast((await fetchRecords([levelId(0, 1)])) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie ta connexion Internet');
@@ -1357,9 +1400,9 @@ $('btnScoreTest').onclick = async () => {
 
 /* ================= Sauvegarde locale : fichier JSON à télécharger, puis à recharger ================= */
 const SAVE_KEYS = ['bastions.progress', 'bastions.custom', 'bastions.pseudo', 'bastions.music',
-  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis'];
+  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis', 'bastions.dataVersion'];
 const SAVE_TYPES = { 'bastions.progress': 'object', 'bastions.custom': 'object', 'bastions.pseudo': 'string',
-  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array' };
+  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array', 'bastions.dataVersion': 'number' };
 function exportSave() {
   const data = {};
   for (const k of SAVE_KEYS) { try { const v = localStorage.getItem(k); if (v != null) data[k] = JSON.parse(v); } catch (e) { /* clé illisible : ignorée */ } }
@@ -1375,6 +1418,7 @@ let pendingSave = null;
 function readSave(text) {
   const d = JSON.parse(text);
   if (!d || d.format !== 'bastions-sauvegarde' || !d.data || typeof d.data !== 'object') throw new Error('format');
+  if (d.data['bastions.dataVersion'] !== DATA_VERSION) throw new Error('ancienne');
   const data = {};
   for (const k of SAVE_KEYS) {                     // seules les clés connues, du bon type, sont reprises
     if (!(k in d.data)) continue;
@@ -1402,7 +1446,10 @@ $('saveFile').addEventListener('change', e => {
       $('saveInfo').classList.remove('hidden'); $('btnSaveConfirm').classList.remove('hidden');
     } catch (err) {
       pendingSave = null; $('btnSaveConfirm').classList.add('hidden');
-      $('saveInfo').textContent = 'Ce fichier n’est pas une sauvegarde Bastions valide.'; $('saveInfo').classList.remove('hidden');
+      $('saveInfo').textContent = err.message === 'ancienne'
+        ? 'Cette sauvegarde vient d’une version précédente du jeu, dont les niveaux ont changé : elle ne peut pas être restaurée.'
+        : 'Ce fichier n’est pas une sauvegarde Bastions valide.';
+      $('saveInfo').classList.remove('hidden');
     }
   };
   r.readAsText(f);
@@ -1444,7 +1491,8 @@ function showPre({ title, chips, specials, id, mine, note, start }) {
   $('preSpecs').innerHTML = specIcons({ specials });
   $('preMine').innerHTML = mine;
   $('preNote').textContent = note || '';
-  const rec = () => remote[id] ? fmtTime(remote[id].time) + '<small>' + escapeHtml(remote[id].pseudo) + '</small>' : null;
+  const rec = () => remote[id] && remote[id].length
+    ? remote[id].map((r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + escapeHtml(r.pseudo) + '</small>').join('') : null;
   $('preRecord').innerHTML = rec() || 'Chargement…';
   preStart = start;
   $('pre').classList.remove('hidden');
@@ -1510,7 +1558,8 @@ function update(dt) {
     const armored = t.kind === 'barracks';
     // Caserne : blindés à sa cadence propre quand elle envoie ; sans chemin, elle se remplit
     // au rythme d'une tour classique (sinon, une fois prise, elle restait trop longtemps vulnérable)
-    const rate = (armored && t.paths.length ? 1 / armorInterval(t.stock) : prodRate(level(t))) * (t.owner < 0 ? RIPOSTE_EFF : 1);
+    const rate = (armored && t.paths.length ? 1 / armorInterval(t.stock) : prodRate(level(t))) * (t.owner < 0 ? RIPOSTE_EFF : 1)
+      * (t.kind !== 'tower' ? SPECIAL_BONUS : 1);   // bâtiments spéciaux : +20 % de production
     if (t.paths.length) {
       t.acc += rate * dt;
       while (t.acc >= 1) {
@@ -2214,7 +2263,7 @@ function drawBarracks(t, c, dk) {
 /* ================= HUD et fin de partie ================= */
 let chronoOn = store.get('bastions.chrono', true) !== false;
 // Temps affiché : la partie en cours ; pour un défi, le total du défi (manches gagnées et essais perdus compris)
-const chronoTime = () => current && current.kind === 'defi' ? sumTimes(current.entry) + clock : clock;
+const chronoTime = () => current && current.kind === 'defi' ? sumTimes(current.entry) + scoreClock() : scoreClock();
 function updateChrono() { const el = $('chrono'); if (el) el.textContent = '⏱ ' + fmtTime(chronoTime()); }
 function buildChips() {
   $('chips').innerHTML = (chronoOn ? '<div class="chip" id="chrono">⏱ 0:00</div>' : '')
@@ -2253,16 +2302,17 @@ function endGame(win) {
   if (win && current.kind === 'campaign') {
     const id = current.cfg.id, ti = campaignPlan()[current.index - 1].ti, best = campBest(), prev = best[id];
     const nextLocked = ti + 1 < TIERS.length && !tierUnlocked(ti + 1);
-    if (prev == null || clock < prev) best[id] = clock;
+    const sc = scoreClock();
+    if (prev == null || sc < prev) best[id] = sc;
     saveProgress();
-    text = 'Victoire en ' + fmtTime(clock) + (clock < STAR_TIME ? ' : étoile gagnée !' : '. Termine en moins de ' + fmtTime(STAR_TIME) + ' pour gagner l’étoile.');
-    if (prev != null && clock >= prev) text += ' Ton meilleur temps : ' + fmtTime(prev) + '.';
+    text = 'Victoire en ' + fmtTime(sc) + (sc < STAR_TIME ? ' : étoile gagnée !' : '. Termine en moins de ' + fmtTime(STAR_TIME) + ' pour gagner l’étoile.');
+    if (prev != null && sc >= prev) text += ' Ton meilleur temps : ' + fmtTime(prev) + '.';
     if (nextLocked && tierUnlocked(ti + 1)) text += ' Difficulté « ' + TIERS[ti + 1].name + ' » débloquée !';
-    onlineId = id; onlineTime = clock;
+    onlineId = id; onlineTime = sc;
   } else if (current.kind === 'defi') {
     const e = current.entry, n = e.challenge.games.length;
-    if (win) { e.times.push(clock + (e.pending || 0)); e.pending = 0; if (e.times.length === n) e.status = 'réussi'; }
-    else { e.status = 'échoué'; e.pending = (e.pending || 0) + clock; e.retries = (e.retries || 0) + 1; }
+    if (win) { e.times.push(scoreClock() + (e.pending || 0)); e.pending = 0; if (e.times.length === n) e.status = 'réussi'; }
+    else { e.status = 'échoué'; e.pending = (e.pending || 0) + scoreClock(); e.retries = (e.retries || 0) + 1; }
     e.pseudo = myPseudo();
     saveHist();
     const tot = sumTimes(e);
@@ -2330,12 +2380,12 @@ function renderCampaign() {
     for (let k = 1; k <= TIER_LEVELS; k++) {
       const L = plan[ti * TIER_LEVELS + k - 1], t = best[L.id], done = t != null, star = done && t < STAR_TIME;
       // cadre vert : record absolu ; bleu : victoire ; rouge : perdu sans jamais gagner ; gris : pas encore joué
-      const rec = done && remote[L.id] && t <= remote[L.id].time + 0.05, lost = !done && lostSet[L.id];
-      const cls = rec ? 'rec' : done ? 'won' : lost ? 'lost' : '';
+      const rank = done ? myRank(L.id) : -1, lost = !done && lostSet[L.id];
+      const cls = rank >= 0 ? RANK_CLASS[rank] : done ? 'won' : lost ? 'lost' : '';
       const wm = L.variant === 'all' ? `<span class="wm all">${ICONS.super}${ICONS.artillery}${ICONS.barracks}</span>`
         : L.variant !== 'none' ? `<span class="wm">${ICONS[L.variant]}</span>` : '';
       html += `<button data-n="${L.n}" class="${cls}"${open ? '' : ' disabled'}`
-        + ` aria-label="${TIERS[ti].name} niveau ${k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${rec ? ', record absolu' : ''}${star ? ', étoile' : ''}">`
+        + ` aria-label="${TIERS[ti].name} niveau ${k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${rank >= 0 ? ', ' + RANK_LABEL[rank] + ' du classement' : ''}${star ? ', étoile' : ''}">`
         + wm + (star ? `<span class="pf">${starSvg('')}</span>` : '')
         + `<span class="n">${k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
         + `<span class="land" style="background:${LANDS[L.land].ground}"></span></button>`;
@@ -2345,7 +2395,7 @@ function renderCampaign() {
   $('campGrid').innerHTML = html;
   $('campInfo').textContent = 'Étoiles : ' + totalStars() + ' / ' + CAMPAIGN_SIZE + '. Une étoile par niveau gagné en moins de '
     + fmtTime(STAR_TIME) + '. Une difficulté se débloque après ' + UNLOCK_WINS + ' victoires dans la précédente. '
-    + 'Cadre doré : record absolu ; vert : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
+    + 'Cadre or, argent ou bronze : ta place dans le top 3 en ligne ; vert : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
 }
 
 function renderReset() {
@@ -2538,7 +2588,7 @@ let custom = store.get('bastions.custom', { skin: 0 });
 if (!custom || typeof custom !== 'object') custom = { skin: 0 };
 let SKIN = null, LAND = LANDS[0];                   // skin actif ; paysage imposé par chaque partie
 // Étoiles : une par niveau de campagne gagné en moins de 1:40
-const totalStars = () => Object.values(campBest()).filter(t => t < STAR_TIME).length;
+const totalStars = () => campaignPlan().filter(L => campBest()[L.id] < STAR_TIME).length;
 // Un skin qui n'est plus débloqué (après une réinitialisation) revient au skin de base
 function applyCustom() {
   const st = totalStars(), sk = SKINS[custom.skin];
@@ -2641,7 +2691,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_55';
+const APP_VERSION = '20261025_60';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
@@ -2674,7 +2724,8 @@ async function checkUpdate() {
 checkUpdate();
 
 $('btnPlay').onclick = () => {
-  soundUnlocked = true; musicSync();             // premier geste : la musique des menus peut démarrer
+  soundUnlocked = true; musicSync();
+  if (dataReset) toast('Nouvelle version : les niveaux ont changé, l’avancement repart de zéro.');             // premier geste : la musique des menus peut démarrer
   const c = $('cover'); c.classList.add('gone');
   setTimeout(() => c.remove(), 500);
 };
