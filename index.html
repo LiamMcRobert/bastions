@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_64)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_68)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -1364,7 +1364,7 @@ $('pseudo').addEventListener('input', e => { pseudo = e.target.value.slice(0, 20
 // Colonne A : identifiant de la partie ; B à D : pseudos des 3 meilleurs ; E à G : leurs temps (secondes, vitesse ×1).
 // Une ligne n'est créée qu'après une première victoire sur cet identifiant. Un joueur n'occupe qu'une place.
 // Adresse du classement : fixe, intégrée au jeu (elle n'est plus modifiable dans Personnalisation)
-const scoreUrl = 'https://script.google.com/macros/s/AKfycbxNUzGZ45OIkDKiFT2bddHoymcoQhzUWkSA9nYxGP6E8_2K6I9rWx-2t59QCqXey1s/exec';
+const scoreUrl = 'https://script.google.com/macros/s/AKfycbzHzwVH2hoKiqvBBfrIEZv50SXjIc6Fe2KkAOj7dfc8Ly4waNSpc21ihwh8ZwtEbZUt6g/exec';
 const remote = {};                                 // identifiant → top 3 [{ pseudo, time }] connu du tableau
 const cleanTop = top => (Array.isArray(top) ? top : []).filter(r => r && r.pseudo && isFinite(+r.time))
   .map(r => ({ pseudo: String(r.pseudo).slice(0, 20), time: +r.time })).sort((a, b) => a.time - b.time).slice(0, 3);
@@ -2710,7 +2710,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_64';
+const APP_VERSION = '20261025_68';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
