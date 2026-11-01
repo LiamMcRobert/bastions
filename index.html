@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_62)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_64)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -468,7 +468,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         </div>
         <p class="lbl" style="margin-top:20px">Jouer le défi d’une autre personne</p>
         <p class="sub" style="margin:2px 0 0">Saisis l’identifiant reçu : mêmes cartes, mêmes réglages.</p>
-        <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. E2331-1kz9ab" aria-label="Identifiant du défi">
+        <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. D2331-1kz9ab" aria-label="Identifiant du défi">
         <button class="ghost" id="btnDefiId">Jouer ce défi</button>
         <p class="err hidden" id="defiErr"></p>
         <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
@@ -595,9 +595,22 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
 // Version des données : les niveaux ayant été regénérés, les avancements d'avant sont remis à zéro une fois
-const DATA_VERSION = 3;   // 3 : temps comptés à la vitesse ×1 (les temps enregistrés avant ne sont plus comparables)
-const dataReset = store.get('bastions.dataVersion', 1) !== DATA_VERSION;
-if (dataReset) { store.set('bastions.progress', {}); store.set('bastions.defis', []); store.set('bastions.dataVersion', DATA_VERSION); }
+// Version des données. 2 : temps comptés à la vitesse ×1, soit le double des anciens temps de jeu.
+// L'avancement n'est jamais effacé par une mise à jour : les anciens temps sont convertis une seule fois.
+const DATA_VERSION = 2;
+function migrateData(data) {                         // data : { 'bastions.progress', 'bastions.defis', … }
+  const x2 = t => Math.round(t * 2 * 10) / 10;
+  const p = data['bastions.progress'];
+  if (p && p.camp && p.camp.best) for (const k of Object.keys(p.camp.best)) p.camp.best[k] = x2(p.camp.best[k]);
+  const d = data['bastions.defis'];
+  if (Array.isArray(d)) d.forEach(e => { if (e && Array.isArray(e.times)) { e.times = e.times.map(x2); if (e.pending) e.pending = x2(e.pending); } });
+  data['bastions.dataVersion'] = DATA_VERSION;
+  return data;
+}
+if (store.get('bastions.dataVersion', 1) < DATA_VERSION) {
+  const m = migrateData({ 'bastions.progress': store.get('bastions.progress', {}), 'bastions.defis': store.get('bastions.defis', []) });
+  for (const k of Object.keys(m)) store.set(k, m[k]);
+} else if (store.get('bastions.dataVersion', 1) > DATA_VERSION) store.set('bastions.dataVersion', DATA_VERSION);   // versions d'essai
 let progress = store.get('bastions.progress', {});
 if (!progress || typeof progress !== 'object') progress = {};
 progress.camp = progress.camp && progress.camp.best ? progress.camp : { best: {} };   // meilleurs temps de campagne
@@ -654,7 +667,7 @@ const OPP_MIX = [                                  // nombre d'adversaires des 1
 ];
 const FINAL_OPP = [1, 2, 2, 3, 3];                 // 15e niveau de chaque difficulté
 const TIER_SHORT = ['T. facile', 'Facile', 'Normal', 'Difficile', 'T. difficile'];
-const levelId = (ti, k) => 'C2-' + ti + String(k).padStart(2, '0');   // identifiant unique d'un niveau
+const levelId = (ti, k) => 'C1-' + ti + String(k).padStart(2, '0');   // identifiant unique d'un niveau
 function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 let CAMP_PLAN = null;
 // [STRAT] plan calculé une seule fois (graines fixes) : la campagne est identique pour tous les joueurs
@@ -1122,7 +1135,7 @@ const STATUS_LABEL = { 'en cours': 'En cours', 'réussi': 'Réussi', 'échoué':
 let defiHist = store.get('bastions.defis', []);
 if (!Array.isArray(defiHist)) defiHist = [];
 // défis enregistrés avant le format à identifiant : on ne garde que ceux encore compatibles
-defiHist = defiHist.filter(x => x && x.challenge && /^E\d/.test(x.challenge.id || ''));
+defiHist = defiHist.filter(x => x && x.challenge && /^D\d/.test(x.challenge.id || ''));
 const saveHist = () => store.set('bastions.defis', defiHist);
 const fmtTime = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 const uid = p => p + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
@@ -1134,16 +1147,16 @@ let pseudo = String(store.get('bastions.pseudo', '') || '').slice(0, 20);
 const myPseudo = () => pseudo.trim() || 'Anonyme';
 
 /* Identifiant d'un défi : il décrit entièrement les parties.
-   Format E<difficulté><manches><adversaires><bâtiments>-<graine en base 36>, ex. E2331-1kz9ab
+   Format D<difficulté><manches><adversaires><bâtiments>-<graine en base 36>, ex. D2331-1kz9ab
    bâtiments : 1 = super-tour, 2 = caserne, 4 = tour de tir (additionnés) */
-const ID_RE = /^E([0-4])([1-5])([1-3])([0-7])-([0-9a-z]{1,8})$/;
+const ID_RE = /^D([0-4])([1-5])([1-3])([0-7])-([0-9a-z]{1,8})$/;
 const SPEC_BITS = { super: 1, barracks: 2, artillery: 4 };
 function encodeChallenge(diff, n, opp, specials, seed) {
   const mask = specials.reduce((m, k) => m | SPEC_BITS[k], 0);
-  return 'E' + diff + n + opp + mask + '-' + (seed >>> 0).toString(36);
+  return 'D' + diff + n + opp + mask + '-' + (seed >>> 0).toString(36);
 }
 function decodeChallenge(id) {
-  const m = ID_RE.exec(String(id || '').trim().toLowerCase().replace(/^e/, 'E'));
+  const m = ID_RE.exec(String(id || '').trim().toLowerCase().replace(/^d/, 'D'));
   if (!m) return null;
   const diff = +m[1], n = +m[2], opp = +m[3], mask = +m[4], seed = parseInt(m[5], 36);
   if (!isFinite(seed)) return null;
@@ -1238,7 +1251,7 @@ const canResume = e => (e.status === 'échoué' || e.status === 'abandonné') &&
 function startFree() { preDefi(newChallenge(), 'créé', 'Nouveau défi'); }
 function playById(raw) {
   const ch = decodeChallenge(raw), err = $('defiErr');
-  if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : E2331-1kz9ab.'; err.classList.remove('hidden'); return; }
+  if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : D2331-1kz9ab.'; err.classList.remove('hidden'); return; }
   err.classList.add('hidden'); $('defiIdIn').value = '';
   preDefi(ch, 'importé', 'Défi reçu');
 }
@@ -1418,7 +1431,8 @@ let pendingSave = null;
 function readSave(text) {
   const d = JSON.parse(text);
   if (!d || d.format !== 'bastions-sauvegarde' || !d.data || typeof d.data !== 'object') throw new Error('format');
-  if (d.data['bastions.dataVersion'] !== DATA_VERSION) throw new Error('ancienne');
+  const ver = d.data['bastions.dataVersion'] || 1;
+  if (ver > DATA_VERSION) throw new Error('ancienne');      // sauvegarde d'une version d'essai
   const data = {};
   for (const k of SAVE_KEYS) {                     // seules les clés connues, du bon type, sont reprises
     if (!(k in d.data)) continue;
@@ -1426,6 +1440,8 @@ function readSave(text) {
     if (t === 'array' ? Array.isArray(v) : (typeof v === t && v !== null)) data[k] = v;
   }
   if (!data['bastions.progress']) throw new Error('vide');
+  if (ver < DATA_VERSION) migrateData(data);       // ancienne sauvegarde : temps convertis
+  else data['bastions.dataVersion'] = DATA_VERSION;
   return { date: d.date, data };
 }
 $('btnSaveExport').onclick = exportSave;
@@ -1447,7 +1463,7 @@ $('saveFile').addEventListener('change', e => {
     } catch (err) {
       pendingSave = null; $('btnSaveConfirm').classList.add('hidden');
       $('saveInfo').textContent = err.message === 'ancienne'
-        ? 'Cette sauvegarde vient d’une version précédente du jeu, dont les niveaux ont changé : elle ne peut pas être restaurée.'
+        ? 'Cette sauvegarde vient d’une version d’essai du jeu : elle ne peut pas être restaurée.'
         : 'Ce fichier n’est pas une sauvegarde Bastions valide.';
       $('saveInfo').classList.remove('hidden');
     }
@@ -2694,7 +2710,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_62';
+const APP_VERSION = '20261025_64';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
@@ -2728,7 +2744,6 @@ checkUpdate();
 
 $('btnPlay').onclick = () => {
   soundUnlocked = true; musicSync();
-  if (dataReset) toast('Nouvelle version : les niveaux ont changé, l’avancement repart de zéro.');             // premier geste : la musique des menus peut démarrer
   const c = $('cover'); c.classList.add('gone');
   setTimeout(() => c.remove(), 500);
 };
