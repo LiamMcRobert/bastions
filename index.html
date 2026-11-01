@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_68)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_72)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -490,7 +490,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Le bouton ×1 en haut à droite accélère le jeu (×1,5 puis ×2). Le bouton 🔊 coupe ou remet la musique (menus et parties).</li>
           <li>Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.</li>
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
-          <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 1:40 donne une étoile.</li>
+          <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
           <li>Personnalisation : 15 skins de tours se débloquent avec les étoiles (toutes à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne.</li>
           <li>Défis : deux défis du jour, des défis à créer, et des défis à partager par leur identifiant. Le meilleur temps de chaque partie peut être envoyé dans un tableau Google Sheets partagé.</li>
@@ -553,7 +553,7 @@ const NEUTRAL = '#8e949c', NEUTRAL_DARK = '#4e535a';
 const NAMES = ['Bleu', 'Rouge', 'Vert', 'Jaune'];
 const MAX_STOCK = 50, MAX_PATHS = 3, TAU = Math.PI * 2;
 const TIER_LEVELS = 15, CAMPAIGN_SIZE = 5 * TIER_LEVELS;   // 5 difficultés × 15 niveaux
-const STAR_TIME = 100, UNLOCK_WINS = 8;        // étoile : victoire en moins de 1:40 ; 8 victoires débloquent la difficulté suivante
+const STAR_TIME = 200, UNLOCK_WINS = 8;        // étoile : victoire en moins de 3:20 (temps compté à la vitesse ×1) ; 8 victoires débloquent la difficulté suivante
 const ASPECT = 1.7;   // proportion de référence (portrait) pour espacer les tours générées
 
 /* Production par seconde : 2 au niveau 1, puis +1 par niveau (7 au niveau 6) */
@@ -594,23 +594,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
-// Version des données : les niveaux ayant été regénérés, les avancements d'avant sont remis à zéro une fois
-// Version des données. 2 : temps comptés à la vitesse ×1, soit le double des anciens temps de jeu.
-// L'avancement n'est jamais effacé par une mise à jour : les anciens temps sont convertis une seule fois.
-const DATA_VERSION = 2;
-function migrateData(data) {                         // data : { 'bastions.progress', 'bastions.defis', … }
-  const x2 = t => Math.round(t * 2 * 10) / 10;
-  const p = data['bastions.progress'];
-  if (p && p.camp && p.camp.best) for (const k of Object.keys(p.camp.best)) p.camp.best[k] = x2(p.camp.best[k]);
-  const d = data['bastions.defis'];
-  if (Array.isArray(d)) d.forEach(e => { if (e && Array.isArray(e.times)) { e.times = e.times.map(x2); if (e.pending) e.pending = x2(e.pending); } });
-  data['bastions.dataVersion'] = DATA_VERSION;
-  return data;
-}
-if (store.get('bastions.dataVersion', 1) < DATA_VERSION) {
-  const m = migrateData({ 'bastions.progress': store.get('bastions.progress', {}), 'bastions.defis': store.get('bastions.defis', []) });
-  for (const k of Object.keys(m)) store.set(k, m[k]);
-} else if (store.get('bastions.dataVersion', 1) > DATA_VERSION) store.set('bastions.dataVersion', DATA_VERSION);   // versions d'essai
+// Les temps enregistrés ou restaurés sont toujours gardés tels quels : aucune conversion n'est appliquée.
 let progress = store.get('bastions.progress', {});
 if (!progress || typeof progress !== 'object') progress = {};
 progress.camp = progress.camp && progress.camp.best ? progress.camp : { best: {} };   // meilleurs temps de campagne
@@ -1413,9 +1397,9 @@ $('btnScoreTest').onclick = async () => {
 
 /* ================= Sauvegarde locale : fichier JSON à télécharger, puis à recharger ================= */
 const SAVE_KEYS = ['bastions.progress', 'bastions.custom', 'bastions.pseudo', 'bastions.music',
-  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis', 'bastions.dataVersion'];
+  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis'];
 const SAVE_TYPES = { 'bastions.progress': 'object', 'bastions.custom': 'object', 'bastions.pseudo': 'string',
-  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array', 'bastions.dataVersion': 'number' };
+  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array' };
 function exportSave() {
   const data = {};
   for (const k of SAVE_KEYS) { try { const v = localStorage.getItem(k); if (v != null) data[k] = JSON.parse(v); } catch (e) { /* clé illisible : ignorée */ } }
@@ -1431,8 +1415,6 @@ let pendingSave = null;
 function readSave(text) {
   const d = JSON.parse(text);
   if (!d || d.format !== 'bastions-sauvegarde' || !d.data || typeof d.data !== 'object') throw new Error('format');
-  const ver = d.data['bastions.dataVersion'] || 1;
-  if (ver > DATA_VERSION) throw new Error('ancienne');      // sauvegarde d'une version d'essai
   const data = {};
   for (const k of SAVE_KEYS) {                     // seules les clés connues, du bon type, sont reprises
     if (!(k in d.data)) continue;
@@ -1440,8 +1422,6 @@ function readSave(text) {
     if (t === 'array' ? Array.isArray(v) : (typeof v === t && v !== null)) data[k] = v;
   }
   if (!data['bastions.progress']) throw new Error('vide');
-  if (ver < DATA_VERSION) migrateData(data);       // ancienne sauvegarde : temps convertis
-  else data['bastions.dataVersion'] = DATA_VERSION;
   return { date: d.date, data };
 }
 $('btnSaveExport').onclick = exportSave;
@@ -1462,9 +1442,7 @@ $('saveFile').addEventListener('change', e => {
       $('saveInfo').classList.remove('hidden'); $('btnSaveConfirm').classList.remove('hidden');
     } catch (err) {
       pendingSave = null; $('btnSaveConfirm').classList.add('hidden');
-      $('saveInfo').textContent = err.message === 'ancienne'
-        ? 'Cette sauvegarde vient d’une version d’essai du jeu : elle ne peut pas être restaurée.'
-        : 'Ce fichier n’est pas une sauvegarde Bastions valide.';
+      $('saveInfo').textContent = 'Ce fichier n’est pas une sauvegarde Bastions valide.';
       $('saveInfo').classList.remove('hidden');
     }
   };
@@ -2606,7 +2584,7 @@ function frame(now) {
 let custom = store.get('bastions.custom', { skin: 0 });
 if (!custom || typeof custom !== 'object') custom = { skin: 0 };
 let SKIN = null, LAND = LANDS[0];                   // skin actif ; paysage imposé par chaque partie
-// Étoiles : une par niveau de campagne gagné en moins de 1:40
+// Étoiles : une par niveau de campagne gagné en moins de 3:20
 const totalStars = () => campaignPlan().filter(L => campBest()[L.id] < STAR_TIME).length;
 // Un skin qui n'est plus débloqué (après une réinitialisation) revient au skin de base
 function applyCustom() {
@@ -2710,7 +2688,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_68';
+const APP_VERSION = '20261025_72';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
