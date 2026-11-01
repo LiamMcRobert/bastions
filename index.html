@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_45)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_50)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -110,14 +110,17 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .tiergrid button{position:relative;min-height:54px;border-radius:10px;border:2px solid var(--line);background:transparent;
   font-size:16px;font-weight:800;overflow:hidden;padding:0 0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
-.tiergrid button.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.tiergrid button{border-width:3px}
+.tiergrid button.won{border-color:var(--accent);background:rgba(47,111,220,.14)}
+.tiergrid button.rec{border-color:#2a9d55;background:rgba(42,157,85,.16)}
+.tiergrid button.lost{border-color:#d8433b;background:rgba(216,67,59,.12)}
 .tiergrid button:disabled{opacity:.3}
 .tiergrid .wm{position:absolute;inset:4px;opacity:.18;pointer-events:none;display:flex}
 .tiergrid .wm svg{width:100%;height:100%;fill:currentColor}
 .tiergrid .wm.all{inset:3px 1px}
 .tiergrid .wm.all svg{width:33.4%}
 .tiergrid .pf{position:absolute;inset:1px;pointer-events:none;display:flex}
-.tiergrid .pf svg{width:100%;height:100%;fill:none;stroke:#fff;stroke-width:1.3;stroke-linejoin:round}
+.tiergrid .pf svg{width:100%;height:100%;fill:none;stroke:#e2b007;stroke-width:1.4;stroke-linejoin:round}
 .tiergrid .n,.tiergrid .t{position:relative}
 .tiergrid .t{font-size:10px;font-weight:700;opacity:.85}
 .tiergrid .land{position:absolute;left:0;right:0;bottom:0;height:5px}
@@ -202,8 +205,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .hist{border:3px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
 .hist.win{border-color:#2a9d55}
 .hist.lose{border-color:#d8433b}
-.hist.gold{border-color:#e2b007}
-.hist.gold .badge{background:#b98d00}
+.hist.won{border-color:var(--accent)}
+.hist.won .badge{background:var(--accent)}
 .hist .when{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .hist .when strong{font-size:18px;font-weight:800;color:var(--panel-ink)}
 .hist .badge{font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;color:#fff;background:var(--muted);white-space:nowrap}
@@ -393,11 +396,19 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <label class="setrow" for="pseudo"><span class="lbl" style="margin:0">Pseudo</span>
           <input id="pseudo" maxlength="20" autocomplete="nickname" placeholder="Anonyme" aria-label="Pseudo, envoyé avec tes meilleurs temps"></label>
         <label class="tgl"><input type="checkbox" id="optSound"><span><strong>Musique</strong>Dans les menus et pendant les parties (même réglage que le bouton 🔊).</span></label>
+        <label class="tgl"><input type="checkbox" id="optChrono"><span><strong>Chronomètre</strong>Affiché en haut de l’écran pendant les parties.</span></label>
         <p class="lbl">Vitesse du jeu</p>
         <div class="seg" id="segSpeed"><button data-v="0">×1</button><button data-v="1">×1,5</button><button data-v="2">×2</button></div>
         <p class="lbl">Tours</p>
         <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne.</p>
         <div class="cards" id="skinGrid"></div>
+        <p class="lbl" style="margin-top:20px">Sauvegarde</p>
+        <p class="sub" style="margin:2px 0 0">Enregistre ta progression (campagne, étoiles, pseudo, skin, réglages, historique des défis) dans un fichier, puis recharge-la sur cet appareil ou un autre, par exemple après avoir effacé les données du navigateur.</p>
+        <button class="ghost" id="btnSaveExport">Télécharger une sauvegarde</button>
+        <button class="ghost" id="btnSaveImport">Restaurer depuis un fichier</button>
+        <input type="file" id="saveFile" accept=".json,application/json" hidden>
+        <p class="sub hidden" id="saveInfo" style="margin-top:8px"></p>
+        <button class="primary hidden" id="btnSaveConfirm">Remplacer ma progression par cette sauvegarde</button>
         <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
         <p class="sub" style="margin:2px 0 0">Remet l’avancement de la campagne à zéro. Touche deux fois le bouton pour confirmer.</p>
         <div id="resetList"></div>
@@ -411,7 +422,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="lbl" style="margin-top:0">Défis du jour</p>
         <p class="sub" style="margin:2px 0 0">Les mêmes pour tout le monde, renouvelés chaque jour à minuit (heure de Paris).</p>
         <div id="dailyList"></div>
-        <p class="lbl" style="margin-top:20px">Créer un défi</p>
+        <button class="ghost" id="btnDefiNew" aria-expanded="false" style="margin-top:16px">Créer un défi</button>
+        <div id="defiCreate" class="hidden">
         <p class="lbl">Nombre d’adversaires</p>
         <div class="seg" id="segOpp">
           <button data-v="1">1</button><button data-v="2" class="on">2</button><button data-v="3">3</button>
@@ -431,6 +443,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         </div>
         <p class="sub" style="margin-top:8px">Au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà de Normal. Deux exemplaires si une seule option est activée, un de chaque sinon.</p>
         <button id="btnFree" class="primary">Créer et jouer le défi</button>
+        </div>
         <p class="lbl" style="margin-top:20px">Jouer le défi d’une autre personne</p>
         <p class="sub" style="margin:2px 0 0">Saisis l’identifiant reçu : mêmes cartes, mêmes réglages.</p>
         <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. D2331-1kz9ab" aria-label="Identifiant du défi">
@@ -1089,7 +1102,9 @@ function dailyChallenges() {
   const day = parisDay();
   return [[2, 'Normal'], [3, 'Difficile']].map(([diff, label]) => {
     const h = hashStr(day + '-' + diff), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
-    const id = encodeChallenge(diff, 3, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
+    // 1er défi (Normal) : 1 manche ; 2e défi (Difficile) : 2 ou 3 manches selon le jour
+    const n = diff === 2 ? 1 : 2 + ((h >>> 6) % 2);
+    const id = encodeChallenge(diff, n, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
     return { label, day, ch: decodeChallenge(id) };
   });
 }
@@ -1119,7 +1134,8 @@ function summary(chId) {
   return { list, mine, mineAttempt, latest: list[list.length - 1] };
 }
 // Ton meilleur temps est-il le record en ligne (ou n'y a-t-il pas encore de record connu) ?
-const holdsRecord = (id, mine) => !!mine && mine.status === 'réussi' && (!remote[id] || mine.total <= remote[id].time + 0.05);
+// Record absolu : ton meilleur temps égale le record du tableau en ligne
+const holdsRecord = (id, mine) => !!mine && mine.status === 'réussi' && !!remote[id] && mine.total <= remote[id].time + 0.05;
 
 function newChallenge() {
   const n = +$('segOpp').querySelector('.on').dataset.v;
@@ -1187,13 +1203,13 @@ const recordTxt = id => remote[id] ? 'Record en ligne : ' + escapeHtml(remote[id
 function renderDaily() {
   $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => {
     const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
-    const cls = won ? (holdsRecord(ch.id, best) ? ' win' : ' gold') : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
+    const cls = won ? (holdsRecord(ch.id, best) ? ' win' : ' won') : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
     const d = day.split('-').reverse().join('/');
     return `<div class="hist${cls}">
       <div class="when"><strong>Défi du jour, ${label}</strong><span class="badge">${d}</span></div>
-      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>3 manches</span>${best ? `<span>⏱ ${fmtTime(best.total)}</span>` : ''}</div>
+      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${ch.games.length} manche${ch.games.length > 1 ? 's' : ''}</span>${best ? `<span>⏱ ${fmtTime(best.total)}</span>` : ''}</div>
       <div class="specs">${specIcons(ch)}</div>
-      <div class="detail">${best ? 'Ton meilleur : ' + (won ? 'réussi en ' + fmtTime(best.total) : best.times.length + '/3 manches') + '. ' : 'Pas encore joué. '}${recordTxt(ch.id)}</div>
+      <div class="detail">${best ? 'Ton meilleur : ' + (won ? 'réussi en ' + fmtTime(best.total) : best.times.length + '/' + ch.games.length + ' manche' + (ch.games.length > 1 ? 's' : '')) + '. ' : 'Pas encore joué. '}${recordTxt(ch.id)}</div>
       <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}<button data-daily="${ch.id}">${S.list.length ? 'Rejouer' : 'Jouer'}</button></div>
     </div>`;
   }).join('');
@@ -1213,7 +1229,7 @@ function renderHist() {
     const when = isNaN(d) ? 'Date inconnue'
       : d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     let cls = '', badge = STATUS_LABEL[last.status] || last.status;
-    if (best && best.status === 'réussi') { const hold = holdsRecord(id, best); cls = hold ? ' win' : ' gold'; badge = hold ? 'Meilleur temps' : 'Réussi'; }
+    if (best && best.status === 'réussi') { const hold = holdsRecord(id, best); cls = hold ? ' win' : ' won'; badge = hold ? 'Record absolu' : 'Réussi'; }
     else if (S.list.some(x => x.status === 'échoué')) { cls = ' lose'; badge = 'Échoué'; }
     const mineTxt = best ? 'Ton meilleur essai : ' + (best.status === 'réussi' ? 'réussi en ' + fmtTime(best.total)
       : best.times.length + '/' + n + ' manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + ', ' + fmtTime(best.total))
@@ -1229,6 +1245,11 @@ function renderHist() {
   }).join('');
 }
 const findEntry = id => defiHist.find(x => x.id === id);
+$('btnDefiNew').onclick = () => {
+  const open = $('defiCreate').classList.toggle('hidden') === false;
+  $('btnDefiNew').setAttribute('aria-expanded', String(open));
+  $('btnDefiNew').textContent = open ? 'Masquer la création de défi' : 'Créer un défi';
+};
 $('btnDefiId').onclick = () => {
   const v = $('defiIdIn').value.trim();
   if (!v) { $('defiErr').textContent = 'Saisis d’abord l’identifiant du défi.'; $('defiErr').classList.remove('hidden'); return; }
@@ -1317,6 +1338,66 @@ $('btnScoreTest').onclick = async () => {
   toast('Test en cours…');
   toast((await fetchRecords([levelId(0, 1)])) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie ta connexion Internet');
 };
+
+/* ================= Sauvegarde locale : fichier JSON à télécharger, puis à recharger ================= */
+const SAVE_KEYS = ['bastions.progress', 'bastions.custom', 'bastions.pseudo', 'bastions.music',
+  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis'];
+const SAVE_TYPES = { 'bastions.progress': 'object', 'bastions.custom': 'object', 'bastions.pseudo': 'string',
+  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array' };
+function exportSave() {
+  const data = {};
+  for (const k of SAVE_KEYS) { try { const v = localStorage.getItem(k); if (v != null) data[k] = JSON.parse(v); } catch (e) { /* clé illisible : ignorée */ } }
+  const json = JSON.stringify({ format: 'bastions-sauvegarde', version: 1, date: new Date().toISOString(), data }, null, 1);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = 'bastions_sauvegarde_' + parisDay() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  toast('Sauvegarde téléchargée');
+}
+let pendingSave = null;
+function readSave(text) {
+  const d = JSON.parse(text);
+  if (!d || d.format !== 'bastions-sauvegarde' || !d.data || typeof d.data !== 'object') throw new Error('format');
+  const data = {};
+  for (const k of SAVE_KEYS) {                     // seules les clés connues, du bon type, sont reprises
+    if (!(k in d.data)) continue;
+    const v = d.data[k], t = SAVE_TYPES[k];
+    if (t === 'array' ? Array.isArray(v) : (typeof v === t && v !== null)) data[k] = v;
+  }
+  if (!data['bastions.progress']) throw new Error('vide');
+  return { date: d.date, data };
+}
+$('btnSaveExport').onclick = exportSave;
+$('btnSaveImport').onclick = () => $('saveFile').click();
+$('saveFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const s = readSave(String(r.result)), best = (s.data['bastions.progress'].camp || {}).best || {}, d = new Date(s.date);
+      const stars = Object.values(best).filter(t => t < STAR_TIME).length;
+      pendingSave = s.data;
+      $('saveInfo').textContent = 'Sauvegarde' + (isNaN(d) ? '' : ' du ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))
+        + ' : ' + Object.keys(best).length + ' niveau' + (Object.keys(best).length > 1 ? 'x' : '') + ' gagné' + (Object.keys(best).length > 1 ? 's' : '')
+        + ', ' + stars + ' étoile' + (stars > 1 ? 's' : '') + (s.data['bastions.pseudo'] ? ', pseudo « ' + s.data['bastions.pseudo'] + ' »' : '')
+        + '. Elle remplacera ta progression actuelle.';
+      $('saveInfo').classList.remove('hidden'); $('btnSaveConfirm').classList.remove('hidden');
+    } catch (err) {
+      pendingSave = null; $('btnSaveConfirm').classList.add('hidden');
+      $('saveInfo').textContent = 'Ce fichier n’est pas une sauvegarde Bastions valide.'; $('saveInfo').classList.remove('hidden');
+    }
+  };
+  r.readAsText(f);
+});
+$('btnSaveConfirm').onclick = () => {
+  if (!pendingSave) return;
+  for (const k of Object.keys(pendingSave)) store.set(k, pendingSave[k]);
+  location.reload();                               // relance le jeu avec la progression restaurée
+};
+// Demande au navigateur de ne pas effacer ce stockage quand l'appareil manque de place
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
 /* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
 let preStart = null;
@@ -2094,8 +2175,13 @@ function drawBarracks(t, c, dk) {
 }
 
 /* ================= HUD et fin de partie ================= */
+let chronoOn = store.get('bastions.chrono', true) !== false;
+// Temps affiché : la partie en cours ; pour un défi, le total du défi (manches gagnées et essais perdus compris)
+const chronoTime = () => current && current.kind === 'defi' ? sumTimes(current.entry) + clock : clock;
+function updateChrono() { const el = $('chrono'); if (el) el.textContent = '⏱ ' + fmtTime(chronoTime()); }
 function buildChips() {
-  $('chips').innerHTML = `<div class="chip">${current ? current.label : ''}</div>` + players.map(p =>
+  $('chips').innerHTML = (chronoOn ? '<div class="chip" id="chrono">⏱ 0:00</div>' : '')
+    + `<div class="chip">${current ? current.label : ''}</div>` + players.map(p =>
     `<div class="chip" id="chip${p.id}"><span class="dot" style="background:${COLORS[p.id]}"></span><span id="cnt${p.id}">1</span></div>`
   ).join('');
 }
@@ -2122,6 +2208,11 @@ function endGame(win) {
   state = 'over'; drag = null; updateChips();
   let text = win ? 'Plus aucun adversaire sur la carte.' : 'Ta dernière tour est tombée.';
   let onlineId = null, onlineTime = 0;
+  if (!win && current.kind === 'campaign') {        // défaite mémorisée pour le cadre rouge (tant que le niveau n'est pas gagné)
+    progress.camp.lost = progress.camp.lost || {};
+    progress.camp.lost[current.cfg.id] = true;
+    saveProgress();
+  }
   if (win && current.kind === 'campaign') {
     const id = current.cfg.id, ti = campaignPlan()[current.index - 1].ti, best = campBest(), prev = best[id];
     const nextLocked = ti + 1 < TIERS.length && !tierUnlocked(ti + 1);
@@ -2173,7 +2264,7 @@ const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<':
 function showTab(name) {
   [...$('tabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === name));
   ['campaign', 'free', 'custom', 'rules'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
-  if (name === 'campaign') renderCampaign();
+  if (name === 'campaign') { renderCampaign(); fetchRecords(campaignPlan().map(L => L.id)).then(ok => { if (ok && $('campGrid').offsetParent) renderCampaign(); }); }
   if (name === 'free') renderDefiTab();
   if (name === 'custom') { renderCustom(); renderReset(); }
 }
@@ -2186,7 +2277,7 @@ const ICONS = {
 };
 const starSvg = cls => `<svg viewBox="0 0 24 24"${cls ? ` class="${cls}"` : ''}><path d="${STAR_PATH}"/></svg>`;
 function renderCampaign() {
-  const best = campBest(), plan = campaignPlan();
+  const best = campBest(), plan = campaignPlan(), lostSet = progress.camp.lost || {};
   let html = '';
   for (let ti = 0; ti < TIERS.length; ti++) {
     const open = tierUnlocked(ti), wins = tierWins(ti);
@@ -2198,10 +2289,13 @@ function renderCampaign() {
       + '</span></div><div class="tiergrid">';
     for (let k = 1; k <= TIER_LEVELS; k++) {
       const L = plan[ti * TIER_LEVELS + k - 1], t = best[L.id], done = t != null, star = done && t < STAR_TIME;
+      // cadre vert : record absolu ; bleu : victoire ; rouge : perdu sans jamais gagner ; gris : pas encore joué
+      const rec = done && remote[L.id] && t <= remote[L.id].time + 0.05, lost = !done && lostSet[L.id];
+      const cls = rec ? 'rec' : done ? 'won' : lost ? 'lost' : '';
       const wm = L.variant === 'all' ? `<span class="wm all">${ICONS.super}${ICONS.artillery}${ICONS.barracks}</span>`
         : L.variant !== 'none' ? `<span class="wm">${ICONS[L.variant]}</span>` : '';
-      html += `<button data-n="${L.n}" class="${done ? 'done' : ''}"${open ? '' : ' disabled'}`
-        + ` aria-label="${TIERS[ti].name} niveau ${k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : ''}${star ? ', étoile' : ''}">`
+      html += `<button data-n="${L.n}" class="${cls}"${open ? '' : ' disabled'}`
+        + ` aria-label="${TIERS[ti].name} niveau ${k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${rec ? ', record absolu' : ''}${star ? ', étoile' : ''}">`
         + wm + (star ? `<span class="pf">${starSvg('')}</span>` : '')
         + `<span class="n">${k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
         + `<span class="land" style="background:${LANDS[L.land].ground}"></span></button>`;
@@ -2211,7 +2305,7 @@ function renderCampaign() {
   $('campGrid').innerHTML = html;
   $('campInfo').textContent = 'Étoiles : ' + totalStars() + ' / ' + CAMPAIGN_SIZE + '. Une étoile par niveau gagné en moins de '
     + fmtTime(STAR_TIME) + '. Une difficulté se débloque après ' + UNLOCK_WINS + ' victoires dans la précédente. '
-    + 'Filigrane : bâtiment spécial présent ; bande de couleur : paysage.';
+    + 'Cadre vert : record absolu ; bleu : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
 }
 
 function renderReset() {
@@ -2394,7 +2488,7 @@ function frame(now) {
   if (state === 'play' && !paused) {
     update(dt * GAME_SPEED * SPEEDS[speedIdx]);
     chipTimer -= dt;
-    if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); positionHint(); }
+    if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); updateChrono(); positionHint(); }
   }
   render();
   requestAnimationFrame(frame);
@@ -2429,6 +2523,7 @@ function renderCustom() {
   const st = totalStars();
   $('starSum').textContent = st + ' / ' + CAMPAIGN_SIZE;
   $('optSound').checked = musicOn;
+  $('optChrono').checked = chronoOn;
   [...$('segSpeed').children].forEach((b, i) => b.classList.toggle('on', i === speedIdx));
   const card = (item, i, on, kind) => {
     const locked = st < item.stars;
@@ -2448,6 +2543,7 @@ function pickCustom(kind, i) {
   renderCustom();
 }
 $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data-skin]'); if (b) pickCustom('skin', +b.dataset.skin); });
+$('optChrono').addEventListener('change', e => { chronoOn = e.target.checked; store.set('bastions.chrono', chronoOn); });
 $('optSound').addEventListener('change', e => { musicOn = e.target.checked; store.set('bastions.music', musicOn); musicSync(); });
 $('segSpeed').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
