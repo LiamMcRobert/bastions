@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_60)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_62)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -432,7 +432,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="sub hidden" id="saveInfo" style="margin-top:8px"></p>
         <button class="primary hidden" id="btnSaveConfirm">Remplacer ma progression par cette sauvegarde</button>
         <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
-        <p class="sub" style="margin:2px 0 0">Remet l’avancement de la campagne à zéro. Touche deux fois le bouton pour confirmer.</p>
+        <p class="sub" style="margin:2px 0 0">Remet à zéro la campagne et l’historique des défis. Le pseudo et les réglages sont conservés. Touche deux fois le bouton pour confirmer.</p>
         <div id="resetList"></div>
         <p class="lbl" style="margin-top:20px">Classement en ligne</p>
         <p class="sub" style="margin:2px 0 0">Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.</p>
@@ -595,7 +595,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
 // Version des données : les niveaux ayant été regénérés, les avancements d'avant sont remis à zéro une fois
-const DATA_VERSION = 2;
+const DATA_VERSION = 3;   // 3 : temps comptés à la vitesse ×1 (les temps enregistrés avant ne sont plus comparables)
 const dataReset = store.get('bastions.dataVersion', 1) !== DATA_VERSION;
 if (dataReset) { store.set('bastions.progress', {}); store.set('bastions.defis', []); store.set('bastions.dataVersion', DATA_VERSION); }
 let progress = store.get('bastions.progress', {});
@@ -2399,7 +2399,9 @@ function renderCampaign() {
 }
 
 function renderReset() {
-  const rows = [{ key: 'campaign', name: 'Campagne', info: Object.keys(campBest()).length + ' / ' + CAMPAIGN_SIZE + ' niveaux gagnés' }];
+  const n = new Set(defiHist.map(x => x.challenge.id)).size;
+  const rows = [{ key: 'all', name: 'Campagne et défis',
+    info: Object.keys(campBest()).length + ' / ' + CAMPAIGN_SIZE + ' niveaux gagnés, ' + n + ' défi' + (n > 1 ? 's' : '') + ' dans l’historique' }];
   $('resetList').innerHTML = rows.map(r =>
     `<div class="pack"><div class="info"><strong>${escapeHtml(r.name)}</strong><span>${r.info}</span></div>
       <button class="del" data-reset="${escapeHtml(r.key)}">Réinitialiser</button></div>`).join('');
@@ -2407,7 +2409,8 @@ function renderReset() {
 $('resetList').addEventListener('click', e => {
   const b = e.target.closest('[data-reset]'); if (!b) return;
   if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Confirmer'; return; }
-  progress.camp = { best: {} };
+  progress.camp = { best: {} };                      // campagne : temps, étoiles, défaites
+  defiHist = []; saveHist();                         // défis : historique et meilleurs essais
   saveProgress(); applyCustom(); buildBg(); renderReset(); renderCustom(); toast('Avancement réinitialisé');
 });
 function toMenu(tab) {
@@ -2691,7 +2694,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_60';
+const APP_VERSION = '20261025_62';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
