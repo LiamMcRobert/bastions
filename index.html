@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_50)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_55)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -111,8 +111,12 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid button{position:relative;min-height:54px;border-radius:10px;border:2px solid var(--line);background:transparent;
   font-size:16px;font-weight:800;overflow:hidden;padding:0 0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .tiergrid button{border-width:3px}
-.tiergrid button.won{border-color:var(--accent);background:rgba(47,111,220,.14)}
-.tiergrid button.rec{border-color:#2a9d55;background:rgba(42,157,85,.16)}
+.tiergrid button.won{border-color:#2a9d55;background:rgba(42,157,85,.16)}
+.tiergrid button.rec{border-color:#e2b007;box-shadow:0 0 8px rgba(242,193,78,.85);
+  background:linear-gradient(110deg,rgba(242,193,78,.25) 30%,rgba(255,247,200,.85) 50%,rgba(242,193,78,.25) 70%) 0 0/300% 100%;
+  animation:shine 3s linear infinite}
+.tiergrid button.rec .pf svg{stroke:#a87a00}
+@keyframes shine{from{background-position:100% 0}to{background-position:-200% 0}}
 .tiergrid button.lost{border-color:#d8433b;background:rgba(216,67,59,.12)}
 .tiergrid button:disabled{opacity:.3}
 .tiergrid .wm{position:absolute;inset:4px;opacity:.18;pointer-events:none;display:flex}
@@ -126,7 +130,7 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid .land{position:absolute;left:0;right:0;bottom:0;height:5px}
 .idline{font-size:13px;color:var(--muted);margin-top:4px}
 .idline code{font:700 14px ui-monospace,Menlo,Consolas,monospace;color:var(--panel-ink);user-select:all;-webkit-user-select:all}
-#defiIdIn{width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
+#defiIdIn,#pseudoAsk{width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
   color:inherit;font:16px ui-monospace,Menlo,Consolas,monospace;padding:0 12px}
 
 .pack{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -199,18 +203,23 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   font-size:32px;font-weight:900;text-shadow:0 2px 0 rgba(14,26,46,.45);box-shadow:0 7px 0 rgba(14,26,46,.35)}
 #btnPlay:active{transform:translateX(-50%) translateY(3px);box-shadow:0 4px 0 rgba(14,26,46,.35)}
 #btnPlay:disabled{opacity:.55}
+#upd{position:absolute;left:50%;bottom:calc(6% + 84px);transform:translateX(-50%);width:min(72%,360px);text-align:center}
+#upd p{margin:0 0 6px;color:#fff;font-weight:800;font-size:20px;text-shadow:0 2px 0 rgba(14,26,46,.6)}
+#upd .bar{height:16px;border-radius:8px;border:3px solid #0e1a2e;background:rgba(255,255,255,.75);overflow:hidden}
+#upd .bar span{display:block;height:100%;width:0;background:linear-gradient(#5b93f5,#2f6fdc);transition:width .2s}
 /* Citation affichée à la victoire */
 .quote{margin:2px 0 14px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--field);
   border-radius:8px;font-style:italic;font-size:15px;line-height:1.4}
 .hist{border:3px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-.hist.win{border-color:#2a9d55}
+.hist.win{border-color:#e2b007;box-shadow:0 0 10px rgba(242,193,78,.75);
+  background:linear-gradient(110deg,transparent 35%,rgba(255,240,180,.55) 50%,transparent 65%) 0 0/300% 100%;animation:shine 3.5s linear infinite}
 .hist.lose{border-color:#d8433b}
-.hist.won{border-color:var(--accent)}
-.hist.won .badge{background:var(--accent)}
+.hist.won{border-color:#2a9d55}
+.hist.won .badge{background:#2a9d55}
 .hist .when{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .hist .when strong{font-size:18px;font-weight:800;color:var(--panel-ink)}
 .hist .badge{font-size:12px;font-weight:800;padding:3px 8px;border-radius:999px;color:#fff;background:var(--muted);white-space:nowrap}
-.hist.win .badge{background:#2a9d55}
+.hist.win .badge{background:linear-gradient(#f2c14e,#c99a00);color:#3a2a00}
 .hist.lose .badge{background:#d8433b}
 .hist .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
 .hist .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field);color:var(--panel-ink)}
@@ -224,6 +233,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .hist .hbtns button.del{color:var(--danger)}
 .hist textarea{min-height:120px;margin-top:8px}
 .quote cite{display:block;font-style:normal;font-weight:700;font-size:13px;margin-top:6px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){ .tiergrid button.rec,.hist.win{animation:none} }
 @media (prefers-reduced-motion: reduce){ .chip,#toast,.msg{transition:none} }
 </style>
 </head>
@@ -356,6 +366,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 <text x="540" y="480" font-family="system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-weight="700" font-size="58" text-anchor="middle" fill="#fff" stroke="#0e1a2e" stroke-opacity=".55" stroke-width="10" paint-order="stroke">Conquête de tours</text>
 
 </svg>
+    <div id="upd" class="hidden"><p>Mise à jour…</p><div class="bar"><span id="updBar"></span></div></div>
     <button id="btnPlay" disabled>Jouer !</button>
   </div>
   <canvas id="cv"></canvas>
@@ -503,6 +514,11 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <h2 id="overTitle"></h2>
       <p class="sub" id="overText"></p>
       <p class="sub" id="overOnline"></p>
+      <div id="askPseudo" class="hidden">
+        <input id="pseudoAsk" maxlength="20" autocomplete="nickname" placeholder="Ton pseudo" aria-label="Pseudo pour le classement">
+        <button class="primary" id="btnPseudoOk">Enregistrer mon temps</button>
+        <button class="ghost" id="btnPseudoSkip">Rester anonyme</button>
+      </div>
       <blockquote class="quote hidden" id="quote"><span id="quoteText"></span><cite id="quoteAuthor"></cite></blockquote>
       <button id="btnDefiCopy" class="ghost hidden" style="margin:0 0 12px">Partager l’identifiant du défi</button>
       <p class="lbl" style="margin-top:0">Profils de tes adversaires</p>
@@ -1399,6 +1415,27 @@ $('btnSaveConfirm').onclick = () => {
 // Demande au navigateur de ne pas effacer ce stockage quand l'appareil manque de place
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
+/* ================= Pseudo demandé à la première victoire (enregistré aussi dans Personnalisation) ================= */
+let pendingScore = null;
+function askPseudoThen(id, time) {
+  pendingScore = { id, time };
+  $('overOnline').textContent = 'Choisis un pseudo pour inscrire ton temps au classement.';
+  $('pseudoAsk').value = '';
+  $('askPseudo').classList.remove('hidden');
+}
+function sendPending() {
+  $('askPseudo').classList.add('hidden');
+  if (pendingScore) { showOnline(pendingScore.id, pendingScore.time); pendingScore = null; }
+}
+$('btnPseudoOk').onclick = () => {
+  const v = $('pseudoAsk').value.trim().slice(0, 20);
+  if (!v) { toast('Saisis un pseudo, ou choisis de rester anonyme'); return; }
+  pseudo = v; store.set('bastions.pseudo', v); $('pseudo').value = v;
+  if (current && current.kind === 'defi') { current.entry.pseudo = v; saveHist(); }
+  sendPending();
+};
+$('btnPseudoSkip').onclick = sendPending;
+
 /* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
 let preStart = null;
 function showPre({ title, chips, specials, id, mine, note, start }) {
@@ -2241,7 +2278,10 @@ function endGame(win) {
   }
   $('overTitle').textContent = (win ? 'Victoire' : 'Défaite') + (current.kind !== 'free' ? ' – ' + current.cfg.name : '');
   $('overText').textContent = text;
-  if (onlineId) showOnline(onlineId, onlineTime); else $('overOnline').textContent = '';
+  $('askPseudo').classList.add('hidden');
+  if (onlineId && !pseudo.trim()) askPseudoThen(onlineId, onlineTime);   // victoire sans pseudo : on le demande d'abord
+  else if (onlineId) showOnline(onlineId, onlineTime);
+  else $('overOnline').textContent = '';
   const q = win ? pickQuote() : null;
   $('quote').classList.toggle('hidden', !q);
   if (q) { $('quoteText').textContent = '« ' + q[0] + ' »'; $('quoteAuthor').textContent = '— ' + q[1]; }
@@ -2305,7 +2345,7 @@ function renderCampaign() {
   $('campGrid').innerHTML = html;
   $('campInfo').textContent = 'Étoiles : ' + totalStars() + ' / ' + CAMPAIGN_SIZE + '. Une étoile par niveau gagné en moins de '
     + fmtTime(STAR_TIME) + '. Une difficulté se débloque après ' + UNLOCK_WINS + ' victoires dans la précédente. '
-    + 'Cadre vert : record absolu ; bleu : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
+    + 'Cadre doré : record absolu ; vert : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
 }
 
 function renderReset() {
@@ -2598,6 +2638,41 @@ function pickQuote() {
 
 /* Page de garde : le jeu est prêt, le bouton « Jouer ! » mène au menu */
 $('btnPlay').disabled = false;
+/* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
+   À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
+   il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
+const APP_VERSION = '20261025_55';
+async function checkUpdate() {
+  if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
+  try {
+    const ctrl = new AbortController(), stop = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch('index.html?check=' + Date.now(), { cache: 'no-store', signal: ctrl.signal });
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let head = '';
+    while (head.length < 3000) { const { value, done } = await reader.read(); if (done) break; head += dec.decode(value, { stream: true }); }
+    reader.cancel().catch(() => {}); clearTimeout(stop);
+    const m = /version (\d{8}_\d+)/.exec(head);
+    if (!m || m[1] === APP_VERSION) return;
+    if (sessionStorage.getItem('bastions.upd') === m[1]) return;     // déjà tenté pendant cette session : pas de boucle
+    sessionStorage.setItem('bastions.upd', m[1]);
+    $('upd').classList.remove('hidden'); $('btnPlay').disabled = true;
+    const full = await fetch('index.html', { cache: 'no-cache' });   // le service de cache garde la nouvelle version
+    const r2 = full.body.getReader(), total = +full.headers.get('content-length') || 6e6;
+    let got = 0;
+    for (;;) {
+      const { value, done } = await r2.read(); if (done) break;
+      got += value.length; $('updBar').style.width = Math.min(96, got / total * 100) + '%';
+    }
+    $('updBar').style.width = '100%';
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (reg) await reg.update().catch(() => {});
+    setTimeout(() => location.reload(), 400);
+  } catch (e) {                                     // réseau lent ou coupé : on garde la version actuelle
+    $('upd').classList.add('hidden'); $('btnPlay').disabled = false;
+  }
+}
+checkUpdate();
+
 $('btnPlay').onclick = () => {
   soundUnlocked = true; musicSync();             // premier geste : la musique des menus peut démarrer
   const c = $('cover'); c.classList.add('gone');
