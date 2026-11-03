@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_72)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_76)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -171,6 +171,11 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .starsum{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:800}
 .starsum svg{width:22px;height:22px;fill:#f2b705;stroke:#a87a00;stroke-width:1.4;stroke-linejoin:round}
 #pseudo{flex:1;max-width:62%;min-height:44px;border-radius:10px;border:2px solid var(--line);background:var(--field);color:inherit;font:inherit;font-size:16px;padding:0 10px}
+#tuto{position:absolute;left:12px;right:12px;bottom:14px;z-index:4;background:var(--panel);color:var(--panel-ink);
+  border-radius:16px;padding:14px 14px 10px;box-shadow:0 8px 24px rgba(0,0,0,.35);border:3px solid #ffd34d;max-width:520px;margin:0 auto}
+#tuto p{margin:0 0 8px;font-size:16px;line-height:1.4}
+#tuto .tbtns{display:flex;gap:8px}
+#tuto .tbtns button{flex:1;margin:0;min-height:46px}
 #pre{z-index:8}
 #pre h2{font-size:24px;margin-bottom:10px}
 #pre .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
@@ -179,11 +184,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #pre .specs span{display:flex;width:30px;height:30px}
 #pre .specs svg{width:100%;height:100%;fill:var(--muted);opacity:.35}
 #pre .specs span.on svg{fill:var(--accent);opacity:1}
-.prebox{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px}
+.prebox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:0 0 8px}
 .prebox div{background:var(--field);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
 .prebox span{font-size:12px;font-weight:700;color:var(--muted)}
 .prebox strong{font-size:22px;font-weight:800;display:flex;flex-direction:column;line-height:1.15}
 .prebox small{font-size:12px;font-weight:600;color:var(--muted)}
+.prebox .none{font-size:15px;font-weight:700;font-style:normal;color:var(--muted)}
 .prebox small.podium{font-size:13px;font-weight:700;color:var(--panel-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #profiles{list-style:none;padding:0;margin:4px 0 6px}
 #profiles li{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:16px}
@@ -211,6 +217,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #upd{position:absolute;left:50%;bottom:calc(6% + 84px);transform:translateX(-50%);width:min(72%,360px);text-align:center}
 #upd p{margin:0 0 6px;color:#fff;font-weight:800;font-size:20px;text-shadow:0 2px 0 rgba(14,26,46,.6)}
 #upd .bar{height:16px;border-radius:8px;border:3px solid #0e1a2e;background:rgba(255,255,255,.75);overflow:hidden}
+#btnOffline{margin-top:10px;min-height:44px;padding:0 18px;border-radius:22px;border:3px solid #0e1a2e;background:#fff;color:#0e1a2e;font-size:16px;font-weight:800}
 #upd .bar span{display:block;height:100%;width:0;background:linear-gradient(#5b93f5,#2f6fdc);transition:width .2s}
 /* Citation affichée à la victoire */
 .quote{margin:2px 0 14px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--field);
@@ -377,7 +384,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 <text x="540" y="480" font-family="system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-weight="700" font-size="58" text-anchor="middle" fill="#fff" stroke="#0e1a2e" stroke-opacity=".55" stroke-width="10" paint-order="stroke">Conquête de tours</text>
 
 </svg>
-    <div id="upd" class="hidden"><p>Mise à jour…</p><div class="bar"><span id="updBar"></span></div></div>
+    <div id="upd" class="hidden"><p>Mise à jour…</p><div class="bar"><span id="updBar"></span></div>
+      <button id="btnOffline" class="hidden">Jouer hors ligne</button></div>
     <button id="btnPlay" disabled>Jouer !</button>
   </div>
   <canvas id="cv"></canvas>
@@ -393,6 +401,10 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
     <button id="btnMenu" class="hbtn">Menu</button>
   </div>
 
+  <div id="tuto" class="hidden" role="dialog" aria-live="polite">
+    <p id="tutoText"></p>
+    <div class="tbtns"><button id="tutoSkip" class="ghost">Passer le tutoriel</button><button id="tutoNext" class="primary">Suivant</button></div>
+  </div>
   <div id="hint" class="msg hidden">Glisse ta tour vers une autre pour attaquer</div>
   <div id="toast" class="msg"></div>
 
@@ -418,6 +430,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <label class="setrow" for="pseudo"><span class="lbl" style="margin:0">Pseudo</span>
           <input id="pseudo" maxlength="20" autocomplete="nickname" placeholder="Anonyme" aria-label="Pseudo, envoyé avec tes meilleurs temps"></label>
         <label class="tgl"><input type="checkbox" id="optSound"><span><strong>Musique</strong>Dans les menus et pendant les parties (même réglage que le bouton 🔊).</span></label>
+        <label class="tgl"><input type="checkbox" id="optCounts"><span><strong>Tours possédées</strong>Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.</span></label>
         <label class="tgl"><input type="checkbox" id="optChrono"><span><strong>Chronomètre</strong>Affiché en haut de l’écran pendant les parties.</span></label>
         <p class="lbl">Vitesse du jeu</p>
         <div class="seg" id="segSpeed"><button data-v="0">×1</button><button data-v="1">×1,5</button><button data-v="2">×2</button></div>
@@ -466,11 +479,6 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="sub" style="margin-top:8px">Au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà de Normal. Deux exemplaires si une seule option est activée, un de chaque sinon.</p>
         <button id="btnFree" class="primary">Créer et jouer le défi</button>
         </div>
-        <p class="lbl" style="margin-top:20px">Jouer le défi d’une autre personne</p>
-        <p class="sub" style="margin:2px 0 0">Saisis l’identifiant reçu : mêmes cartes, mêmes réglages.</p>
-        <input id="defiIdIn" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex. D2331-1kz9ab" aria-label="Identifiant du défi">
-        <button class="ghost" id="btnDefiId">Jouer ce défi</button>
-        <p class="err hidden" id="defiErr"></p>
         <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
         </div>
         <div id="defiHist" class="hidden">
@@ -499,6 +507,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
           <li>Ta progression reste enregistrée dans ce navigateur.</li>
         </ul>
+        <button class="primary" id="btnTutoRules">Revoir le tutoriel</button>
       </section>
 
     </div>
@@ -515,6 +524,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <div><span>Ton meilleur</span><strong id="preMine"></strong></div>
       </div>
       <p class="sub" id="preNote"></p>
+      <label class="tgl hidden" id="preTutoRow"><input type="checkbox" id="optTuto"><span><strong>Tutoriel</strong>Les bases du jeu, étape par étape, pendant la partie.</span></label>
       <button id="btnPreGo" class="primary">Lancer la partie</button>
       <button id="btnPreBack" class="ghost">Retour</button>
     </div>
@@ -532,7 +542,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <button class="ghost" id="btnPseudoSkip">Rester anonyme</button>
       </div>
       <blockquote class="quote hidden" id="quote"><span id="quoteText"></span><cite id="quoteAuthor"></cite></blockquote>
-      <button id="btnDefiCopy" class="ghost hidden" style="margin:0 0 12px">Partager l’identifiant du défi</button>
+      <button id="btnDefiCopy" class="ghost hidden" style="margin:0 0 12px">Partager cette partie</button>
       <p class="lbl" style="margin-top:0">Profils de tes adversaires</p>
       <ul id="profiles"></ul>
       <button id="btnNext" class="primary">Niveau suivant</button>
@@ -818,7 +828,9 @@ const LANDS = [
   { name: 'Désert', stars: 21, ground: '#efd69c', patch: '#e3c584', rock: '#d0955f', rockShade: '#9d653a', snow: null,
     tree: '#5f9e4a', tree2: '#4a8239', trunk: '#6b4a2a', tuft: '#c4a26a', plants: ['cactus'], small: 'pebble' },
   { name: 'Montagne enneigée', stars: 36, ground: '#eef3f7', patch: '#dde7ef', rock: '#8f9ba8', rockShade: '#5f6b78', snow: '#ffffff',
-    tree: '#2f6b4a', tree2: '#24563b', trunk: '#5b4330', tuft: '#b4c2ce', plants: ['snowpine'], small: 'pebble' }
+    tree: '#2f6b4a', tree2: '#24563b', trunk: '#5b4330', tuft: '#b4c2ce', plants: ['snowpine'], small: 'pebble' },
+  { name: 'Marais', stars: 0, ground: '#76895a', patch: '#4f6f66', rock: '#7d8a76', rockShade: '#56614f', snow: null,
+    tree: '#5b7a3a', tree2: '#46602c', trunk: '#4e3d2a', tuft: '#4d6633', plants: ['reed', 'reed', 'deadtree'], small: 'tuft', water: true }
 ];
 const isDark = () => {
   const th = document.documentElement.dataset && document.documentElement.dataset.theme;
@@ -839,8 +851,13 @@ function buildBg() {
   // taches de sol plus foncées
   bgx.fillStyle = L.patch;
   for (let i = 0; i < 14; i++) {
-    const x = r() * W, y = r() * H, rx = (40 + r() * 90) * s;
-    bgx.beginPath(); bgx.ellipse(x, y, rx, rx * (0.4 + r() * 0.3), r() * 0.6 - 0.3, 0, TAU); bgx.fill();
+    const x = r() * W, y = r() * H, rx = (40 + r() * 90) * s, ry = rx * (0.4 + r() * 0.3), rot = r() * 0.6 - 0.3;
+    bgx.beginPath(); bgx.ellipse(x, y, rx, ry, rot, 0, TAU); bgx.fill();
+    if (L.water) {                                 // marais : mares d'eau trouble, reflet clair et berge sombre
+      bgx.save(); bgx.strokeStyle = 'rgba(40,55,35,.5)'; bgx.lineWidth = 2 * s; bgx.stroke();
+      bgx.fillStyle = 'rgba(200,225,215,.28)'; bgx.beginPath(); bgx.ellipse(x - rx * 0.25, y - ry * 0.3, rx * 0.35, ry * 0.18, rot, 0, TAU); bgx.fill();
+      bgx.restore(); bgx.fillStyle = L.patch;
+    }
   }
   obstacles = []; links = computeLinks([]);
   const SH = 0.9;                                    // obstacles légèrement réduits : les bords restent franchissables
@@ -946,6 +963,25 @@ function drawPlant(g, t, pal) {
   g.strokeStyle = pal.ol; g.lineWidth = pal.lw; g.lineJoin = 'round';
   // silhouette : contour épais puis remplissage par-dessus, façon dessin animé
   const blob = (shape, fill) => { shape(); g.lineWidth = pal.lw * 2; g.stroke(); g.fillStyle = fill; g.fill(); g.lineWidth = pal.lw; };
+  if (type === 'reed') {                           // roseaux à massettes
+    g.strokeStyle = pal.tree; g.lineWidth = Math.max(1.2, h * 0.05); g.lineCap = 'round';
+    for (const [dx, k] of [[-0.18, 0.85], [0, 1.05], [0.16, 0.75], [0.3, 0.95]]) {
+      g.beginPath(); g.moveTo(x + dx * h, y); g.quadraticCurveTo(x + dx * h + h * 0.05, y - h * k * 0.6, x + dx * h + h * 0.08, y - h * k); g.stroke();
+      if (k > 0.8) { g.fillStyle = '#6b4a2a'; g.beginPath(); g.ellipse(x + dx * h + h * 0.075, y - h * k * 0.82, h * 0.05, h * 0.13, 0.1, 0, TAU); g.fill(); }
+    }
+    g.strokeStyle = pal.tree2; g.lineWidth = Math.max(1, h * 0.04);
+    g.beginPath(); g.moveTo(x - h * 0.05, y); g.quadraticCurveTo(x - h * 0.3, y - h * 0.4, x - h * 0.45, y - h * 0.5); g.stroke();
+    return;
+  }
+  if (type === 'deadtree') {                       // arbre mort aux branches nues
+    g.strokeStyle = '#4a3a2a'; g.lineCap = 'round';
+    g.lineWidth = h * 0.11; g.beginPath(); g.moveTo(x, y); g.lineTo(x + h * 0.04, y - h * 0.9); g.stroke();
+    g.lineWidth = h * 0.06; g.beginPath();
+    g.moveTo(x + h * 0.02, y - h * 0.5); g.lineTo(x - h * 0.3, y - h * 0.8);
+    g.moveTo(x + h * 0.03, y - h * 0.65); g.lineTo(x + h * 0.32, y - h * 0.95);
+    g.moveTo(x - h * 0.18, y - h * 0.68); g.lineTo(x - h * 0.25, y - h * 0.98); g.stroke();
+    return;
+  }
   if (type === 'cactus') {
     const w = h * 0.16;
     blob(() => {
@@ -1157,11 +1193,10 @@ const parisDay = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Pari
 function hashStr(str) { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 function dailyChallenges() {
   const day = parisDay();
-  return [[2, 'Normal'], [3, 'Difficile']].map(([diff, label]) => {
-    const h = hashStr(day + '-' + diff), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
-    // 1er défi (Normal) : 1 manche ; 2e défi (Difficile) : 2 ou 3 manches selon le jour
-    const n = diff === 2 ? 1 : 2 + ((h >>> 6) % 2);
-    const id = encodeChallenge(diff, n, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
+  // 3 défis d'une partie : deux en Normal (cartes différentes), un en Difficile
+  return [[2, 'Normal 1', 'n1'], [2, 'Normal 2', 'n2'], [3, 'Difficile', 'd']].map(([diff, label, key]) => {
+    const h = hashStr(day + '-' + key), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
+    const id = encodeChallenge(diff, 1, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
     return { label, day, ch: decodeChallenge(id) };
   });
 }
@@ -1233,30 +1268,49 @@ function resumeAttempt(entry) {
 }
 const canResume = e => (e.status === 'échoué' || e.status === 'abandonné') && e.times.length < e.challenge.games.length;
 function startFree() { preDefi(newChallenge(), 'créé', 'Nouveau défi'); }
-function playById(raw) {
-  const ch = decodeChallenge(raw), err = $('defiErr');
-  if (!ch) { err.textContent = 'Identifiant invalide. Exemple attendu : D2331-1kz9ab.'; err.classList.remove('hidden'); return; }
-  err.classList.add('hidden'); $('defiIdIn').value = '';
-  preDefi(ch, 'importé', 'Défi reçu');
-}
 async function copyText(txt, what) {
   try { await navigator.clipboard.writeText(txt); toast((what || 'Texte') + ' copié'); return; } catch (e) { /* repli ci-dessous */ }
   const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select();
   let ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-  ta.remove(); toast(ok ? (what || 'Texte') + ' copié' : 'Copie impossible : recopie l’identifiant à la main');
+  ta.remove(); toast(ok ? (what || 'Texte') + ' copié' : 'Copie impossible : recopie le lien à la main');
 }
-// Partager : feuille de partage du téléphone si disponible, sinon copie de l'identifiant
+// Partager une partie : un lien vers le jeu, qui ouvre directement cette partie (campagne ou défi)
+const GAME_URL = 'https://LiamMcRobert.github.io/bastions/';
+const partLink = id => GAME_URL + '#p=' + encodeURIComponent(id);
 async function shareId(id) {
+  const url = partLink(id);
   if (navigator.share) {
-    try { await navigator.share({ title: 'Défi Bastions', text: 'Défi Bastions : ' + id }); return; }
+    try { await navigator.share({ title: 'Bastions', text: 'Bats mon temps sur cette partie de Bastions !', url }); return; }
     catch (err) { if (err && err.name === 'AbortError') return; }
   }
-  copyText(id, 'Identifiant');
+  copyText(url, 'Lien');
+}
+// Ouverture d'un lien partagé (…/bastions/#p=identifiant), après le bouton « Jouer ! »
+const sharedId = (() => { const m = /[#&]p=([^&]+)/.exec(location.hash); return m ? decodeURIComponent(m[1]) : null; })();
+function openShared(id) {
+  if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+  const L = campaignPlan().find(x => x.id === id);
+  if (L) {
+    if (!tierUnlocked(L.ti)) { showTab('campaign'); toast('Ce niveau (' + TIERS[L.ti].name + ' ' + L.k + ') n’est pas encore débloqué pour toi.'); return; }
+    preCampaign(L.n); return;
+  }
+  const ch = decodeChallenge(id);
+  if (ch) preDefi(ch, 'reçu', 'Partie partagée');
+  else toast('Lien de partie invalide');
 }
 const specIcons = ch => SPECIAL_ORDER.map(k => { const on = ch.specials.includes(k), lab = SPECIAL_LABEL[k] + (on ? ' activée' : ' non activée');
   return `<span class="${on ? 'on' : ''}" title="${lab}" role="img" aria-label="${lab}">${ICONS[k]}</span>`; }).join('');
-const recordTxt = id => remote[id] && remote[id].length ? 'Top 3 : ' + escapeHtml(topLine(remote[id])) + '. ' : '';
-// Défis du jour : deux cartes en tête de l'onglet
+// Cases « Top 3 en ligne » et « Ton meilleur », identiques à l'encart de lancement d'une partie
+const none = txt => '<em class="none">' + txt + '</em>';   // état sans valeur, en petit
+const podiumHtml = id => remote[id] ? (remote[id].length
+  ? remote[id].map((r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + escapeHtml(r.pseudo) + '</small>').join('')
+  : none('Aucun record')) : none('—');
+const mineHtml = (best, n) => !best ? none('Pas encore joué')
+  : best.status === 'réussi' ? fmtTime(best.total) + '<small>défi réussi' + (best.retries ? ', ' + best.retries + ' manche' + (best.retries > 1 ? 's' : '') + ' rejouée' + (best.retries > 1 ? 's' : '') : '') + '</small>'
+  : best.times.length + '/' + n + '<small>manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + '</small>';
+const boxHtml = (id, best, n) => `<div class="prebox"><div><span>Top 3 en ligne</span><strong>${podiumHtml(id)}</strong></div>`
+  + `<div><span>Ton meilleur</span><strong>${mineHtml(best, n)}</strong></div></div>`;
+// Défis du jour : trois cartes en tête de l'onglet
 function renderDaily() {
   $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => {
     const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
@@ -1264,10 +1318,10 @@ function renderDaily() {
     const d = day.split('-').reverse().join('/');
     return `<div class="hist${cls}">
       <div class="when"><strong>Défi du jour, ${label}</strong><span class="badge">${d}</span></div>
-      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${ch.games.length} manche${ch.games.length > 1 ? 's' : ''}</span>${best ? `<span>⏱ ${fmtTime(best.total)}</span>` : ''}</div>
+      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${ch.games.length} manche${ch.games.length > 1 ? 's' : ''}</span></div>
       <div class="specs">${specIcons(ch)}</div>
-      <div class="detail">${best ? 'Ton meilleur : ' + (won ? 'réussi en ' + fmtTime(best.total) : best.times.length + '/' + ch.games.length + ' manche' + (ch.games.length > 1 ? 's' : '')) + '. ' : 'Pas encore joué. '}${recordTxt(ch.id)}</div>
-      <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}<button data-daily="${ch.id}">${S.list.length ? 'Rejouer' : 'Jouer'}</button></div>
+      ${boxHtml(ch.id, best, ch.games.length)}
+      <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}<button data-daily="${ch.id}" data-label="${label}">${S.list.length ? 'Rejouer' : 'Jouer'}</button></div>
     </div>`;
   }).join('');
 }
@@ -1288,15 +1342,11 @@ function renderHist() {
     let cls = '', badge = STATUS_LABEL[last.status] || last.status;
     if (best && best.status === 'réussi') { const r = myRank(id); cls = rankClass(id, true); badge = r >= 0 ? MEDALS[r] + ' ' + RANK_LABEL[r] : 'Réussi'; }
     else if (S.list.some(x => x.status === 'échoué')) { cls = ' lose'; badge = 'Échoué'; }
-    const mineTxt = best ? 'Ton meilleur essai : ' + (best.status === 'réussi' ? 'réussi en ' + fmtTime(best.total)
-      : best.times.length + '/' + n + ' manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + ', ' + fmtTime(best.total))
-      + (best.retries ? ', ' + best.retries + ' manche' + (best.retries > 1 ? 's' : '') + ' rejouée' + (best.retries > 1 ? 's' : '') : '') + '. ' : '';
     return `<div class="hist${cls}">
       <div class="when"><strong>${escapeHtml(when)}</strong><span class="badge">${badge}</span></div>
-      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${n} manche${n > 1 ? 's' : ''}</span><span>⏱ ${best ? fmtTime(best.total) : '0:00'}</span></div>
+      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${n} manche${n > 1 ? 's' : ''}</span>${last.source === 'reçu' || last.source === 'importé' ? '<span>reçu</span>' : ''}</div>
       <div class="specs">${specIcons(ch)}</div>
-      <div class="detail">${last.source === 'importé' ? 'Défi reçu. ' : ''}${mineTxt}${recordTxt(id)}</div>
-      <div class="idline">Identifiant : <code>${escapeHtml(id)}</code></div>
+      ${boxHtml(id, best, n)}
       <div class="hbtns">${canResume(last) ? `<button data-resume="${last.id}">Reprendre</button>` : ''}<button data-replay="${last.id}">Rejouer</button><button data-share="${escapeHtml(id)}">Partager</button><button class="del" data-del="${escapeHtml(id)}" aria-label="Supprimer ce défi de l’historique">Supprimer</button></div>
     </div>`;
   }).join('');
@@ -1306,11 +1356,6 @@ $('btnDefiNew').onclick = () => {
   const open = $('defiCreate').classList.toggle('hidden') === false;
   $('btnDefiNew').setAttribute('aria-expanded', String(open));
   $('btnDefiNew').textContent = open ? 'Masquer la création de défi' : 'Créer un défi';
-};
-$('btnDefiId').onclick = () => {
-  const v = $('defiIdIn').value.trim();
-  if (!v) { $('defiErr').textContent = 'Saisis d’abord l’identifiant du défi.'; $('defiErr').classList.remove('hidden'); return; }
-  playById(v);
 };
 $('btnHist').onclick = () => {
   $('defiNew').classList.add('hidden'); $('defiHist').classList.remove('hidden'); renderHist();
@@ -1336,11 +1381,11 @@ function onDefiClick(e) {
   if (rs) { const x = findEntry(rs.dataset.resume); if (x && canResume(x)) preDefi(x.challenge, x.source, null, x); }
   if (rp) { const x = findEntry(rp.dataset.replay); if (x) preDefi(x.challenge, x.source); }
   if (sh) shareId(sh.dataset.share);
-  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, 'du jour', 'Défi du jour, ' + TIERS[ch.difficulty].name); }
+  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, 'du jour', 'Défi du jour, ' + dy.dataset.label); }
 }
 $('histList').addEventListener('click', onDefiClick);
 $('dailyList').addEventListener('click', onDefiClick);
-$('btnDefiCopy').onclick = () => { if (current && current.kind === 'defi') shareId(current.entry.challenge.id); };
+$('btnDefiCopy').onclick = () => { if (current) shareId(current.kind === 'defi' ? current.entry.challenge.id : current.cfg.id); };
 $('pseudo').value = pseudo;
 $('pseudo').addEventListener('input', e => { pseudo = e.target.value.slice(0, 20); store.set('bastions.pseudo', pseudo); });
 
@@ -1359,10 +1404,10 @@ async function fetchRecords(ids) {
   ids = [...new Set(ids)].filter(Boolean);
   if (!scoreUrl || !ids.length) return false;
   try {
-    const res = await fetch(scoreUrl + (scoreUrl.includes('?') ? '&' : '?') + 'ids=' + encodeURIComponent(ids.join(',')));
+    const res = await fetch(scoreUrl + (scoreUrl.includes('?') ? '&' : '?') + 'ids=' + encodeURIComponent(ids.join(',')), { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
     const data = await res.json();
     if (!data || !data.ok || !data.scores) return false;
-    for (const id of ids) { const r = data.scores[id]; if (r && r.top) remote[id] = cleanTop(r.top); }
+    for (const id of ids) { const r = data.scores[id]; remote[id] = r && r.top ? cleanTop(r.top) : []; }   // pas de ligne : aucun record
     return true;
   } catch (e) { return false; }
 }
@@ -1397,9 +1442,9 @@ $('btnScoreTest').onclick = async () => {
 
 /* ================= Sauvegarde locale : fichier JSON à télécharger, puis à recharger ================= */
 const SAVE_KEYS = ['bastions.progress', 'bastions.custom', 'bastions.pseudo', 'bastions.music',
-  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.defis'];
+  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.counts', 'bastions.tuto', 'bastions.defis'];
 const SAVE_TYPES = { 'bastions.progress': 'object', 'bastions.custom': 'object', 'bastions.pseudo': 'string',
-  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.defis': 'array' };
+  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.counts': 'boolean', 'bastions.tuto': 'boolean', 'bastions.defis': 'array' };
 function exportSave() {
   const data = {};
   for (const k of SAVE_KEYS) { try { const v = localStorage.getItem(k); if (v != null) data[k] = JSON.parse(v); } catch (e) { /* clé illisible : ignorée */ } }
@@ -1477,6 +1522,69 @@ $('btnPseudoOk').onclick = () => {
 };
 $('btnPseudoSkip').onclick = sendPending;
 
+/* ================= Tutoriel (proposé avant les niveaux Très facile) ================= */
+// Étapes « info » : le jeu est en pause jusqu'à « Suivant ». Étapes « à toi » : le jeu tourne
+// jusqu'à ce que le joueur ait fait l'action demandée.
+let tuto = null, tutoDone = store.get('bastions.tuto', false) === true;
+const myBase = () => towers.find(t => t.owner === 0);
+const nearNeutral = () => { const b = myBase(); if (!b) return null;
+  return towers.filter(t => t.owner === -1 && canLink(b, t)).sort((a, c) => dist(a, b) - dist(c, b))[0] || null; };
+const TUTO_STEPS = [
+  { text: 'Voici ta tour, en bleu. Le nombre indique ses défenseurs.', target: myBase },
+  { text: 'Sans chemin, une tour remplit sa garnison : 2 unités par seconde au départ, puis +1 par niveau. Les points sous la tour montrent son niveau (un niveau tous les 10 défenseurs).', target: myBase },
+  { text: 'Les tours grises sont neutres : elles ne produisent rien, mais se défendent avec leur garnison.', target: nearNeutral },
+  { text: 'À toi : glisse ton doigt de ta tour jusqu’à cette tour grise pour y envoyer tes troupes.', target: nearNeutral,
+    wait: () => towers.some(t => t.owner === 0 && t.paths.length) },
+  { text: 'Une tour qui envoie des troupes ne remplit plus sa garnison. Pour prendre une tour, il faut y envoyer plus d’unités qu’elle n’a de défenseurs.', target: myBase },
+  { text: 'Une tour peut avoir 3 chemins. Touche un chemin pour le couper, ou ta tour pour couper tous ses chemins. Les montagnes, les forêts et les autres tours bloquent les chemins.', target: null },
+  { text: 'Laisse tes troupes prendre la tour grise…', target: () => tuto && tuto.prey,
+    wait: () => towers.filter(t => t.owner === 0).length >= 2 },
+  { text: 'Bravo, elle est à toi ! Elle produit maintenant pour ton camp.', target: () => towers.find(t => t.owner === 0 && t !== myBase()) },
+  { text: 'L’adversaire attaque aussi. Prends toutes ses tours pour gagner. Les unités ennemies qui se croisent se combattent.', target: () => towers.find(t => t.owner === 1) },
+  { text: 'En haut : le chronomètre (victoire en moins de 3:20 = une étoile), la pause, le son et la vitesse ×1, ×1,5 ou ×2. Bonne conquête !', target: null }
+];
+function startTuto() {
+  tuto = { i: -1, prey: null };
+  hintShown = true; $('hint').classList.add('hidden');
+  nextTuto();
+}
+function nextTuto() {
+  if (!tuto) return;
+  tuto.i++;
+  const st = TUTO_STEPS[tuto.i];
+  if (!st) { endTuto(true); return; }
+  if (st.wait && tuto.i === 3) tuto.prey = nearNeutral();
+  tuto.info = !st.wait;
+  paused = tuto.info; drag = null;
+  $('btnPause').textContent = paused ? '▶' : '❚❚';
+  $('tutoText').textContent = st.text;
+  $('tutoNext').classList.toggle('hidden', !tuto.info);
+  $('tutoNext').textContent = tuto.i === TUTO_STEPS.length - 1 ? 'C’est parti !' : 'Suivant';
+  $('tuto').classList.remove('hidden');
+  placeTuto();
+  musicSync();
+}
+// La bulle se place en haut si l'élément expliqué est dans la moitié basse de l'écran, pour ne pas le cacher
+function placeTuto() {
+  const el = $('tuto'), t = tutoTarget();
+  if (t && t.y > H * 0.5) {
+    el.style.top = Math.round($('hud').getBoundingClientRect().bottom - $('app').getBoundingClientRect().top + 8) + 'px';
+    el.style.bottom = 'auto';
+  } else { el.style.top = 'auto'; el.style.bottom = '14px'; }
+}
+function endTuto(done) {
+  if (!tuto) return;
+  tuto = null; $('tuto').classList.add('hidden');
+  if (done) { tutoDone = true; store.set('bastions.tuto', true); }
+  if (state === 'play') { paused = false; $('btnPause').textContent = '❚❚'; musicSync(); }
+}
+// Vérifié à chaque image : passe à l'étape suivante quand l'action demandée est faite
+function tutoTick() { if (tuto && !tuto.info) { const st = TUTO_STEPS[tuto.i]; if (st && st.wait && st.wait()) nextTuto(); else placeTuto(); } }
+function tutoTarget() { if (!tuto) return null; const st = TUTO_STEPS[tuto.i]; return st && st.target ? st.target() : null; }
+$('tutoNext').onclick = nextTuto;
+$('tutoSkip').onclick = () => endTuto(true);
+$('btnTutoRules').onclick = () => preCampaign(1, true);
+
 /* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
 let preStart = null;
 function showPre({ title, chips, specials, id, mine, note, start }) {
@@ -1487,29 +1595,32 @@ function showPre({ title, chips, specials, id, mine, note, start }) {
   $('preNote').textContent = note || '';
   const rec = () => remote[id] && remote[id].length
     ? remote[id].map((r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + escapeHtml(r.pseudo) + '</small>').join('') : null;
-  $('preRecord').innerHTML = rec() || 'Chargement…';
+  $('preRecord').innerHTML = rec() || none('Chargement…');
   preStart = start;
   $('pre').classList.remove('hidden');
   fetchRecords([id]).then(ok => {                  // le record s'affiche dès que le tableau a répondu
-    if (preStart === start) $('preRecord').innerHTML = rec() || (ok ? 'Aucun record' : 'Indisponible');
+    if (preStart === start) $('preRecord').innerHTML = rec() || (ok ? none('Aucun record') : none('Indisponible'));
   });
 }
-function hidePre() { $('pre').classList.add('hidden'); preStart = null; }
+function hidePre() { $('pre').classList.add('hidden'); $('preTutoRow').classList.add('hidden'); preStart = null; }
 $('btnPreGo').onclick = () => { const go = preStart; hidePre(); if (go) go(); };
 $('btnPreBack').onclick = hidePre;
 // Campagne
-function preCampaign(n) {
+function preCampaign(n, forceTuto) {
   const L = campaignPlan()[n - 1], t = campBest()[L.id];
   showPre({
     title: TIERS[L.ti].name + ', niveau ' + L.k + '/' + TIER_LEVELS,
     chips: ['1v' + L.opp, TIERS[L.ti].name, LANDS[L.land].name],
     specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER : [L.variant],
     id: L.id,
-    mine: t == null ? 'Pas encore gagné'
+    mine: t == null ? none('Pas encore gagné')
       : fmtTime(t) + '<small>' + (t < STAR_TIME ? '★ étoile obtenue' : 'pas encore d’étoile') + '</small>',
     note: 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
-    start: () => startCampaign(n)
+    start: () => { startCampaign(n); if (L.ti === 0 && $('optTuto').checked) startTuto(); }
   });
+  // Très facile : tutoriel proposé (coché tant qu'il n'a jamais été suivi jusqu'au bout)
+  $('preTutoRow').classList.toggle('hidden', L.ti !== 0);
+  $('optTuto').checked = L.ti === 0 && (forceTuto || !tutoDone);
 }
 // Défi (nouveau, reçu, du jour, rejoué ou repris)
 function preDefi(ch, source, title, entry) {
@@ -1519,10 +1630,10 @@ function preDefi(ch, source, title, entry) {
     chips: ['1v' + ch.games[0].opponents, TIERS[ch.difficulty].name, n + ' manche' + (n > 1 ? 's' : '')],
     specials: ch.specials,
     id: ch.id,
-    mine: !best ? 'Pas encore joué'
+    mine: !best ? none('Pas encore joué')
       : best.status === 'réussi' ? fmtTime(best.total) + '<small>défi réussi</small>'
       : best.times.length + '/' + n + '<small>manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + '</small>',
-    note: entry ? 'Reprise à la manche ' + (entry.times.length + 1) + ' : les temps déjà acquis sont conservés.' : 'Identifiant à partager : ' + ch.id,
+    note: entry ? 'Reprise à la manche ' + (entry.times.length + 1) + ' : les temps déjà acquis sont conservés.' : '',
     start: () => entry ? resumeAttempt(entry) : startAttempt(ch, source)
   });
 }
@@ -1825,10 +1936,18 @@ function render() {
     ctx.restore();
   }
 
-  if (state === 'play' && paused) {
+  // Tutoriel : cercle pulsant autour de l'élément expliqué
+  const tt = tutoTarget();
+  if (tt) {
+    const k = 0.5 + 0.5 * Math.sin(performance.now() / 250);
+    ctx.save(); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.globalAlpha = 0.6 + 0.4 * k;
+    ctx.beginPath(); ctx.arc(tt.x, tt.y, rad(tt) + 14 + 6 * k, 0, TAU); ctx.stroke(); ctx.restore();
+  }
+  if (state === 'play' && paused && !tuto) {
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(minDim * 0.09)}px system-ui,sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('Pause', W / 2, H / 2);
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `700 ${Math.round(minDim * 0.09)}px system-ui,sans-serif`; ctx.fillText('Pause', W / 2, H / 2);
+    ctx.font = `600 ${Math.round(minDim * 0.04)}px system-ui,sans-serif`; ctx.fillText('Touche l’écran pour reprendre', W / 2, H / 2 + minDim * 0.08);
   }
 }
 
@@ -1851,22 +1970,29 @@ function drawPath(a, b, o) {
 
 /* ================= Skins de tours (déblocables avec les étoiles de campagne) ================= */
 // 15 skins ; tout est débloqué à 45 étoiles, soit 60 % des 75 étoiles de la campagne
-const SKINS = [
-  { name: 'Bastion',        stars: 0,  wall: 'stone',   roof: 'crenel' },
-  { name: 'Tour de guet',   stars: 3,  wall: 'wood',    roof: 'cone', flag: true },
-  { name: 'Donjon',         stars: 6,  wall: 'brick',   roof: 'crenel', windows: true, flag: true },
-  { name: 'Minaret',        stars: 9,  wall: 'smooth',  roof: 'dome', windows: true, gold: true },
-  { name: 'Champignon',     stars: 12, wall: 'smooth',  roof: 'mushroom' },
-  { name: 'Pagode',         stars: 15, wall: 'wood',    roof: 'pagoda' },
-  { name: 'Clocher',        stars: 18, wall: 'stone',   roof: 'spire', windows: true },
-  { name: 'Phare',          stars: 21, wall: 'stripes', roof: 'lantern' },
-  { name: 'Tour sylvestre', stars: 24, wall: 'vines',   roof: 'canopy' },
-  { name: 'Tour de glace',  stars: 27, wall: 'ice',     roof: 'spikes' },
-  { name: 'Tour de lave',   stars: 31, wall: 'lava',    roof: 'crenel' },
-  { name: 'Tour du mage',   stars: 34, wall: 'stone',   roof: 'mage', windows: true },
-  { name: 'Citadelle',      stars: 38, wall: 'brick',   roof: 'crenel', trim: true, flag: true, windows: true },
-  { name: 'Tour céleste',   stars: 41, wall: 'stars',   roof: 'orb', trim: true },
-  { name: 'Tour royale',    stars: 45, wall: 'smooth',  roof: 'crenel', trim: true, goldMerlon: true, flag: true }
+const SKINS = [                                     // 22 skins ; tout est débloqué à 45 étoiles (60 % des 75)
+  { name: 'Bastion',            stars: 0,  wall: 'stone',   roof: 'crenel' },
+  { name: 'Tour de guet',       stars: 2,  wall: 'wood',    roof: 'cone', flag: true },
+  { name: 'Donjon',             stars: 4,  wall: 'brick',   roof: 'crenel', windows: true, flag: true },
+  { name: 'Minaret',            stars: 6,  wall: 'smooth',  roof: 'dome', windows: true, gold: true },
+  { name: 'Pyramide égyptienne', stars: 9, shape: 'egypt' },
+  { name: 'Champignon',         stars: 11, wall: 'smooth',  roof: 'mushroom' },
+  { name: 'Pagode',             stars: 13, wall: 'wood',    roof: 'pagoda' },
+  { name: 'Pyramide inca',      stars: 15, shape: 'inca' },
+  { name: 'Clocher',            stars: 17, wall: 'stone',   roof: 'spire', windows: true },
+  { name: 'Phare',              stars: 19, wall: 'stripes', roof: 'lantern' },
+  { name: 'Big Ben',            stars: 21, shape: 'bigben' },
+  { name: 'Château de sable',   stars: 24, shape: 'sand' },
+  { name: 'Tour sylvestre',     stars: 26, wall: 'vines',   roof: 'canopy' },
+  { name: 'Tour de glace',      stars: 28, wall: 'ice',     roof: 'spikes' },
+  { name: 'Arc de Triomphe',    stars: 30, shape: 'arc' },
+  { name: 'Tour de lave',       stars: 32, wall: 'lava',    roof: 'crenel' },
+  { name: 'Tour du mage',       stars: 34, wall: 'stone',   roof: 'mage', windows: true },
+  { name: 'Tour d’obsidienne',  stars: 36, shape: 'obsidian' },
+  { name: 'Citadelle',          stars: 39, wall: 'brick',   roof: 'crenel', trim: true, flag: true, windows: true },
+  { name: 'Tour Eiffel',        stars: 41, shape: 'eiffel' },
+  { name: 'Tour céleste',       stars: 43, wall: 'stars',   roof: 'orb', trim: true },
+  { name: 'Tour royale',        stars: 45, wall: 'smooth',  roof: 'crenel', trim: true, goldMerlon: true, flag: true }
 ];
 
 function drawStar(cx, cy, R) {
@@ -2116,12 +2242,142 @@ function drawRoof(S, sup, x, yt, r, ry, c, dk, OL) {
   return drawRoofBase(S, sup, x, yt, r, ry, c, dk, OL);
 }
 
+/* Skins « monuments » : silhouettes complètes, aux couleurs du propriétaire.
+   Renvoie la hauteur du nombre (ty) et le bas de la silhouette (yb) pour les repères de niveau. */
+function drawShapeTower(S, t, x, y, r, lv, c, dk, OL, sup) {
+  const L6 = Math.min(lv, 6), yb = y + r * 0.55;
+  const shade = (x0, x1) => { const g = ctx.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, dk); g.addColorStop(0.35, c); g.addColorStop(1, dk); return g; };
+  ctx.lineJoin = 'round'; ctx.strokeStyle = OL; ctx.lineWidth = 1.5;
+  let ty;
+  switch (S.shape) {
+    case 'egypt': {                                 // pyramide lisse, face ombrée à droite, pyramidion doré
+      const H = r * (1.55 + 0.18 * L6), w = r * 1.4, ax = x + r * 0.1;
+      ctx.beginPath(); ctx.moveTo(x - w, yb); ctx.lineTo(ax, yb - H); ctx.lineTo(x + w * 0.35, yb + r * 0.12); ctx.closePath(); ctx.fillStyle = c; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + w * 0.35, yb + r * 0.12); ctx.lineTo(ax, yb - H); ctx.lineTo(x + w, yb - r * 0.05); ctx.closePath(); ctx.fillStyle = dk; ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.beginPath(); ctx.moveTo(x - w, yb); ctx.lineTo(ax, yb - H); ctx.lineTo(x + w * 0.35, yb + r * 0.12); ctx.closePath(); ctx.clip();
+      ctx.globalAlpha = 0.22; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      for (let k = 1; k < 6; k++) { const yy = yb - H * k / 6 + r * 0.06; ctx.beginPath(); ctx.moveTo(x - w, yy); ctx.lineTo(x + w, yy); ctx.stroke(); }
+      ctx.restore();
+      ctx.beginPath(); ctx.moveTo(ax, yb - H); ctx.lineTo(ax - r * 0.17, yb - H + r * 0.28); ctx.lineTo(ax + r * 0.12, yb - H + r * 0.3); ctx.closePath(); ctx.fillStyle = GOLD; ctx.fill(); ctx.stroke();
+      ty = yb - H * 0.35; break;
+    }
+    case 'inca': {                                  // pyramide à degrés, escalier central, temple au sommet
+      const steps = 4, H = r * (1.45 + 0.15 * L6), sh = H * 0.8 / steps;
+      for (let k = 0; k < steps; k++) {
+        const w = r * (1.45 - k * 0.27), y0 = yb - k * sh;
+        ctx.fillStyle = shade(x - w, x + w); ctx.fillRect(x - w, y0 - sh, w * 2, sh); ctx.strokeRect(x - w, y0 - sh, w * 2, sh);
+        ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x - w, y0 - sh, w * 2, sh * 0.18);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x - r * 0.16, yb - steps * sh, r * 0.32, steps * sh);
+      ctx.save(); ctx.globalAlpha = 0.3; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      for (let k = 1; k < steps * 3; k++) { const yy = yb - k * sh / 3; ctx.beginPath(); ctx.moveTo(x - r * 0.16, yy); ctx.lineTo(x + r * 0.16, yy); ctx.stroke(); }
+      ctx.restore();
+      const tw = r * 0.38, th = H * 0.2, tyy = yb - steps * sh;
+      ctx.fillStyle = dk; ctx.fillRect(x - tw, tyy - th, tw * 2, th); ctx.strokeRect(x - tw, tyy - th, tw * 2, th);
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(x - tw * 0.3, tyy - th * 0.75, tw * 0.6, th * 0.75);
+      ty = yb - H * 0.42; break;
+    }
+    case 'bigben': {                                // tour carrée, cadran, flèche
+      const H = r * (2.0 + 0.2 * L6), w = r * 0.55, top = yb - H * 0.78;
+      ctx.fillStyle = shade(x - w, x + w); ctx.fillRect(x - w, top, w * 2, H * 0.78); ctx.strokeRect(x - w, top, w * 2, H * 0.78);
+      ctx.save(); ctx.globalAlpha = 0.25; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      for (const fx of [-0.4, 0, 0.4]) { ctx.beginPath(); ctx.moveTo(x + fx * w, top + r * 0.9); ctx.lineTo(x + fx * w, yb); ctx.stroke(); }
+      ctx.restore();
+      const cyc = top + r * 0.45, cr = w * 0.72;
+      ctx.beginPath(); ctx.arc(x, cyc, cr, 0, TAU); ctx.fillStyle = '#f7f1dc'; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, cyc); ctx.lineTo(x, cyc - cr * 0.7); ctx.moveTo(x, cyc); ctx.lineTo(x + cr * 0.5, cyc + cr * 0.15); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - w * 1.1, top); ctx.lineTo(x, top - H * 0.24); ctx.lineTo(x + w * 1.1, top); ctx.closePath(); ctx.fillStyle = dk; ctx.fill(); ctx.stroke();
+      ctx.fillStyle = GOLD; ctx.beginPath(); ctx.arc(x, top - H * 0.24, r * 0.08, 0, TAU); ctx.fill();
+      ty = yb - H * 0.3; break;
+    }
+    case 'arc': {                                   // arc monumental : façade, arche, attique
+      const W2 = r * 1.25, H = r * (1.35 + 0.1 * L6), top = yb - H;
+      ctx.fillStyle = shade(x - W2, x + W2); ctx.fillRect(x - W2, top, W2 * 2, H); ctx.strokeRect(x - W2, top, W2 * 2, H);
+      ctx.fillStyle = dk; ctx.fillRect(x - W2 * 1.04, top, W2 * 2.08, H * 0.2); ctx.strokeRect(x - W2 * 1.04, top, W2 * 2.08, H * 0.2);
+      const aw = W2 * 0.42, ah = H * 0.55;
+      ctx.beginPath(); ctx.moveTo(x - aw, yb); ctx.lineTo(x - aw, yb - ah + aw); ctx.arc(x, yb - ah + aw, aw, Math.PI, 0); ctx.lineTo(x + aw, yb); ctx.closePath();
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.globalAlpha = 0.25; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x - W2, top + H * 0.32); ctx.lineTo(x + W2, top + H * 0.32); ctx.stroke(); ctx.restore();
+      ty = top + H * 0.32 - r * 0.05; break;
+    }
+    case 'eiffel': {                                // tour en treillis, deux plates-formes
+      const H = r * (2.3 + 0.2 * L6), base = r * 1.15, top = yb - H;
+      const half = f => base * Math.pow(1 - f, 1.8) + r * 0.06;
+      const path = () => {
+        ctx.beginPath(); ctx.moveTo(x - base, yb);
+        for (let i = 1; i <= 20; i++) { const f = i / 20; ctx.lineTo(x - half(f), yb - H * f); }
+        for (let i = 20; i >= 0; i--) { const f = i / 20; ctx.lineTo(x + half(f), yb - H * f); }
+        ctx.closePath();
+      };
+      path(); ctx.fillStyle = shade(x - base, x + base); ctx.fill();
+      ctx.save(); path(); ctx.clip();
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1;
+      for (let i = 0; i < 12; i++) { const y0 = yb - H * i / 12, y1 = yb - H * (i + 1) / 12;
+        ctx.beginPath(); ctx.moveTo(x - half(i / 12), y0); ctx.lineTo(x + half((i + 1) / 12), y1); ctx.moveTo(x + half(i / 12), y0); ctx.lineTo(x - half((i + 1) / 12), y1); ctx.stroke(); }
+      ctx.beginPath(); ctx.moveTo(x - base * 0.55, yb); ctx.quadraticCurveTo(x, yb - H * 0.22, x + base * 0.55, yb); ctx.closePath(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill();
+      ctx.restore();
+      path(); ctx.strokeStyle = OL; ctx.stroke();
+      for (const f of [0.22, 0.5]) { const hw = half(f) * 1.3; ctx.fillStyle = dk; ctx.fillRect(x - hw, yb - H * f - r * 0.07, hw * 2, r * 0.14); ctx.strokeRect(x - hw, yb - H * f - r * 0.07, hw * 2, r * 0.14); }
+      ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, top - r * 0.35); ctx.stroke();
+      ty = yb - H * 0.36; break;
+    }
+    case 'obsidian': {                              // flèche noire à facettes, anneaux du camp, cristal violet
+      const H = r * (2.0 + 0.2 * L6), w = r * 0.62, top = yb - H;
+      ctx.beginPath(); ctx.moveTo(x - w, yb); ctx.lineTo(x - w * 0.45, top + r * 0.3); ctx.lineTo(x, top); ctx.lineTo(x + w * 0.45, top + r * 0.3); ctx.lineTo(x + w, yb); ctx.closePath();
+      const g = ctx.createLinearGradient(x - w, 0, x + w, 0); g.addColorStop(0, '#2c2838'); g.addColorStop(0.4, '#4a4560'); g.addColorStop(1, '#17151f');
+      ctx.fillStyle = g; ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.globalAlpha = 0.35; ctx.strokeStyle = '#8f86b3'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x - w * 0.15, yb); ctx.stroke(); ctx.restore();
+      for (const f of [0.18, 0.48]) { const yy = yb - H * f, hw = w * (1 - f * 0.6); ctx.fillStyle = c; ctx.fillRect(x - hw, yy - r * 0.09, hw * 2, r * 0.18); ctx.strokeRect(x - hw, yy - r * 0.09, hw * 2, r * 0.18); }
+      const glow = ctx.createRadialGradient(x, top, 1, x, top, r * 0.8); glow.addColorStop(0, 'rgba(190,120,255,.7)'); glow.addColorStop(1, 'rgba(190,120,255,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, top, r * 0.8, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, top - r * 0.42); ctx.lineTo(x - r * 0.17, top); ctx.lineTo(x, top + r * 0.2); ctx.lineTo(x + r * 0.17, top); ctx.closePath();
+      ctx.fillStyle = '#c99bff'; ctx.fill(); ctx.stroke();
+      ty = yb - H * 0.33; break;
+    }
+    case 'sand': {                                  // château de sable : donjon, créneaux arrondis, ruban et fanion du camp
+      const w = r * 1.0, H = r * (1.0 + 0.12 * L6), top = yb - H;
+      const sand = ctx.createLinearGradient(x - w, 0, x + w, 0); sand.addColorStop(0, '#c9a465'); sand.addColorStop(0.4, '#ecd29a'); sand.addColorStop(1, '#b8914f');
+      ctx.beginPath(); ctx.moveTo(x - w, top); ctx.lineTo(x - w * 1.08, yb); ctx.quadraticCurveTo(x, yb + r * 0.3, x + w * 1.08, yb); ctx.lineTo(x + w, top); ctx.closePath();
+      ctx.fillStyle = sand; ctx.fill(); ctx.stroke();
+      for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.arc(x + i * w * 0.4, top, w * 0.17, Math.PI, 0); ctx.closePath(); ctx.fillStyle = '#e2c487'; ctx.fill(); ctx.stroke(); }
+      ctx.fillStyle = c; ctx.fillRect(x - w * 1.02, top + H * 0.42, w * 2.04, r * 0.18); ctx.strokeRect(x - w * 1.02, top + H * 0.42, w * 2.04, r * 0.18);
+      ctx.fillStyle = 'rgba(120,85,40,.55)';
+      for (const [px, py] of [[-0.6, 0.25], [0.5, 0.7], [-0.2, 0.75], [0.7, 0.2]]) { ctx.beginPath(); ctx.arc(x + px * w, top + py * H, r * 0.05, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.arc(x, yb - r * 0.05, r * 0.2, Math.PI, 0); ctx.fill();
+      drawFlag(x + w * 0.55, top - w * 0.1, r, c);
+      ty = top + H * 0.22; break;
+    }
+  }
+  if (sup) drawStar(x, ty - r * 0.75, r * 0.26);   // super-tour : étoile dorée au-dessus du nombre
+  return { ty, yb };
+}
+
 function drawTower(t) {
   const c = colorOf(t.owner), dk = darkOf(t.owner);
   if (t.kind === 'barracks') { drawBarracks(t, c, dk); return; }
   const S = SKIN || SKINS[0], lv = level(t), r = rad(t) * (1 + t.hit * 0.06);
   const sup = t.kind === 'super', art = t.kind === 'artillery';
   const { x, y } = t, OL = 'rgba(0,0,0,.55)';
+  if (S.shape && !art) {                           // skin « monument » (la tour de tir garde sa coupole et son canon)
+    ctx.fillStyle = 'rgba(0,0,0,.22)';
+    ctx.beginPath(); ctx.ellipse(x + r * 0.35, y + r * 0.62, r * 1.25, r * 0.5, 0, 0, TAU); ctx.fill();
+    if (t.fx > 0) { const k = 1 + (1 - t.fx) * 1.6; ctx.save(); ctx.globalAlpha = t.fx; ctx.strokeStyle = c; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(x, y + r * 0.55, r * k, r * 0.45 * k, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
+    const { ty, yb } = drawShapeTower(S, t, x, y, r, lv, c, dk, OL, sup);
+    if (t.deny > 0) { ctx.save(); ctx.globalAlpha = t.deny; ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.ellipse(x, yb, r + 7, r * 0.45 + 5, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
+    ctx.font = `800 ${Math.round(r * 0.72)}px system-ui,-apple-system,sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round';
+    ctx.strokeText(t.stock, x, ty); ctx.fillStyle = '#fff'; ctx.fillText(t.stock, x, ty);
+    const pr = Math.max(1.6, baseR * 0.075), gap = pr * 3, y0 = yb + r * 0.3 + pr * 2;
+    ctx.fillStyle = sup ? GOLD_DARK : INK; ctx.globalAlpha = 0.75;
+    for (let i = 0; i < lv; i++) { ctx.beginPath(); ctx.arc(x + (i - (lv - 1) / 2) * gap, y0, pr, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+    return;
+  }
   // Fausse perspective : cylindre vu de 3/4, plus haut à chaque niveau (super-tour plus élancée)
   const ry = r * 0.45, h = r * (0.5 + 0.12 * Math.min(lv, 6)) * (sup ? 1.3 : 1);
   const yb = y + h * 0.45, yt = y - h * 0.55;           // centres du pied et du sommet
@@ -2256,16 +2512,18 @@ function drawBarracks(t, c, dk) {
 
 /* ================= HUD et fin de partie ================= */
 let chronoOn = store.get('bastions.chrono', true) !== false;
+let countsOn = store.get('bastions.counts', true) !== false;
 // Temps affiché : la partie en cours ; pour un défi, le total du défi (manches gagnées et essais perdus compris)
 const chronoTime = () => current && current.kind === 'defi' ? sumTimes(current.entry) + scoreClock() : scoreClock();
 function updateChrono() { const el = $('chrono'); if (el) el.textContent = '⏱ ' + fmtTime(chronoTime()); }
 function buildChips() {
   $('chips').innerHTML = (chronoOn ? '<div class="chip" id="chrono">⏱ 0:00</div>' : '')
-    + `<div class="chip">${current ? current.label : ''}</div>` + players.map(p =>
+    + `<div class="chip">${current ? current.label : ''}</div>` + (!countsOn ? '' : players.map(p =>
     `<div class="chip" id="chip${p.id}"><span class="dot" style="background:${COLORS[p.id]}"></span><span id="cnt${p.id}">1</span></div>`
-  ).join('');
+  ).join(''));
 }
 function updateChips() {
+  if (!countsOn) return;
   const owned = [0, 0, 0, 0];
   for (const t of towers) if (t.owner >= 0) owned[t.owner]++;
   for (const p of players) {
@@ -2285,6 +2543,7 @@ function nextExists() {
   return false;
 }
 function endGame(win) {
+  if (tuto) endTuto(true);
   state = 'over'; drag = null; updateChips();
   let text = win ? 'Plus aucun adversaire sur la carte.' : 'Ta dernière tour est tombée.';
   let onlineId = null, onlineTime = 0;
@@ -2336,7 +2595,7 @@ function endGame(win) {
   $('btnNext').classList.toggle('hidden', !((win && nextExists()) || defiRetry));
   $('btnNext').textContent = defiRetry ? 'Rejouer cette partie' : current.kind === 'defi' ? 'Partie suivante' : 'Niveau suivant';
   $('btnAgain').textContent = current.kind === 'defi' ? 'Recommencer le défi' : 'Rejouer ce niveau';
-  $('btnDefiCopy').classList.toggle('hidden', !(current.kind === 'defi' && current.entry.status !== 'en cours'));
+  $('btnDefiCopy').classList.remove('hidden');      // partage possible après toute partie, gagnée ou perdue
   $('btnAgain').className = (win && nextExists()) || defiRetry ? 'ghost' : 'primary';
   $('over').classList.remove('hidden');
   musicSync();
@@ -2408,6 +2667,7 @@ $('resetList').addEventListener('click', e => {
   saveProgress(); applyCustom(); buildBg(); renderReset(); renderCustom(); toast('Avancement réinitialisé');
 });
 function toMenu(tab) {
+  if (tuto) endTuto(false);
   // quitter un défi en cours le classe comme abandonné dans l'historique
   if (current && current.kind === 'defi' && current.entry.status === 'en cours') { current.entry.status = 'abandonné'; saveHist(); }
   state = 'menu'; towers = []; units = []; drag = null; paused = false;
@@ -2444,7 +2704,7 @@ function removePathAt(x, y) {
       if (d < bd) { bd = d; best = { a, id }; }
     }
   }
-  if (best) { best.a.paths = best.a.paths.filter(i => i !== best.id); toast('Chemin supprimé'); }
+  if (best) best.a.paths = best.a.paths.filter(i => i !== best.id);
 }
 function addPath(a, b) {
   if (a.owner !== 0 || a === b) return;
@@ -2457,6 +2717,7 @@ function addPath(a, b) {
 const ptOf = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
 
 cv.addEventListener('pointerdown', e => {
+  if (state === 'play' && paused && !tuto) { setPaused(false); return; }   // toucher l'écran sort de la pause
   if (state !== 'play' || paused || drag) return;
   const p = ptOf(e), t = towerAt(p.x, p.y);
   if (!hintShown) { hintShown = true; $('hint').classList.add('hidden'); }
@@ -2469,14 +2730,10 @@ cv.addEventListener('pointermove', e => {
   if (!drag || e.pointerId !== drag.id) return;
   const p = ptOf(e);
   if (drag.mode === 'cut') {
-    let cut = false;
     for (const t of towers) {
       if (t.owner !== 0 || !t.paths.length) continue;
-      const before = t.paths.length;
       t.paths = t.paths.filter(id => !segInt(drag.x, drag.y, p.x, p.y, t.x, t.y, towers[id].x, towers[id].y));
-      if (t.paths.length !== before) cut = true;
     }
-    if (cut) toast('Chemin coupé');
     drag.trail.push(p); if (drag.trail.length > 24) drag.trail.shift();
   }
   drag.x = p.x; drag.y = p.y;
@@ -2487,7 +2744,7 @@ function endDrag(e) {
     const p = ptOf(e), t = towerAt(p.x, p.y);
     const moved = Math.hypot(p.x - drag.sx, p.y - drag.sy) > 12;
     if (!moved) {
-      if (drag.start.paths.length) { drag.start.paths = []; toast('Chemins de la tour coupés'); }
+      if (drag.start.paths.length) drag.start.paths = [];
     } else if (t && t !== drag.start) addPath(drag.start, t);
   } else if (drag.mode === 'cut' && e.type === 'pointerup' && state === 'play') {
     // Simple toucher (sans glisser) sur un chemin : on le supprime
@@ -2527,12 +2784,13 @@ $('btnAgain').onclick = () => current.kind === 'defi'
   ? preDefi(current.entry.challenge, current.entry.source) : preCampaign(current.index);
 $('btnLevels').onclick = () => toMenu(current.kind === 'defi' ? 'free' : 'campaign');
 $('btnMenu').onclick = () => toMenu(current && current.kind === 'defi' ? 'free' : 'campaign');
-$('btnPause').onclick = () => {
+function setPaused(v) {
   if (state !== 'play') return;
-  paused = !paused; drag = null;
+  paused = v; drag = null;
   $('btnPause').textContent = paused ? '▶' : '❚❚';
   musicSync();
-};
+}
+$('btnPause').onclick = () => { if (!tuto || !tuto.info) setPaused(!paused); };
 
 /* ================= Boucle ================= */
 let speedIdx = Math.max(0, Math.min(SPEEDS.length - 1, +store.get('bastions.speed', 0) || 0));
@@ -2576,6 +2834,7 @@ function frame(now) {
     update(dt * GAME_SPEED * SPEEDS[speedIdx]);
     chipTimer -= dt;
     if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); updateChrono(); positionHint(); }
+    tutoTick();
   }
   render();
   requestAnimationFrame(frame);
@@ -2611,6 +2870,7 @@ function renderCustom() {
   $('starSum').textContent = st + ' / ' + CAMPAIGN_SIZE;
   $('optSound').checked = musicOn;
   $('optChrono').checked = chronoOn;
+  $('optCounts').checked = countsOn;
   [...$('segSpeed').children].forEach((b, i) => b.classList.toggle('on', i === speedIdx));
   const card = (item, i, on, kind) => {
     const locked = st < item.stars;
@@ -2630,6 +2890,7 @@ function pickCustom(kind, i) {
   renderCustom();
 }
 $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data-skin]'); if (b) pickCustom('skin', +b.dataset.skin); });
+$('optCounts').addEventListener('change', e => { countsOn = e.target.checked; store.set('bastions.counts', countsOn); });
 $('optChrono').addEventListener('change', e => { chronoOn = e.target.checked; store.set('bastions.chrono', chronoOn); });
 $('optSound').addEventListener('change', e => { musicOn = e.target.checked; store.set('bastions.music', musicOn); musicSync(); });
 $('segSpeed').addEventListener('click', e => {
@@ -2688,7 +2949,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_72';
+const APP_VERSION = '20261025_76';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
@@ -2703,19 +2964,22 @@ async function checkUpdate() {
     if (sessionStorage.getItem('bastions.upd') === m[1]) return;     // déjà tenté pendant cette session : pas de boucle
     sessionStorage.setItem('bastions.upd', m[1]);
     $('upd').classList.remove('hidden'); $('btnPlay').disabled = true;
-    const full = await fetch('index.html', { cache: 'no-cache' });   // le service de cache garde la nouvelle version
+    // Synchronisation trop lente (plus de 10 s) : on propose de jouer tout de suite avec la version installée
+    const dl = new AbortController(), slow = setTimeout(() => $('btnOffline').classList.remove('hidden'), 10000);
+    $('btnOffline').onclick = () => { dl.abort(); sessionStorage.removeItem('bastions.upd'); };
+    const full = await fetch('index.html', { cache: 'no-cache', signal: dl.signal });   // le service de cache garde la nouvelle version
     const r2 = full.body.getReader(), total = +full.headers.get('content-length') || 6e6;
     let got = 0;
     for (;;) {
       const { value, done } = await r2.read(); if (done) break;
       got += value.length; $('updBar').style.width = Math.min(96, got / total * 100) + '%';
     }
-    $('updBar').style.width = '100%';
+    $('updBar').style.width = '100%'; clearTimeout(slow);
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg) await reg.update().catch(() => {});
     setTimeout(() => location.reload(), 400);
   } catch (e) {                                     // réseau lent ou coupé : on garde la version actuelle
-    $('upd').classList.add('hidden'); $('btnPlay').disabled = false;
+    $('upd').classList.add('hidden'); $('btnOffline').classList.add('hidden'); $('btnPlay').disabled = false;
   }
 }
 checkUpdate();
@@ -2724,6 +2988,7 @@ $('btnPlay').onclick = () => {
   soundUnlocked = true; musicSync();
   const c = $('cover'); c.classList.add('gone');
   setTimeout(() => c.remove(), 500);
+  if (sharedId) openShared(sharedId);              // partie reçue par lien
 };
 /* Mise en cache pour le jeu hors ligne (uniquement en HTTPS, donc sur GitHub Pages) */
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
