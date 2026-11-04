@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_92)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_94)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -473,9 +473,6 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="lbl">Tours</p>
         <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne.</p>
         <div class="cards" id="skinGrid"></div>
-        <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
-        <p class="sub" style="margin:2px 0 0">Remet à zéro la campagne et l’historique des défis. Le compte et les réglages sont conservés. Touche deux fois le bouton pour confirmer.</p>
-        <div id="resetList"></div>
         <p class="lbl" style="margin-top:20px">Classement en ligne</p>
         <p class="sub" style="margin:2px 0 0">Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.</p>
         <button class="ghost" id="btnScoreTest">Tester la connexion</button>
@@ -1642,22 +1639,21 @@ $('btnSyncSkip').onclick = () => {
 
 /* ================= Tableaux des scores : étoiles (campagne) et médailles (défis du jour, 7 jours) ================= */
 const dayMinus = (day, k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
-// Médailles (or, argent, bronze) par partie, d'après les meilleurs temps de chaque joueur dans le tableau ;
-// classement comme aux Jeux olympiques. Campagne : tous les niveaux, avec les étoiles à titre indicatif.
-// Défis : défis du jour des 7 derniers jours glissants.
+// Médailles de chaque partie d'après son podium en ligne (colonnes B à G du tableau : 1er = or, 2e = argent,
+// 3e = bronze), le même que celui affiché sur les cartes et les cadres. Chaque joueur cumule séparément ses ors,
+// argents et bronzes ; classement comme aux Jeux olympiques (or, puis argent, puis bronze), et total des trois.
+// Campagne : les 75 niveaux, étoiles à titre indicatif. Défis : défis du jour des 7 derniers jours glissants.
 function boardRows(kind) {
-  const logins = Object.keys(allPlayers), med = {};
-  const ids = kind === 'campaign' ? campaignPlan().map(L => L.id)
+  const camp = kind === 'campaign', ids = camp ? campaignPlan().map(L => L.id)
     : [0, 1, 2, 3, 4, 5, 6].flatMap(k => dailyChallenges(dayMinus(parisDay(), k)).map(d => d.ch.id));
-  for (const id of ids) {
-    logins.filter(l => allPlayers[l][id] != null).sort((a, b) => allPlayers[a][id] - allPlayers[b][id]).slice(0, 3)
-      .forEach((l, i) => { (med[l] = med[l] || [0, 0, 0])[i]++; });
-  }
-  const rows = logins.map(l => {
+  const rows = new Map();                             // clé : nom en minuscules
+  const row = name => { const k = name.toLowerCase(); if (!rows.has(k)) rows.set(k, { login: name, m: [0, 0, 0], stars: null }); return rows.get(k); };
+  for (const id of ids) (remote[id] || []).forEach((r, i) => { if (i < 3) row(r.pseudo).m[i]++; });
+  if (camp) for (const l of Object.keys(allPlayers)) {          // étoiles des joueurs du tableau, même sans médaille
     const m = allPlayers[l], won = ids.filter(id => m[id] != null);
-    return { login: l, m: med[l] || [0, 0, 0], wins: won.length, stars: kind === 'campaign' ? won.filter(id => m[id] < STAR_TIME).length : 0 };
-  }).filter(r => kind === 'campaign' ? r.wins : r.m[0] + r.m[1] + r.m[2]);
-  return rows.sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
+    if (won.length) row(l).stars = won.filter(id => m[id] < STAR_TIME).length;
+  }
+  return [...rows.values()].sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
 }
 function renderBoard(kind) {
   const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '', camp = kind === 'campaign';
@@ -1668,7 +1664,7 @@ function renderBoard(kind) {
     + (camp ? ' Les étoiles sont indiquées à titre indicatif et ne comptent pas dans le classement.' : '');
   const head = '<tr><th>#</th><th>Login</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th>' + (camp ? '<th class="ind">★</th>' : '') + '</tr>';
   const body = rows.map((r, i) => `<tr${r.login.toLowerCase() === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${escapeHtml(r.login)}</td>`
-    + `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>` + (camp ? `<td class="ind">${r.stars}</td>` : '') + '</tr>').join('');
+    + `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>` + (camp ? `<td class="ind">${r.stars == null ? '–' : r.stars}</td>` : '') + '</tr>').join('');
   const sub = [0, 1, 2].map(i => rows.reduce((a, r) => a + r.m[i], 0));
   const foot = rows.length ? `<tr class="tot"><td></td><td>Sous-totaux</td><td>${sub[0]}</td><td>${sub[1]}</td><td>${sub[2]}</td><td>${sub[0] + sub[1] + sub[2]}</td>`
     + (camp ? '<td class="ind"></td>' : '') + '</tr>' : '';
@@ -2785,7 +2781,7 @@ function showTab(name) {
   ['campaign', 'free', 'custom', 'rules'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
   if (name === 'campaign') { renderCampaign(); fetchRecords(campaignPlan().map(L => L.id)).then(ok => { if (ok && $('campGrid').offsetParent) renderCampaign(); }); }
   if (name === 'free') renderDefiTab();
-  if (name === 'custom') { renderCustom(); renderReset(); }
+  if (name === 'custom') renderCustom();
 }
 /* Filigranes des bâtiments spéciaux et étoile (contour) */
 const STAR_PATH = 'M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z';
@@ -2824,21 +2820,6 @@ function renderCampaign() {
   $('campGrid').innerHTML = html;
 }
 
-function renderReset() {
-  const n = new Set(defiHist.map(x => x.challenge.id)).size;
-  const rows = [{ key: 'all', name: 'Campagne et défis',
-    info: Object.keys(campBest()).length + ' / ' + CAMPAIGN_SIZE + ' niveaux gagnés, ' + n + ' défi' + (n > 1 ? 's' : '') + ' dans l’historique' }];
-  $('resetList').innerHTML = rows.map(r =>
-    `<div class="pack"><div class="info"><strong>${escapeHtml(r.name)}</strong><span>${r.info}</span></div>
-      <button class="del" data-reset="${escapeHtml(r.key)}">Réinitialiser</button></div>`).join('');
-}
-$('resetList').addEventListener('click', e => {
-  const b = e.target.closest('[data-reset]'); if (!b) return;
-  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Confirmer'; return; }
-  progress.camp = { best: {} };                      // campagne : temps, étoiles, défaites
-  defiHist = []; saveHist();                         // défis : historique et meilleurs essais
-  saveProgress(); applyCustom(); buildBg(); renderReset(); renderCustom(); toast('Avancement réinitialisé');
-});
 function toMenu(tab) {
   if (tuto) endTuto(false);
   // quitter un défi en cours le classe comme abandonné dans l'historique
@@ -3139,7 +3120,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_92';
+const APP_VERSION = '20261025_94';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
