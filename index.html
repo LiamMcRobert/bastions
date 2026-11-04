@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_76)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_80)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -33,7 +33,7 @@
 :root{
   --ground:#a3d06a; --grass2:#93c25c; --hill:#cdeb94; --hill-shade:#6f9f3e;
   --tree:#47a53f; --tree2:#2f8236; --trunk:#7a5230; --outline:rgba(30,45,20,.6); --ink:#1f2328;
-  --panel:rgba(252,250,246,.96); --panel-ink:#1f2328; --muted:#555b63;
+  --panel:rgba(252,250,246,.96); --panel-solid:#fcfaf6; --panel-ink:#1f2328; --muted:#555b63;
   --line:rgba(0,0,0,.16); --field:rgba(0,0,0,.05); --accent:#2f6fdc; --danger:#c0392b;
   color-scheme:light;
   box-sizing:border-box;
@@ -44,14 +44,14 @@
   :root:not([data-theme="light"]){
     --ground:#34503a; --grass2:#2e4833; --hill:#55805a; --hill-shade:#24402a;
     --tree:#33733d; --tree2:#24582e; --trunk:#4d3724; --outline:rgba(0,0,0,.6); --ink:#e9ecef;
-    --panel:rgba(32,37,44,.96); --panel-ink:#e9ecef; --muted:#a3aab3;
+    --panel:rgba(32,37,44,.96); --panel-solid:#20252c; --panel-ink:#e9ecef; --muted:#a3aab3;
     --line:rgba(255,255,255,.18); --field:rgba(255,255,255,.06); --danger:#ff6b5e; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --ground:#34503a; --grass2:#2e4833; --hill:#55805a; --hill-shade:#24402a;
   --tree:#33733d; --tree2:#24582e; --trunk:#4d3724; --outline:rgba(0,0,0,.6); --ink:#e9ecef;
-  --panel:rgba(32,37,44,.96); --panel-ink:#e9ecef; --muted:#a3aab3;
+  --panel:rgba(32,37,44,.96); --panel-solid:#20252c; --panel-ink:#e9ecef; --muted:#a3aab3;
   --line:rgba(255,255,255,.18); --field:rgba(255,255,255,.06); --danger:#ff6b5e; color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -87,9 +87,19 @@ h3{margin:8px 0 4px;font-size:20px}
 .rules{margin:0;padding-left:18px;font-size:15px;line-height:1.45;color:var(--muted)}
 .rules li{margin:5px 0}
 .lbl{margin:12px 0 0;font-weight:600;font-size:16px}
-.tabs{display:flex;gap:4px;margin:0 0 14px;border-bottom:2px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.menuhead{position:sticky;top:-20px;z-index:3;background:var(--panel-solid);margin:-20px -18px 14px;padding:16px 18px 0;border-radius:18px 18px 0 0}
+.titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.titlerow h1{margin:0}
+.headicons{display:flex;gap:8px}
+.iconbtn{width:46px;height:46px;border-radius:14px;border:2px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center;padding:0}
+.iconbtn svg{width:26px;height:26px;fill:var(--muted)}
+.iconbtn svg .spine{fill:none;stroke:var(--panel-solid);stroke-width:1.4}
+.iconbtn.on{border-color:var(--accent);background:var(--accent)}
+.iconbtn.on svg{fill:#fff}
+.iconbtn.on svg .spine{stroke:var(--accent)}
+.tabs{display:flex;gap:4px;margin:10px 0 0;border-bottom:2px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{flex:1 0 auto;min-height:44px;border:none;background:none;font-size:14px;font-weight:600;
+.tabs button{flex:1 0 auto;min-height:44px;border:none;background:none;font-size:16px;font-weight:600;
   color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;padding:0 4px}
 .tabs button.on{color:var(--panel-ink);border-bottom-color:var(--accent)}
 .seg{display:flex;gap:8px;margin:8px 0 6px}
@@ -411,16 +421,25 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   <!-- ===== Menu principal ===== -->
   <div id="menu" class="overlay">
     <div class="panel">
-      <h1>Bastions</h1>
-      <div class="tabs" id="tabs">
-        <button data-tab="campaign" class="on">Campagne</button>
-        <button data-tab="free">Défi</button>
-        <button data-tab="custom">Personnalisation</button>
-        <button data-tab="rules">Règles</button>
+      <!-- En-tête figé : titre, icônes Personnalisation et Règles, onglets Campagne / Défis -->
+      <div class="menuhead">
+        <div class="titlerow">
+          <h1>Bastions</h1>
+          <div class="headicons">
+            <button class="iconbtn" data-tab="custom" aria-label="Personnalisation" title="Personnalisation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c.6-4.6 4.1-7.6 8.5-7.6s7.9 3 8.5 7.6z"/></svg></button>
+            <button class="iconbtn" data-tab="rules" aria-label="Règles" title="Règles">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.2C9.8 4.6 6.6 4 3 4.3v14.2c3.6-.3 6.8.3 9 1.9 2.2-1.6 5.4-2.2 9-1.9V4.3c-3.6-.3-6.8.3-9 1.9z"/><path d="M12 6.2v14.2" class="spine"/></svg></button>
+          </div>
+        </div>
+        <div class="tabs" id="tabs">
+          <button data-tab="campaign" class="on">Campagne</button>
+          <button data-tab="free">Défis</button>
+        </div>
       </div>
 
       <section id="tab-campaign">
-        <p class="sub" id="campInfo"></p>
+        <button class="ghost" id="btnTutoCamp" style="margin-top:0">Tutoriel : apprendre les bases</button>
         <div class="camp" id="campGrid"></div>
       </section>
 
@@ -455,7 +474,6 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <section id="tab-free" class="hidden">
         <div id="defiNew">
         <p class="lbl" style="margin-top:0">Défis du jour</p>
-        <p class="sub" style="margin:2px 0 0">Les mêmes pour tout le monde, renouvelés chaque jour à minuit (heure de Paris).</p>
         <div id="dailyList"></div>
         <button class="ghost" id="btnDefiNew" aria-expanded="false" style="margin-top:16px">Créer un défi</button>
         <div id="defiCreate" class="hidden">
@@ -476,14 +494,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <label class="tgl"><input type="checkbox" data-opt="barracks"><span><strong>Caserne de troupes blindées</strong>Envoie des blindés valant 10 unités chacun ; sans chemin, se remplit comme une tour classique. 20 défenseurs au départ, 30 au maximum.</span></label>
           <label class="tgl"><input type="checkbox" data-opt="artillery"><span><strong>Tour de tir de zone</strong>Tour classique qui tire en plus sur les unités et tours adverses à portée, à 50 % de sa cadence de production (+10 % de portée par palier de 10 défenseurs). 10 au départ, 50 au maximum.</span></label>
         </div>
-        <p class="sub" style="margin-top:8px">Au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà de Normal. Deux exemplaires si une seule option est activée, un de chaque sinon.</p>
         <button id="btnFree" class="primary">Créer et jouer le défi</button>
         </div>
         <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
         </div>
         <div id="defiHist" class="hidden">
           <button class="ghost" id="btnHistBack" style="margin-top:0">Retour au défi</button>
-          <p class="sub" style="margin-top:10px">Temps comptés à la vitesse ×1 : jouer en ×1,5 ou ×2 ne les change pas.</p>
           <div id="histList"></div>
           <button class="ghost" id="btnHistReset" style="margin-top:14px">Réinitialiser l’historique</button>
         </div>
@@ -499,9 +515,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.</li>
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
           <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.</li>
+          <li>Cadres des parties (campagne et défis) : or, argent ou bronze pour ta place dans le top 3 en ligne ; vert pour une victoire ; rouge pour une défaite ; gris si la partie n’a pas encore été jouée. Sur la grille de campagne, le filigrane indique le bâtiment spécial et la bande de couleur le paysage.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 15 skins de tours se débloquent avec les étoiles (toutes à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne.</li>
-          <li>Défis : deux défis du jour, des défis à créer, et des défis à partager par leur identifiant. Le meilleur temps de chaque partie peut être envoyé dans un tableau Google Sheets partagé.</li>
+          <li>Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne.</li>
+          <li>Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.</li>
+          <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
+          <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
@@ -1529,6 +1548,15 @@ let tuto = null, tutoDone = store.get('bastions.tuto', false) === true;
 const myBase = () => towers.find(t => t.owner === 0);
 const nearNeutral = () => { const b = myBase(); if (!b) return null;
   return towers.filter(t => t.owner === -1 && canLink(b, t)).sort((a, c) => dist(a, b) - dist(c, b))[0] || null; };
+// Niveau de tutoriel : carte fixe et simple (1 adversaire très lent, tours grises faibles), jouable à tout moment ;
+// il ne compte ni dans la campagne ni dans le classement en ligne
+const TUTO_CFG = { name: 'Tutoriel', seed: 424242, opponents: 1, neutrals: 6, neutralStock: [3, 8], playerStart: 15, aiStart: 3,
+  aiLevel: 0.05, pool: ['defensif'], profiles: null, specials: [], specialG: 1, specialPop: 1, stockBias: 1, land: 0 };
+function startTutoLevel() {
+  current = { kind: 'tuto', index: 0, cfg: TUTO_CFG, label: 'Tutoriel' };
+  buildGame(TUTO_CFG);
+  startTuto();
+}
 const TUTO_STEPS = [
   { text: 'Voici ta tour, en bleu. Le nombre indique ses défenseurs.', target: myBase },
   { text: 'Sans chemin, une tour remplit sa garnison : 2 unités par seconde au départ, puis +1 par niveau. Les points sous la tour montrent son niveau (un niveau tous les 10 défenseurs).', target: myBase },
@@ -1583,7 +1611,8 @@ function tutoTick() { if (tuto && !tuto.info) { const st = TUTO_STEPS[tuto.i]; i
 function tutoTarget() { if (!tuto) return null; const st = TUTO_STEPS[tuto.i]; return st && st.target ? st.target() : null; }
 $('tutoNext').onclick = nextTuto;
 $('tutoSkip').onclick = () => endTuto(true);
-$('btnTutoRules').onclick = () => preCampaign(1, true);
+$('btnTutoRules').onclick = startTutoLevel;
+$('btnTutoCamp').onclick = startTutoLevel;
 
 /* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
 let preStart = null;
@@ -2580,6 +2609,7 @@ function endGame(win) {
     }
   }
   $('overTitle').textContent = (win ? 'Victoire' : 'Défaite') + (current.kind !== 'free' ? ' – ' + current.cfg.name : '');
+  if (current.kind === 'tuto') text = win ? 'Tutoriel réussi : tu connais les bases. À toi la campagne !' : 'Tutoriel terminé. Tu peux le rejouer quand tu veux.';
   $('overText').textContent = text;
   $('askPseudo').classList.add('hidden');
   if (onlineId && !pseudo.trim()) askPseudoThen(onlineId, onlineTime);   // victoire sans pseudo : on le demande d'abord
@@ -2594,8 +2624,8 @@ function endGame(win) {
   const defiRetry = !win && current.kind === 'defi';
   $('btnNext').classList.toggle('hidden', !((win && nextExists()) || defiRetry));
   $('btnNext').textContent = defiRetry ? 'Rejouer cette partie' : current.kind === 'defi' ? 'Partie suivante' : 'Niveau suivant';
-  $('btnAgain').textContent = current.kind === 'defi' ? 'Recommencer le défi' : 'Rejouer ce niveau';
-  $('btnDefiCopy').classList.remove('hidden');      // partage possible après toute partie, gagnée ou perdue
+  $('btnAgain').textContent = current.kind === 'defi' ? 'Recommencer le défi' : current.kind === 'tuto' ? 'Rejouer le tutoriel' : 'Rejouer ce niveau';
+  $('btnDefiCopy').classList.toggle('hidden', current.kind === 'tuto');   // partage possible après toute partie (sauf le tutoriel)
   $('btnAgain').className = (win && nextExists()) || defiRetry ? 'ghost' : 'primary';
   $('over').classList.remove('hidden');
   musicSync();
@@ -2605,7 +2635,8 @@ function endGame(win) {
 const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function showTab(name) {
-  [...$('tabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  document.querySelectorAll('#menu [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  menuTab = name;
   ['campaign', 'free', 'custom', 'rules'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
   if (name === 'campaign') { renderCampaign(); fetchRecords(campaignPlan().map(L => L.id)).then(ok => { if (ok && $('campGrid').offsetParent) renderCampaign(); }); }
   if (name === 'free') renderDefiTab();
@@ -2646,9 +2677,6 @@ function renderCampaign() {
     html += '</div>';
   }
   $('campGrid').innerHTML = html;
-  $('campInfo').textContent = 'Étoiles : ' + totalStars() + ' / ' + CAMPAIGN_SIZE + '. Une étoile par niveau gagné en moins de '
-    + fmtTime(STAR_TIME) + '. Une difficulté se débloque après ' + UNLOCK_WINS + ' victoires dans la précédente. '
-    + 'Cadre or, argent ou bronze : ta place dans le top 3 en ligne ; vert : victoire ; rouge : défaite ; gris : pas encore joué. Filigrane : bâtiment spécial ; bande de couleur : paysage.';
 }
 
 function renderReset() {
@@ -2761,9 +2789,26 @@ document.querySelectorAll('#optList input').forEach(inp => {
   inp.checked = !!freeOpts[inp.dataset.opt];
   inp.addEventListener('change', () => { freeOpts[inp.dataset.opt] = inp.checked; store.set('bastions.opts', freeOpts); });
 });
-$('tabs').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (b) showTab(b.dataset.tab);
+let menuTab = 'campaign';
+document.querySelector('#menu .menuhead').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab);
 });
+// Glisser vers la gauche sur Campagne : Défis ; vers la droite sur Défis : Campagne
+(() => {
+  const panel = document.querySelector('#menu .panel');
+  let sx = 0, sy = 0, on = false;
+  panel.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || e.target.closest('textarea,input')) { on = false; return; }
+    on = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  panel.addEventListener('touchend', e => {
+    if (!on) return; on = false;
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // geste surtout horizontal
+    if (dx < 0 && menuTab === 'campaign') showTab('free');
+    else if (dx > 0 && menuTab === 'free') showTab('campaign');
+  }, { passive: true });
+})();
 ['segOpp', 'segDiff', 'segGames'].forEach(id => $(id).addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   [...$(id).children].forEach(x => x.classList.toggle('on', x === b));
@@ -2781,7 +2826,7 @@ $('btnNext').onclick = () => {
   }
 };
 $('btnAgain').onclick = () => current.kind === 'defi'
-  ? preDefi(current.entry.challenge, current.entry.source) : preCampaign(current.index);
+  ? preDefi(current.entry.challenge, current.entry.source) : current.kind === 'tuto' ? startTutoLevel() : preCampaign(current.index);
 $('btnLevels').onclick = () => toMenu(current.kind === 'defi' ? 'free' : 'campaign');
 $('btnMenu').onclick = () => toMenu(current && current.kind === 'defi' ? 'free' : 'campaign');
 function setPaused(v) {
@@ -2949,7 +2994,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_76';
+const APP_VERSION = '20261025_80';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
