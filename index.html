@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_90)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_92)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -193,6 +193,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .board td:nth-child(2),.board th:nth-child(2){text-align:left;font-weight:700;overflow-wrap:anywhere}
 .board tr.me td{background:rgba(47,111,220,.14)}
 .board tr.tot td{font-weight:800;border-bottom:none}
+.board .ind{color:var(--muted);font-weight:600;border-left:1px dashed var(--line)}
 #pre h2{font-size:24px;margin-bottom:10px}
 #pre .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
 #pre .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field)}
@@ -532,7 +533,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
           <li>Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps y est envoyé automatiquement en fin de partie (« Passer sans synchroniser » permet de continuer hors ligne).</li>
-          <li>Tableaux des scores : étoiles de toute la campagne (bouton en bas de Campagne) et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis).</li>
+          <li>Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
@@ -1641,37 +1642,36 @@ $('btnSyncSkip').onclick = () => {
 
 /* ================= Tableaux des scores : étoiles (campagne) et médailles (défis du jour, 7 jours) ================= */
 const dayMinus = (day, k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
+// Médailles (or, argent, bronze) par partie, d'après les meilleurs temps de chaque joueur dans le tableau ;
+// classement comme aux Jeux olympiques. Campagne : tous les niveaux, avec les étoiles à titre indicatif.
+// Défis : défis du jour des 7 derniers jours glissants.
 function boardRows(kind) {
-  const logins = Object.keys(allPlayers);
-  if (kind === 'campaign') {
-    const ids = campaignPlan().map(L => L.id);
-    return logins.map(l => { const m = allPlayers[l]; const won = ids.filter(id => m[id] != null);
-      return { login: l, stars: won.filter(id => m[id] < STAR_TIME).length, wins: won.length }; })
-      .filter(r => r.wins).sort((a, b) => b.stars - a.stars || b.wins - a.wins || a.login.localeCompare(b.login));
-  }
-  const today = parisDay(), med = {};
-  for (let k = 0; k < 7; k++) for (const d of dailyChallenges(dayMinus(today, k))) {
-    const id = d.ch.id;
+  const logins = Object.keys(allPlayers), med = {};
+  const ids = kind === 'campaign' ? campaignPlan().map(L => L.id)
+    : [0, 1, 2, 3, 4, 5, 6].flatMap(k => dailyChallenges(dayMinus(parisDay(), k)).map(d => d.ch.id));
+  for (const id of ids) {
     logins.filter(l => allPlayers[l][id] != null).sort((a, b) => allPlayers[a][id] - allPlayers[b][id]).slice(0, 3)
       .forEach((l, i) => { (med[l] = med[l] || [0, 0, 0])[i]++; });
   }
-  return Object.keys(med).map(l => ({ login: l, m: med[l] }))
-    .sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
+  const rows = logins.map(l => {
+    const m = allPlayers[l], won = ids.filter(id => m[id] != null);
+    return { login: l, m: med[l] || [0, 0, 0], wins: won.length, stars: kind === 'campaign' ? won.filter(id => m[id] < STAR_TIME).length : 0 };
+  }).filter(r => kind === 'campaign' ? r.wins : r.m[0] + r.m[1] + r.m[2]);
+  return rows.sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
 }
 function renderBoard(kind) {
-  const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '';
-  $('boardTitle').textContent = kind === 'campaign' ? 'Scores de la campagne' : 'Scores des défis du jour';
-  $('boardNote').textContent = kind === 'campaign' ? 'Étoiles gagnées sur l’ensemble de la campagne (victoires en cas d’égalité).'
-    : 'Médailles des défis du jour sur les 7 derniers jours, classées comme aux Jeux olympiques : d’abord l’or, puis l’argent, puis le bronze.';
-  const head = kind === 'campaign' ? '<tr><th>#</th><th>Login</th><th>★</th><th>Victoires</th></tr>'
-    : '<tr><th>#</th><th>Login</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th></tr>';
+  const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '', camp = kind === 'campaign';
+  $('boardTitle').textContent = camp ? 'Scores de la campagne' : 'Scores des défis du jour';
+  $('boardNote').textContent = (camp ? 'Médailles gagnées sur l’ensemble des niveaux de la campagne'
+    : 'Médailles des défis du jour sur les 7 derniers jours')
+    + ', classées comme aux Jeux olympiques : d’abord l’or, puis l’argent, puis le bronze.'
+    + (camp ? ' Les étoiles sont indiquées à titre indicatif et ne comptent pas dans le classement.' : '');
+  const head = '<tr><th>#</th><th>Login</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th>' + (camp ? '<th class="ind">★</th>' : '') + '</tr>';
   const body = rows.map((r, i) => `<tr${r.login.toLowerCase() === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${escapeHtml(r.login)}</td>`
-    + (kind === 'campaign' ? `<td>${r.stars}</td><td>${r.wins}</td>` : `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>`) + '</tr>').join('');
-  let foot = '';
-  if (kind !== 'campaign' && rows.length) {
-    const s = [0, 1, 2].map(i => rows.reduce((a, r) => a + r.m[i], 0));
-    foot = `<tr class="tot"><td></td><td>Sous-totaux</td><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td><td>${s[0] + s[1] + s[2]}</td></tr>`;
-  }
+    + `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>` + (camp ? `<td class="ind">${r.stars}</td>` : '') + '</tr>').join('');
+  const sub = [0, 1, 2].map(i => rows.reduce((a, r) => a + r.m[i], 0));
+  const foot = rows.length ? `<tr class="tot"><td></td><td>Sous-totaux</td><td>${sub[0]}</td><td>${sub[1]}</td><td>${sub[2]}</td><td>${sub[0] + sub[1] + sub[2]}</td>`
+    + (camp ? '<td class="ind"></td>' : '') + '</tr>' : '';
   $('boardTable').innerHTML = rows.length ? `<table class="board"><thead>${head}</thead><tbody>${body}${foot}</tbody></table>`
     : '<p class="sub">Aucun résultat en ligne pour le moment.</p>';
 }
@@ -3139,7 +3139,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_90';
+const APP_VERSION = '20261025_92';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
