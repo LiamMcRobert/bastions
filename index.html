@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_80)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_88)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -144,7 +144,7 @@ h3{margin:8px 0 4px;font-size:20px}
 .tiergrid .land{position:absolute;left:0;right:0;bottom:0;height:5px}
 .idline{font-size:13px;color:var(--muted);margin-top:4px}
 .idline code{font:700 14px ui-monospace,Menlo,Consolas,monospace;color:var(--panel-ink);user-select:all;-webkit-user-select:all}
-#defiIdIn,#pseudoAsk{width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
+.acInput{display:block;width:100%;min-height:48px;margin-top:8px;border-radius:12px;border:2px solid var(--line);background:var(--field);
   color:inherit;font:16px ui-monospace,Menlo,Consolas,monospace;padding:0 12px}
 
 .pack{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -180,13 +180,19 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .setrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;border-bottom:1px solid var(--line)}
 .starsum{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:800}
 .starsum svg{width:22px;height:22px;fill:#f2b705;stroke:#a87a00;stroke-width:1.4;stroke-linejoin:round}
-#pseudo{flex:1;max-width:62%;min-height:44px;border-radius:10px;border:2px solid var(--line);background:var(--field);color:inherit;font:inherit;font-size:16px;padding:0 10px}
 #tuto{position:absolute;left:12px;right:12px;bottom:14px;z-index:4;background:var(--panel);color:var(--panel-ink);
   border-radius:16px;padding:14px 14px 10px;box-shadow:0 8px 24px rgba(0,0,0,.35);border:3px solid #ffd34d;max-width:520px;margin:0 auto}
 #tuto p{margin:0 0 8px;font-size:16px;line-height:1.4}
 #tuto .tbtns{display:flex;gap:8px}
 #tuto .tbtns button{flex:1;margin:0;min-height:46px}
 #pre{z-index:8}
+#board{z-index:8}
+.board{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:15px}
+.board th{font-size:13px;color:var(--muted);text-align:center;padding:6px 4px;border-bottom:2px solid var(--line)}
+.board td{text-align:center;padding:8px 4px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.board td:nth-child(2),.board th:nth-child(2){text-align:left;font-weight:700;overflow-wrap:anywhere}
+.board tr.me td{background:rgba(47,111,220,.14)}
+.board tr.tot td{font-weight:800;border-bottom:none}
 #pre h2{font-size:24px;margin-bottom:10px}
 #pre .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
 #pre .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field)}
@@ -441,13 +447,23 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <section id="tab-campaign">
         <button class="ghost" id="btnTutoCamp" style="margin-top:0">Tutoriel : apprendre les bases</button>
         <div class="camp" id="campGrid"></div>
+        <button class="ghost" id="btnBoardCamp" style="margin-top:16px">Tableau des scores</button>
       </section>
 
       <section id="tab-custom" class="hidden">
         <div class="setrow"><span class="lbl" style="margin:0">Étoiles acquises</span>
           <span class="starsum"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z"/></svg><span id="starSum">0</span></span></div>
-        <label class="setrow" for="pseudo"><span class="lbl" style="margin:0">Pseudo</span>
-          <input id="pseudo" maxlength="20" autocomplete="nickname" placeholder="Anonyme" aria-label="Pseudo, envoyé avec tes meilleurs temps"></label>
+        <p class="lbl">Compte</p>
+        <div id="acctOn" class="hidden"><p class="sub" style="margin:0">Connecté : <strong id="acctName"></strong>. Ton avancement est enregistré dans le tableau en ligne.</p>
+          <button class="ghost" id="btnLogout">Se déconnecter de cet appareil</button></div>
+        <div id="acctOff">
+          <p class="sub" style="margin:0">Un Login unique et un code à 4 chiffres pour enregistrer tes temps en ligne et retrouver ton avancement sur n’importe quel appareil. N’utilise pas un code qui te sert ailleurs : il est lisible par l’administrateur du jeu.</p>
+          <input class="acLogin acInput" maxlength="20" placeholder="Login" autocomplete="username" aria-label="Login">
+          <input class="acPin acInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Code à 4 chiffres" autocomplete="off" aria-label="Code à 4 chiffres">
+          <p class="err hidden"></p>
+          <button class="primary" data-act="create">Créer mon Login</button>
+          <button class="ghost" data-act="login">Me connecter</button>
+        </div>
         <label class="tgl"><input type="checkbox" id="optSound"><span><strong>Musique</strong>Dans les menus et pendant les parties (même réglage que le bouton 🔊).</span></label>
         <label class="tgl"><input type="checkbox" id="optCounts"><span><strong>Tours possédées</strong>Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.</span></label>
         <label class="tgl"><input type="checkbox" id="optChrono"><span><strong>Chronomètre</strong>Affiché en haut de l’écran pendant les parties.</span></label>
@@ -456,15 +472,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <p class="lbl">Tours</p>
         <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne.</p>
         <div class="cards" id="skinGrid"></div>
-        <p class="lbl" style="margin-top:20px">Sauvegarde</p>
-        <p class="sub" style="margin:2px 0 0">Enregistre ta progression (campagne, étoiles, pseudo, skin, réglages, historique des défis) dans un fichier, puis recharge-la sur cet appareil ou un autre, par exemple après avoir effacé les données du navigateur.</p>
-        <button class="ghost" id="btnSaveExport">Télécharger une sauvegarde</button>
-        <button class="ghost" id="btnSaveImport">Restaurer depuis un fichier</button>
-        <input type="file" id="saveFile" accept=".json,application/json" hidden>
-        <p class="sub hidden" id="saveInfo" style="margin-top:8px"></p>
-        <button class="primary hidden" id="btnSaveConfirm">Remplacer ma progression par cette sauvegarde</button>
         <p class="lbl" style="margin-top:20px">Réinitialiser l’avancement</p>
-        <p class="sub" style="margin:2px 0 0">Remet à zéro la campagne et l’historique des défis. Le pseudo et les réglages sont conservés. Touche deux fois le bouton pour confirmer.</p>
+        <p class="sub" style="margin:2px 0 0">Remet à zéro la campagne et l’historique des défis. Le compte et les réglages sont conservés. Touche deux fois le bouton pour confirmer.</p>
         <div id="resetList"></div>
         <p class="lbl" style="margin-top:20px">Classement en ligne</p>
         <p class="sub" style="margin:2px 0 0">Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.</p>
@@ -497,6 +506,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <button id="btnFree" class="primary">Créer et jouer le défi</button>
         </div>
         <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
+        <button class="ghost" id="btnBoardDefi">Tableau des scores</button>
         </div>
         <div id="defiHist" class="hidden">
           <button class="ghost" id="btnHistBack" style="margin-top:0">Retour au défi</button>
@@ -517,10 +527,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.</li>
           <li>Cadres des parties (campagne et défis) : or, argent ou bronze pour ta place dans le top 3 en ligne ; vert pour une victoire ; rouge pour une défaite ; gris si la partie n’a pas encore été jouée. Sur la grille de campagne, le filigrane indique le bâtiment spécial et la bande de couleur le paysage.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y règle aussi le pseudo, la musique, la vitesse et le classement en ligne.</li>
+          <li>Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne.</li>
           <li>Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.</li>
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
+          <li>Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps n’y est envoyé qu’en fin de partie, si tu le choisis.</li>
+          <li>Tableaux des scores : étoiles de toute la campagne (bouton en bas de Campagne) et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis).</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
@@ -529,6 +541,16 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <button class="primary" id="btnTutoRules">Revoir le tutoriel</button>
       </section>
 
+    </div>
+  </div>
+
+  <!-- ===== Tableau des scores ===== -->
+  <div id="board" class="overlay hidden">
+    <div class="panel">
+      <h2 id="boardTitle"></h2>
+      <p class="sub" id="boardNote"></p>
+      <div id="boardTable"></div>
+      <button class="primary" id="btnBoardClose">Fermer</button>
     </div>
   </div>
 
@@ -555,10 +577,17 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <h2 id="overTitle"></h2>
       <p class="sub" id="overText"></p>
       <p class="sub" id="overOnline"></p>
-      <div id="askPseudo" class="hidden">
-        <input id="pseudoAsk" maxlength="20" autocomplete="nickname" placeholder="Ton pseudo" aria-label="Pseudo pour le classement">
-        <button class="primary" id="btnPseudoOk">Enregistrer mon temps</button>
-        <button class="ghost" id="btnPseudoSkip">Rester anonyme</button>
+      <div id="overSync" class="hidden">
+        <div id="syncOn"><button class="primary" id="btnSyncSend">Enregistrer mon temps en ligne</button></div>
+        <div id="syncOff">
+          <p class="sub" style="margin:0 0 4px">N’utilise pas un code qui te sert ailleurs : il est lisible par l’administrateur du jeu.</p>
+          <input class="acLogin acInput" maxlength="20" placeholder="Login" autocomplete="username" aria-label="Login">
+          <input class="acPin acInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Code à 4 chiffres" autocomplete="off" aria-label="Code à 4 chiffres">
+          <p class="err hidden"></p>
+          <button class="primary" data-act="create">Créer mon Login</button>
+          <button class="ghost" data-act="login">Me connecter</button>
+        </div>
+        <button class="ghost" id="btnSyncSkip">Passer sans synchroniser</button>
       </div>
       <blockquote class="quote hidden" id="quote"><span id="quoteText"></span><cite id="quoteAuthor"></cite></blockquote>
       <button id="btnDefiCopy" class="ghost hidden" style="margin:0 0 12px">Partager cette partie</button>
@@ -1182,8 +1211,12 @@ const uid = p => p + Date.now().toString(36) + Math.floor(Math.random() * 1e6).t
 const sumTimes = e => e.times.reduce((a, b) => a + b, 0) + (e.pending || 0);
 
 /* Pseudo (onglet Personnalisation), envoyé avec les meilleurs temps */
-let pseudo = String(store.get('bastions.pseudo', '') || '').slice(0, 20);
-const myPseudo = () => pseudo.trim() || 'Anonyme';
+// Compte du joueur sur cet appareil : Login unique et code à 4 chiffres (voir « Comptes joueurs »)
+let account = (a => a && a.login && /^\d{4}$/.test(a.pin) ? a : null)(store.get('bastions.account', null));
+// Login connu de cet appareil mais sans code (ancien pseudo, ou code vidé dans le tableau) : le code est demandé
+// à la prochaine fin de partie synchronisée, et tous les temps de l'appareil sont alors versés dans le tableau
+let pendingLogin = account ? '' : String(store.get('bastions.pendingLogin', '') || store.get('bastions.pseudo', '') || '').trim().slice(0, 20);
+const myPseudo = () => account ? account.login : 'Anonyme';
 
 /* Identifiant d'un défi : il décrit entièrement les parties.
    Format D<difficulté><manches><adversaires><bâtiments>-<graine en base 36>, ex. D2331-1kz9ab
@@ -1210,8 +1243,7 @@ function decodeChallenge(id) {
 /* Défis du jour : la graine dépend de la date (heure de Paris), tout le monde a donc les mêmes défis */
 const parisDay = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris' }).format(new Date());
 function hashStr(str) { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
-function dailyChallenges() {
-  const day = parisDay();
+function dailyChallenges(day = parisDay()) {
   // 3 défis d'une partie : deux en Normal (cartes différentes), un en Difficile
   return [[2, 'Normal 1', 'n1'], [2, 'Normal 2', 'n2'], [3, 'Difficile', 'd']].map(([diff, label, key]) => {
     const h = hashStr(day + '-' + key), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
@@ -1405,141 +1437,237 @@ function onDefiClick(e) {
 $('histList').addEventListener('click', onDefiClick);
 $('dailyList').addEventListener('click', onDefiClick);
 $('btnDefiCopy').onclick = () => { if (current) shareId(current.kind === 'defi' ? current.entry.challenge.id : current.cfg.id); };
-$('pseudo').value = pseudo;
-$('pseudo').addEventListener('input', e => { pseudo = e.target.value.slice(0, 20); store.set('bastions.pseudo', pseudo); });
 
 /* ================= Classement en ligne : Google Sheets via une application Web Apps Script ================= */
 // Colonne A : identifiant de la partie ; B à D : pseudos des 3 meilleurs ; E à G : leurs temps (secondes, vitesse ×1).
 // Une ligne n'est créée qu'après une première victoire sur cet identifiant. Un joueur n'occupe qu'une place.
 // Adresse du classement : fixe, intégrée au jeu (elle n'est plus modifiable dans Personnalisation)
-const scoreUrl = 'https://script.google.com/macros/s/AKfycbzHzwVH2hoKiqvBBfrIEZv50SXjIc6Fe2KkAOj7dfc8Ly4waNSpc21ihwh8ZwtEbZUt6g/exec';
+const scoreUrl = 'https://script.google.com/macros/s/AKfycbyVLODS6P9EvEAFxj3ctnk-_6bmg4UvUpiI-2i8wy2LGO3NE4yUMWm3LIjz2Idv4TWlWw/exec';
 const remote = {};                                 // identifiant → top 3 [{ pseudo, time }] connu du tableau
 const cleanTop = top => (Array.isArray(top) ? top : []).filter(r => r && r.pseudo && isFinite(+r.time))
   .map(r => ({ pseudo: String(r.pseudo).slice(0, 20), time: +r.time })).sort((a, b) => a.time - b.time).slice(0, 3);
 // Ta place dans le top 3 (0, 1 ou 2), d'après ton pseudo ; -1 si tu n'y figures pas
 const myRank = id => remote[id] ? remote[id].findIndex(r => r.pseudo.toLowerCase() === myPseudo().toLowerCase()) : -1;
 const MEDALS = ['🥇', '🥈', '🥉'], RANK_CLASS = ['r1', 'r2', 'r3'], RANK_LABEL = ['1er', '2e', '3e'];
-async function fetchRecords(ids) {
-  ids = [...new Set(ids)].filter(Boolean);
-  if (!scoreUrl || !ids.length) return false;
-  try {
-    const res = await fetch(scoreUrl + (scoreUrl.includes('?') ? '&' : '?') + 'ids=' + encodeURIComponent(ids.join(',')), { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
-    const data = await res.json();
-    if (!data || !data.ok || !data.scores) return false;
-    for (const id of ids) { const r = data.scores[id]; remote[id] = r && r.top ? cleanTop(r.top) : []; }   // pas de ligne : aucun record
-    return true;
-  } catch (e) { return false; }
-}
-// Chaque victoire est envoyée : le script garde ton meilleur temps et le classe dans le top 3
-async function submitScore(id, time) {
-  if (!scoreUrl || !id) return null;
-  try {
-    const res = await fetch(scoreUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ id, pseudo: myPseudo(), time: Math.round(time * 10) / 10 }) });
-    const data = await res.json();
-    if (!data || !data.ok) return null;
-    remote[id] = cleanTop(data.top);
-    return { updated: !!data.updated, rank: myRank(id), top: remote[id] };
-  } catch (e) { return null; }
-}
 const topLine = top => top.map((r, i) => MEDALS[i] + ' ' + r.pseudo + ' ' + fmtTime(r.time)).join(', ');
 // Ligne « classement en ligne » de l'écran de fin
 function showOnline(id, time) {
   const el = $('overOnline');
   el.textContent = 'Classement en ligne : envoi…';
   submitScore(id, time).then(r => {
-    if (!r) { el.textContent = 'Classement en ligne indisponible (hors ligne).'; return; }
-    el.textContent = (r.rank >= 0 ? 'Tu es ' + RANK_LABEL[r.rank] + ' du classement' + (r.updated ? ' !' : ' (ton meilleur temps est conservé).')
+    if (!r) { el.textContent = 'Classement en ligne indisponible (hors ligne) : temps non transmis.'; return; }
+    if (r.nocode) {                                   // le code a été vidé dans le tableau : on en choisit un nouveau
+      pendingLogin = account.login; store.set('bastions.pendingLogin', pendingLogin);
+      account = null; store.set('bastions.account', null); refreshAccount(); offerSync(id, time); return;
+    }
+    if (r.error) { el.textContent = r.error; return; }
+    const mine = r.rank >= 0 ? r.top[r.rank] : null, kept = mine && mine.time < time - 0.05;   // un meilleur temps était déjà enregistré
+    el.textContent = (r.rank >= 0 ? 'Tu es ' + RANK_LABEL[r.rank] + ' du classement' + (kept ? ' (ton meilleur temps, ' + fmtTime(mine.time) + ', est conservé).' : ' !')
       : 'Hors du top 3.') + ' Top 3 : ' + topLine(r.top) + '.';
   });
 }
 
 $('btnScoreTest').onclick = async () => {
   toast('Test en cours…');
-  toast((await fetchRecords([levelId(0, 1)])) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie ta connexion Internet');
+  toast((await fetchAll(true)) ? 'Classement en ligne joignable' : 'Classement injoignable : vérifie ta connexion Internet');
 };
 
-/* ================= Sauvegarde locale : fichier JSON à télécharger, puis à recharger ================= */
-const SAVE_KEYS = ['bastions.progress', 'bastions.custom', 'bastions.pseudo', 'bastions.music',
-  'bastions.speed', 'bastions.opts', 'bastions.chrono', 'bastions.counts', 'bastions.tuto', 'bastions.defis'];
-const SAVE_TYPES = { 'bastions.progress': 'object', 'bastions.custom': 'object', 'bastions.pseudo': 'string',
-  'bastions.music': 'boolean', 'bastions.speed': 'number', 'bastions.opts': 'object', 'bastions.chrono': 'boolean', 'bastions.counts': 'boolean', 'bastions.tuto': 'boolean', 'bastions.defis': 'array' };
-function exportSave() {
-  const data = {};
-  for (const k of SAVE_KEYS) { try { const v = localStorage.getItem(k); if (v != null) data[k] = JSON.parse(v); } catch (e) { /* clé illisible : ignorée */ } }
-  const json = JSON.stringify({ format: 'bastions-sauvegarde', version: 1, date: new Date().toISOString(), data }, null, 1);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-  a.download = 'bastions_sauvegarde_' + parisDay() + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-  toast('Sauvegarde téléchargée');
-}
-let pendingSave = null;
-function readSave(text) {
-  const d = JSON.parse(text);
-  if (!d || d.format !== 'bastions-sauvegarde' || !d.data || typeof d.data !== 'object') throw new Error('format');
-  const data = {};
-  for (const k of SAVE_KEYS) {                     // seules les clés connues, du bon type, sont reprises
-    if (!(k in d.data)) continue;
-    const v = d.data[k], t = SAVE_TYPES[k];
-    if (t === 'array' ? Array.isArray(v) : (typeof v === t && v !== null)) data[k] = v;
-  }
-  if (!data['bastions.progress']) throw new Error('vide');
-  return { date: d.date, data };
-}
-$('btnSaveExport').onclick = exportSave;
-$('btnSaveImport').onclick = () => $('saveFile').click();
-$('saveFile').addEventListener('change', e => {
-  const f = e.target.files && e.target.files[0]; e.target.value = '';
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const s = readSave(String(r.result)), best = (s.data['bastions.progress'].camp || {}).best || {}, d = new Date(s.date);
-      const stars = Object.values(best).filter(t => t < STAR_TIME).length;
-      pendingSave = s.data;
-      $('saveInfo').textContent = 'Sauvegarde' + (isNaN(d) ? '' : ' du ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }))
-        + ' : ' + Object.keys(best).length + ' niveau' + (Object.keys(best).length > 1 ? 'x' : '') + ' gagné' + (Object.keys(best).length > 1 ? 's' : '')
-        + ', ' + stars + ' étoile' + (stars > 1 ? 's' : '') + (s.data['bastions.pseudo'] ? ', pseudo « ' + s.data['bastions.pseudo'] + ' »' : '')
-        + '. Elle remplacera ta progression actuelle.';
-      $('saveInfo').classList.remove('hidden'); $('btnSaveConfirm').classList.remove('hidden');
-    } catch (err) {
-      pendingSave = null; $('btnSaveConfirm').classList.add('hidden');
-      $('saveInfo').textContent = 'Ce fichier n’est pas une sauvegarde Bastions valide.';
-      $('saveInfo').classList.remove('hidden');
-    }
-  };
-  r.readAsText(f);
-});
-$('btnSaveConfirm').onclick = () => {
-  if (!pendingSave) return;
-  for (const k of Object.keys(pendingSave)) store.set(k, pendingSave[k]);
-  location.reload();                               // relance le jeu avec la progression restaurée
-};
 // Demande au navigateur de ne pas effacer ce stockage quand l'appareil manque de place
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
-/* ================= Pseudo demandé à la première victoire (enregistré aussi dans Personnalisation) ================= */
+/* ================= Comptes joueurs et synchronisation avec le tableau ================= */
+// Onglet 1 : une colonne par Login (à partir de H) avec ses meilleurs temps ; onglet 2 : le code à 4 chiffres.
+// L'appareil garde le Login et le code ; il télécharge l'avancement régulièrement,
+// mais n'envoie un nouveau temps qu'en fin de partie, si le joueur le choisit.
+let allPlayers = {}, lastFetch = 0, fetching = null;
+const ACCT_ERR = {
+  pris: 'Ce Login est déjà utilisé : choisis-en un autre.',
+  inconnu: 'Login inconnu : vérifie l’orthographe, ou crée-le.',
+  login: 'Login invalide : 2 à 20 caractères (lettres, chiffres, espace, - _ . ’), commençant par une lettre ou un chiffre.',
+  pin: 'Le code doit compter exactement 4 chiffres.',
+  nocode: 'Ce Login n’a pas encore de code : choisis-en un et touche « Créer mon code ».'
+};
+const acctError = d => !d ? 'Tableau injoignable : vérifie ta connexion Internet.'
+  : d.error === 'code' ? 'Code incorrect (' + d.left + ' essai' + (d.left > 1 ? 's' : '') + ' restant' + (d.left > 1 ? 's' : '') + ').'
+  : d.error === 'bloque' ? 'Trop de codes erronés : ce Login est bloqué ' + d.minutes + ' min.'
+  : ACCT_ERR[d.error] || 'Erreur du tableau : ' + d.error;
+async function apiPost(body) {
+  try {
+    const res = await fetch(scoreUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body),
+      signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined });
+    return await res.json();
+  } catch (e) { return null; }
+}
+// Meilleurs temps gagnés sur cet appareil : campagne et défis réussis
+function localTimes() {
+  const out = Object.assign({}, campBest());
+  for (const id of new Set(defiHist.map(x => x.challenge.id))) { const m = summary(id).mine; if (m && m.status === 'réussi') out[id] = m.total; }
+  return out;
+}
+// Avancement du joueur connecté, venu du tableau, fusionné avec celui de l'appareil (le meilleur temps gagne)
+function pullMine() {
+  if (!account) return;
+  const key = Object.keys(allPlayers).find(l => l.toLowerCase() === account.login.toLowerCase());
+  const mine = key ? allPlayers[key] : null;
+  if (!mine) return;
+  const best = campBest(); let changed = false;
+  for (const id of Object.keys(mine)) {
+    const t = +mine[id];
+    if (/^C1-/.test(id)) {
+      if (best[id] == null || t < best[id] - 0.05) { best[id] = t; if (progress.camp.lost) delete progress.camp.lost[id]; changed = true; }
+    } else {
+      const m = summary(id).mine;
+      if (m && m.status === 'réussi' && m.total <= t + 0.05) continue;
+      const ch = decodeChallenge(id); if (!ch) continue;
+      const n = ch.games.length, part = Math.round(t / n * 10) / 10;
+      defiHist.push({ id: 's' + Date.now().toString(36) + id.slice(-4), date: new Date().toISOString(), source: 'synchro', challenge: ch,
+        times: Array.from({ length: n }, (_, i) => i < n - 1 ? part : Math.round((t - part * (n - 1)) * 10) / 10),
+        status: 'réussi', pseudo: account.login, retries: 0 });
+      changed = true;
+    }
+  }
+  if (changed) { saveProgress(); saveHist(); applyCustom(); }
+}
+// Lecture complète du tableau (top 3 et avancement de chaque joueur), au plus toutes les 20 s
+async function fetchAll(force) {
+  if (!scoreUrl) return false;
+  if (!force && Date.now() - lastFetch < 20000) return true;
+  if (fetching) return fetching;
+  fetching = (async () => {
+    try {
+      const res = await fetch(scoreUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
+      const data = await res.json();
+      if (!data || !data.ok || !data.scores) return false;
+      for (const id of Object.keys(data.scores)) remote[id] = cleanTop(data.scores[id].top);
+      allPlayers = data.players || {};
+      lastFetch = Date.now();
+      pullMine();
+      return true;
+    } catch (e) { return false; } finally { fetching = null; }
+  })();
+  return fetching;
+}
+async function fetchRecords(ids) {
+  const ok = await fetchAll();
+  if (ok) for (const id of ids) if (!remote[id]) remote[id] = [];   // pas de ligne : aucun record
+  return ok;
+}
+// Envoi d'un temps de fin de partie par le joueur connecté
+async function submitScore(id, time) {
+  if (!account || !id) return null;
+  const d = await apiPost({ action: 'score', login: account.login, pin: account.pin, id, time: Math.round(time * 10) / 10 });
+  if (d && d.error === 'nocode') return { nocode: true };
+  if (!d || !d.ok) return d ? { error: acctError(d) } : null;
+  remote[id] = cleanTop(d.top);
+  const k = Object.keys(allPlayers).find(l => l.toLowerCase() === account.login.toLowerCase()) || account.login;
+  allPlayers[k] = allPlayers[k] || {}; if (!(allPlayers[k][id] <= time)) allPlayers[k][id] = Math.round(time * 10) / 10;
+  return { updated: !!d.updated, rank: myRank(id), top: remote[id] };
+}
+// Création d'un Login ou connexion : l'avancement de l'appareil est fusionné avec celui du tableau
+async function accountAction(act, login, pin) {
+  login = String(login || '').trim(); pin = String(pin || '').trim();
+  if (!/^\d{4}$/.test(pin)) return ACCT_ERR.pin;
+  const d = await apiPost({ action: act, login, pin, times: localTimes() });
+  if (!d || !d.ok) return acctError(d);
+  account = { login: d.login, pin }; store.set('bastions.account', account);
+  pendingLogin = ''; store.set('bastions.pendingLogin', '');
+  if (current && current.kind === 'defi' && current.entry) { current.entry.pseudo = d.login; saveHist(); }
+  refreshAccount();
+  await fetchAll(true);
+  return null;
+}
+function refreshAccount() {
+  $('acctOn').classList.toggle('hidden', !account);
+  $('acctOff').classList.toggle('hidden', !!account);
+  $('acctName').textContent = account ? account.login : '';
+  // Login sans code : champ pré-rempli et bouton « Créer mon code »
+  document.querySelectorAll('.acLogin').forEach(i => { if (!account && pendingLogin && !i.value) i.value = pendingLogin; });
+  document.querySelectorAll('[data-act=create]').forEach(b => { b.textContent = pendingLogin ? 'Créer mon code' : 'Créer mon Login'; });
+}
+// Formulaires « Login + code » (Personnalisation et fin de partie) : boutons Créer / Me connecter
+function bindAcctForm(box, onDone) {
+  box.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const err = box.querySelector('.err');
+    err.classList.add('hidden'); b.disabled = true;
+    const msg = await accountAction(b.dataset.act, box.querySelector('.acLogin').value, box.querySelector('.acPin').value);
+    b.disabled = false;
+    if (msg) { err.textContent = msg; err.classList.remove('hidden'); box.querySelector(msg === ACCT_ERR.pris || msg === ACCT_ERR.login ? '.acLogin' : '.acPin').focus(); return; }
+    box.querySelector('.acPin').value = '';
+    onDone();
+  });
+}
+bindAcctForm($('acctOff'), () => { toast('Connecté : ' + account.login); renderCustom(); });
+$('btnLogout').onclick = () => { account = null; store.set('bastions.account', null); refreshAccount(); toast('Déconnecté de cet appareil'); };
+refreshAccount();
+
+/* Fin de partie : le temps n'est envoyé que si le joueur le choisit */
 let pendingScore = null;
-function askPseudoThen(id, time) {
+function offerSync(id, time) {
   pendingScore = { id, time };
-  $('overOnline').textContent = 'Choisis un pseudo pour inscrire ton temps au classement.';
-  $('pseudoAsk').value = '';
-  $('askPseudo').classList.remove('hidden');
+  $('overOnline').textContent = account ? 'Ton temps n’est pas encore envoyé au classement en ligne.'
+    : pendingLogin ? 'Ton Login « ' + pendingLogin + ' » n’a pas encore de code : choisis un code à 4 chiffres pour enregistrer ce temps. Tous les temps de cet appareil seront versés dans le tableau.'
+    : 'Crée ton Login ou connecte-toi pour enregistrer ce temps en ligne.';
+  refreshAccount();
+  $('syncOn').classList.toggle('hidden', !account);
+  $('syncOff').classList.toggle('hidden', !!account);
+  $('syncOff').querySelector('.err').classList.add('hidden');
+  $('overSync').classList.remove('hidden');
 }
 function sendPending() {
-  $('askPseudo').classList.add('hidden');
+  $('overSync').classList.add('hidden');
   if (pendingScore) { showOnline(pendingScore.id, pendingScore.time); pendingScore = null; }
 }
-$('btnPseudoOk').onclick = () => {
-  const v = $('pseudoAsk').value.trim().slice(0, 20);
-  if (!v) { toast('Saisis un pseudo, ou choisis de rester anonyme'); return; }
-  pseudo = v; store.set('bastions.pseudo', v); $('pseudo').value = v;
-  if (current && current.kind === 'defi') { current.entry.pseudo = v; saveHist(); }
-  sendPending();
-};
-$('btnPseudoSkip').onclick = sendPending;
+$('btnSyncSend').onclick = sendPending;
+bindAcctForm($('syncOff'), sendPending);
+$('btnSyncSkip').onclick = () => { $('overSync').classList.add('hidden'); pendingScore = null; $('overOnline').textContent = 'Temps non transmis.'; };
+
+/* ================= Tableaux des scores : étoiles (campagne) et médailles (défis du jour, 7 jours) ================= */
+const dayMinus = (day, k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
+function boardRows(kind) {
+  const logins = Object.keys(allPlayers);
+  if (kind === 'campaign') {
+    const ids = campaignPlan().map(L => L.id);
+    return logins.map(l => { const m = allPlayers[l]; const won = ids.filter(id => m[id] != null);
+      return { login: l, stars: won.filter(id => m[id] < STAR_TIME).length, wins: won.length }; })
+      .filter(r => r.wins).sort((a, b) => b.stars - a.stars || b.wins - a.wins || a.login.localeCompare(b.login));
+  }
+  const today = parisDay(), med = {};
+  for (let k = 0; k < 7; k++) for (const d of dailyChallenges(dayMinus(today, k))) {
+    const id = d.ch.id;
+    logins.filter(l => allPlayers[l][id] != null).sort((a, b) => allPlayers[a][id] - allPlayers[b][id]).slice(0, 3)
+      .forEach((l, i) => { (med[l] = med[l] || [0, 0, 0])[i]++; });
+  }
+  return Object.keys(med).map(l => ({ login: l, m: med[l] }))
+    .sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
+}
+function renderBoard(kind) {
+  const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '';
+  $('boardTitle').textContent = kind === 'campaign' ? 'Scores de la campagne' : 'Scores des défis du jour';
+  $('boardNote').textContent = kind === 'campaign' ? 'Étoiles gagnées sur l’ensemble de la campagne (victoires en cas d’égalité).'
+    : 'Médailles des défis du jour sur les 7 derniers jours, classées comme aux Jeux olympiques : d’abord l’or, puis l’argent, puis le bronze.';
+  const head = kind === 'campaign' ? '<tr><th>#</th><th>Login</th><th>★</th><th>Victoires</th></tr>'
+    : '<tr><th>#</th><th>Login</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th></tr>';
+  const body = rows.map((r, i) => `<tr${r.login.toLowerCase() === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${escapeHtml(r.login)}</td>`
+    + (kind === 'campaign' ? `<td>${r.stars}</td><td>${r.wins}</td>` : `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>`) + '</tr>').join('');
+  let foot = '';
+  if (kind !== 'campaign' && rows.length) {
+    const s = [0, 1, 2].map(i => rows.reduce((a, r) => a + r.m[i], 0));
+    foot = `<tr class="tot"><td></td><td>Sous-totaux</td><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td><td>${s[0] + s[1] + s[2]}</td></tr>`;
+  }
+  $('boardTable').innerHTML = rows.length ? `<table class="board"><thead>${head}</thead><tbody>${body}${foot}</tbody></table>`
+    : '<p class="sub">Aucun résultat en ligne pour le moment.</p>';
+}
+async function openBoard(kind) {
+  $('boardTable').innerHTML = '<p class="sub">Chargement…</p>';
+  $('board').classList.remove('hidden');
+  renderBoard(kind);
+  const ok = await fetchAll(true);
+  if (!$('board').classList.contains('hidden')) { if (ok) renderBoard(kind); else $('boardTable').innerHTML = '<p class="sub">Tableau injoignable : vérifie ta connexion Internet.</p>'; }
+}
+$('btnBoardCamp').onclick = () => openBoard('campaign');
+$('btnBoardDefi').onclick = () => openBoard('defi');
+$('btnBoardClose').onclick = () => $('board').classList.add('hidden');
 
 /* ================= Tutoriel (proposé avant les niveaux Très facile) ================= */
 // Étapes « info » : le jeu est en pause jusqu'à « Suivant ». Étapes « à toi » : le jeu tourne
@@ -2573,6 +2701,7 @@ function nextExists() {
 }
 function endGame(win) {
   if (tuto) endTuto(true);
+  $('hint').classList.add('hidden');
   state = 'over'; drag = null; updateChips();
   let text = win ? 'Plus aucun adversaire sur la carte.' : 'Ta dernière tour est tombée.';
   let onlineId = null, onlineTime = 0;
@@ -2611,9 +2740,8 @@ function endGame(win) {
   $('overTitle').textContent = (win ? 'Victoire' : 'Défaite') + (current.kind !== 'free' ? ' – ' + current.cfg.name : '');
   if (current.kind === 'tuto') text = win ? 'Tutoriel réussi : tu connais les bases. À toi la campagne !' : 'Tutoriel terminé. Tu peux le rejouer quand tu veux.';
   $('overText').textContent = text;
-  $('askPseudo').classList.add('hidden');
-  if (onlineId && !pseudo.trim()) askPseudoThen(onlineId, onlineTime);   // victoire sans pseudo : on le demande d'abord
-  else if (onlineId) showOnline(onlineId, onlineTime);
+  $('overSync').classList.add('hidden'); pendingScore = null;
+  if (onlineId) offerSync(onlineId, onlineTime);   // envoi au classement seulement si le joueur le choisit
   else $('overOnline').textContent = '';
   const q = win ? pickQuote() : null;
   $('quote').classList.toggle('hidden', !q);
@@ -2994,7 +3122,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_80';
+const APP_VERSION = '20261025_88';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
@@ -3028,6 +3156,11 @@ async function checkUpdate() {
   }
 }
 checkUpdate();
+fetchAll().then(ok => { if (ok && !$('menu').classList.contains('hidden')) showTab(menuTab); });
+setInterval(() => {
+  if ($('menu').classList.contains('hidden')) return;
+  fetchAll().then(ok => { if (ok && menuTab === 'campaign') renderCampaign(); else if (ok && menuTab === 'free') renderDefiTab(); });
+}, 60000);
 
 $('btnPlay').onclick = () => {
   soundUnlocked = true; musicSync();
