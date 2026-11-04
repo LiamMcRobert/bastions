@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_94)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_98)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -1440,7 +1440,7 @@ $('btnDefiCopy').onclick = () => { if (current) shareId(current.kind === 'defi' 
 // Colonne A : identifiant de la partie ; B à D : pseudos des 3 meilleurs ; E à G : leurs temps (secondes, vitesse ×1).
 // Une ligne n'est créée qu'après une première victoire sur cet identifiant. Un joueur n'occupe qu'une place.
 // Adresse du classement : fixe, intégrée au jeu (elle n'est plus modifiable dans Personnalisation)
-const scoreUrl = 'https://script.google.com/macros/s/AKfycbyVLODS6P9EvEAFxj3ctnk-_6bmg4UvUpiI-2i8wy2LGO3NE4yUMWm3LIjz2Idv4TWlWw/exec';
+const scoreUrl = 'https://script.google.com/macros/s/AKfycbx4aZAcnNFxt69KO-Jcadje1FbH4Qameo_ERWxUOyTHGxiUH5xXrsweT0uicsf8kA2h/exec';
 const remote = {};                                 // identifiant → top 3 [{ pseudo, time }] connu du tableau
 const cleanTop = top => (Array.isArray(top) ? top : []).filter(r => r && r.pseudo && isFinite(+r.time))
   .map(r => ({ pseudo: String(r.pseudo).slice(0, 20), time: +r.time })).sort((a, b) => a.time - b.time).slice(0, 3);
@@ -1493,7 +1493,7 @@ let allPlayers = {}, lastFetch = 0, fetching = null;
 const ACCT_ERR = {
   pris: 'Ce Login est déjà utilisé : choisis-en un autre.',
   inconnu: 'Login inconnu : vérifie l’orthographe, ou crée-le.',
-  login: 'Login invalide : 2 à 20 caractères (lettres, chiffres, espace, - _ . ’), commençant par une lettre ou un chiffre.',
+  login: 'Login invalide : 2 à 20 caractères, espaces et parenthèses acceptés, sans guillemets, et sans commencer par =, +, - ou @.',
   pin: 'Le code doit compter exactement 4 chiffres.',
   nocode: 'Ce Login n’a pas encore de code : choisis-en un et touche « Créer mon code ».'
 };
@@ -3120,7 +3120,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_94';
+const APP_VERSION = '20261025_98';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
