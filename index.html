@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_88)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_90)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -531,7 +531,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.</li>
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
-          <li>Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps n’y est envoyé qu’en fin de partie, si tu le choisis.</li>
+          <li>Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps y est envoyé automatiquement en fin de partie (« Passer sans synchroniser » permet de continuer hors ligne).</li>
           <li>Tableaux des scores : étoiles de toute la campagne (bouton en bas de Campagne) et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis).</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
@@ -1451,11 +1451,23 @@ const myRank = id => remote[id] ? remote[id].findIndex(r => r.pseudo.toLowerCase
 const MEDALS = ['🥇', '🥈', '🥉'], RANK_CLASS = ['r1', 'r2', 'r3'], RANK_LABEL = ['1er', '2e', '3e'];
 const topLine = top => top.map((r, i) => MEDALS[i] + ' ' + r.pseudo + ' ' + fmtTime(r.time)).join(', ');
 // Ligne « classement en ligne » de l'écran de fin
+// Envoi automatique du temps en fin de partie ; « Passer sans synchroniser » reste disponible pendant l'envoi
+let syncStop = null;
 function showOnline(id, time) {
-  const el = $('overOnline');
+  const el = $('overOnline'), ctrl = new AbortController();
+  syncStop = ctrl;
   el.textContent = 'Classement en ligne : envoi…';
-  submitScore(id, time).then(r => {
-    if (!r) { el.textContent = 'Classement en ligne indisponible (hors ligne) : temps non transmis.'; return; }
+  $('syncOn').classList.add('hidden'); $('syncOff').classList.add('hidden');
+  $('overSync').classList.remove('hidden');          // seul « Passer sans synchroniser » est proposé pendant l'envoi
+  submitScore(id, time, ctrl.signal).then(r => {
+    if (ctrl.signal.aborted) return;                 // le joueur a choisi de passer
+    syncStop = null; $('overSync').classList.add('hidden');
+    if (!r) {                                        // hors ligne : on peut réessayer ou passer
+      el.textContent = 'Classement en ligne injoignable (hors ligne) : temps non transmis.';
+      pendingScore = { id, time };
+      $('btnSyncSend').textContent = 'Réessayer l’envoi'; $('syncOn').classList.remove('hidden'); $('overSync').classList.remove('hidden');
+      return;
+    }
     if (r.nocode) {                                   // le code a été vidé dans le tableau : on en choisit un nouveau
       pendingLogin = account.login; store.set('bastions.pendingLogin', pendingLogin);
       account = null; store.set('bastions.account', null); refreshAccount(); offerSync(id, time); return;
@@ -1491,10 +1503,11 @@ const acctError = d => !d ? 'Tableau injoignable : vérifie ta connexion Interne
   : d.error === 'code' ? 'Code incorrect (' + d.left + ' essai' + (d.left > 1 ? 's' : '') + ' restant' + (d.left > 1 ? 's' : '') + ').'
   : d.error === 'bloque' ? 'Trop de codes erronés : ce Login est bloqué ' + d.minutes + ' min.'
   : ACCT_ERR[d.error] || 'Erreur du tableau : ' + d.error;
-async function apiPost(body) {
+async function apiPost(body, stop) {
   try {
-    const res = await fetch(scoreUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body),
-      signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined });
+    const sig = AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined;
+    const signal = stop && sig && AbortSignal.any ? AbortSignal.any([stop, sig]) : stop || sig;   // « Passer » interrompt l'envoi
+    const res = await fetch(scoreUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal });
     return await res.json();
   } catch (e) { return null; }
 }
@@ -1553,9 +1566,9 @@ async function fetchRecords(ids) {
   return ok;
 }
 // Envoi d'un temps de fin de partie par le joueur connecté
-async function submitScore(id, time) {
+async function submitScore(id, time, stop) {
   if (!account || !id) return null;
-  const d = await apiPost({ action: 'score', login: account.login, pin: account.pin, id, time: Math.round(time * 10) / 10 });
+  const d = await apiPost({ action: 'score', login: account.login, pin: account.pin, id, time: Math.round(time * 10) / 10 }, stop);
   if (d && d.error === 'nocode') return { nocode: true };
   if (!d || !d.ok) return d ? { error: acctError(d) } : null;
   remote[id] = cleanTop(d.top);
@@ -1604,6 +1617,7 @@ refreshAccount();
 /* Fin de partie : le temps n'est envoyé que si le joueur le choisit */
 let pendingScore = null;
 function offerSync(id, time) {
+  if (account) { pendingScore = null; showOnline(id, time); return; }   // connecté : envoi automatique
   pendingScore = { id, time };
   $('overOnline').textContent = account ? 'Ton temps n’est pas encore envoyé au classement en ligne.'
     : pendingLogin ? 'Ton Login « ' + pendingLogin + ' » n’a pas encore de code : choisis un code à 4 chiffres pour enregistrer ce temps. Tous les temps de cet appareil seront versés dans le tableau.'
@@ -1620,7 +1634,10 @@ function sendPending() {
 }
 $('btnSyncSend').onclick = sendPending;
 bindAcctForm($('syncOff'), sendPending);
-$('btnSyncSkip').onclick = () => { $('overSync').classList.add('hidden'); pendingScore = null; $('overOnline').textContent = 'Temps non transmis.'; };
+$('btnSyncSkip').onclick = () => {
+  if (syncStop) { syncStop.abort(); syncStop = null; }
+  $('overSync').classList.add('hidden'); pendingScore = null; $('overOnline').textContent = 'Temps non transmis.';
+};
 
 /* ================= Tableaux des scores : étoiles (campagne) et médailles (défis du jour, 7 jours) ================= */
 const dayMinus = (day, k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
@@ -3122,7 +3139,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_88';
+const APP_VERSION = '20261025_90';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
