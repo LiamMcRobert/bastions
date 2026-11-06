@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_100)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_104)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -95,6 +95,7 @@ h3{margin:8px 0 4px;font-size:20px}
 .iconbtn svg{width:26px;height:26px;fill:var(--muted)}
 .iconbtn svg .spine{fill:none;stroke:var(--panel-solid);stroke-width:1.4}
 .iconbtn.on{border-color:var(--accent);background:var(--accent)}
+.iconbtn svg.flag{width:30px;height:20px;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .iconbtn.on svg{fill:#fff}
 .iconbtn.on svg .spine{stroke:var(--accent)}
 .tabs{display:flex;gap:4px;margin:10px 0 0;border-bottom:2px solid var(--line);overflow-x:auto;scrollbar-width:none}
@@ -433,6 +434,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <div class="titlerow">
           <h1>Bastions</h1>
           <div class="headicons">
+            <button class="iconbtn" id="btnLang"></button>
             <button class="iconbtn" data-tab="custom" aria-label="Personnalisation" title="Personnalisation">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2"/><path d="M3.5 21c.6-4.6 4.1-7.6 8.5-7.6s7.9 3 8.5 7.6z"/></svg></button>
             <button class="iconbtn" data-tab="rules" aria-label="Règles" title="Règles">
@@ -454,9 +456,6 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <section id="tab-custom" class="hidden">
         <div class="setrow"><span class="lbl" style="margin:0">Étoiles acquises</span>
           <span class="starsum"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z"/></svg><span id="starSum">0</span></span></div>
-        <p class="lbl">Langue</p>
-        <div class="seg" id="segLang"><button data-v="fr">Français</button><button data-v="en">English</button></div>
-        <p class="sub" style="margin:4px 0 0">Le jeu redémarre pour appliquer la langue.</p>
         <p class="lbl">Compte</p>
         <div id="acctOn" class="hidden"><p class="sub" style="margin:0">Connecté : <strong id="acctName"></strong>. Ton avancement est enregistré dans le tableau en ligne.</p>
           <button class="ghost" id="btnLogout">Se déconnecter de cet appareil</button></div>
@@ -528,7 +527,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.</li>
           <li>Cadres des parties (campagne et défis) : or, argent ou bronze pour ta place dans le top 3 en ligne ; vert pour une victoire ; rouge pour une défaite ; gris si la partie n’a pas encore été jouée. Sur la grille de campagne, le filigrane indique le bâtiment spécial et la bande de couleur le paysage.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne.</li>
+          <li>Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).</li>
           <li>Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.</li>
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
@@ -867,7 +866,7 @@ const EN = {
 "Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.": "Times: counted at ×1 speed (playing at ×1.5 or ×2 doesn't change them). The top 3 of each game is saved online.",
 "Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps y est envoyé automatiquement en fin de partie (« Passer sans synchroniser » permet de continuer hors ligne).": "Account: a unique Login and a 4-digit code. A Login without a code chooses one at its next synced game end, and all the device's times are then poured into the sheet. Your progress is downloaded regularly from the online sheet; a new time is sent automatically at the end of a game (“Skip without syncing” lets you carry on offline).",
 "Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.": "Scoreboards: medals (gold, silver, bronze) across the whole campaign, with stars shown for reference (button at the bottom of Campaign), and medals of the daily challenges of the last 7 days (button at the bottom of Challenges). Ranked like the Olympic Games.",
-"Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne.": "Settings: 22 tower skins unlock with stars (all at 45 stars). You also manage your account (Login and code), music, speed and the online ranking there.",
+"Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Settings: 22 tower skins unlock with stars (all at 45 stars). You also manage your account (Login and code), music, speed and the online ranking there. The flag at the top of the menu switches the language (French or English).",
 "Ta progression reste enregistrée dans ce navigateur.": "Your progress stays saved in this browser.",
 "Revoir le tutoriel": "Replay the tutorial",
 "Top 3 en ligne": "Online top 3",
@@ -1985,12 +1984,17 @@ function bindAcctForm(box, onDone) {
   });
 }
 bindAcctForm($('acctOff'), () => { toast('Connecté : ' + account.login); renderCustom(); });
-// Choix de la langue : enregistré, puis le jeu redémarre dans la langue choisie
-document.querySelectorAll('#segLang button').forEach(b => b.classList.toggle('on', b.dataset.v === LANG));
-$('segLang').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b || b.dataset.v === LANG) return;
-  store.set('bastions.lang', b.dataset.v); location.reload();
-});
+// Langue : le drapeau montre la langue actuelle ; un toucher passe à l'autre langue et relance le jeu
+const FLAGS = {
+  fr: '<svg class="flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#0055a4"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ef4135"/></svg>',
+  en: '<svg class="flag" viewBox="0 0 60 40" aria-hidden="true" preserveAspectRatio="none"><clipPath id="ukc"><path d="M30 20h30v20zv20H0zH0V0zV0h30z"/></clipPath>'
+    + '<rect width="60" height="40" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/>'
+    + '<path d="M0 0l60 40M60 0L0 40" clip-path="url(#ukc)" stroke="#c8102e" stroke-width="5"/>'
+    + '<path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13"/><path d="M30 0v40M0 20h60" stroke="#c8102e" stroke-width="8"/></svg>'
+};
+$('btnLang').innerHTML = FLAGS[LANG];
+$('btnLang').setAttribute('aria-label', LANG === 'fr' ? 'Langue : français (toucher pour passer en anglais)' : 'Language: English (tap to switch to French)');
+$('btnLang').onclick = () => { store.set('bastions.lang', LANG === 'fr' ? 'en' : 'fr'); location.reload(); };
 $('btnLogout').onclick = () => { account = null; store.set('bastions.account', null); refreshAccount(); toast('Déconnecté de cet appareil'); };
 refreshAccount();
 
@@ -2272,7 +2276,10 @@ function arrive(u) {
     if (t.owner === 0) lostTower = true;
     t.paths = []; t.acc = 0; t.facc = 0; t.rr = 0; t.fx = 1; t.aggr = [];
     if (u.owner < 0) { t.owner = -1; t.stock = Math.min(t.cap, 10); }   // la riposte rend la tour grise, à 10
-    else { t.owner = u.owner; t.stock = Math.min(t.cap, v - t.stock); }
+    else {
+      t.owner = u.owner; t.stock = Math.min(t.cap, v - t.stock);
+      if (u.owner > 0 && players[u.owner]) players[u.owner].conquered = true;   // l'ordinateur a pris sa première tour
+    }
   }
 }
 
@@ -2408,10 +2415,10 @@ function aiThink(pl) {
       if (needy && dist(t, needy) < minDim * 0.6) { t.paths.push(needy.id); continue; }
     }
     if (t.stock < prof.threshold) continue;
-    // Règle : la toute première tour qu'un ordinateur attaque ne peut pas appartenir au joueur
+    // Règle : un ordinateur n'attaque le joueur qu'après avoir conquis au moins une tour
     // (sauf s'il n'a aucune autre cible atteignable, pour ne jamais bloquer la partie)
     let best = null, bc = Infinity;
-    for (const spareHuman of pl.attacked ? [false] : [true, false]) {
+    for (const spareHuman of pl.conquered ? [false] : [true, false]) {
       for (const c of towers) {
         if (c.owner === pl.id || t.paths.includes(c.id) || !canLink(t, c)) continue;
         if (spareHuman && c.owner === 0) continue;
@@ -2424,7 +2431,7 @@ function aiThink(pl) {
       }
       if (best) break;
     }
-    if (best) { t.paths.push(best.id); pl.attacked = true; }
+    if (best) t.paths.push(best.id);
   }
 }
 
@@ -3508,7 +3515,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_100';
+const APP_VERSION = '20261025_104';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
