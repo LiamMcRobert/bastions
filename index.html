@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_98)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_100)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -454,6 +454,9 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <section id="tab-custom" class="hidden">
         <div class="setrow"><span class="lbl" style="margin:0">Étoiles acquises</span>
           <span class="starsum"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.9 6.5.85-4.75 4.5 1.2 6.45L12 17.2l-5.8 3.1 1.2-6.45L2.65 9.35l6.5-.85z"/></svg><span id="starSum">0</span></span></div>
+        <p class="lbl">Langue</p>
+        <div class="seg" id="segLang"><button data-v="fr">Français</button><button data-v="en">English</button></div>
+        <p class="sub" style="margin:4px 0 0">Le jeu redémarre pour appliquer la langue.</p>
         <p class="lbl">Compte</p>
         <div id="acctOn" class="hidden"><p class="sub" style="margin:0">Connecté : <strong id="acctName"></strong>. Ton avancement est enregistré dans le tableau en ligne.</p>
           <button class="ghost" id="btnLogout">Se déconnecter de cet appareil</button></div>
@@ -771,6 +774,379 @@ const tierUnlocked = ti => ti === 0 || tierWins(ti - 1) >= UNLOCK_WINS;
 
 /* ================= État du jeu ================= */
 const $ = id => document.getElementById(id);
+
+/* ================= Langue : français (texte d'origine) ou anglais =================
+   Le jeu est écrit en français. En anglais, chaque texte affiché (nœuds de texte, attributs placeholder,
+   aria-label et title, textes dessinés) est traduit à la volée : dictionnaire de phrases entières, puis motifs
+   pour les messages construits avec des valeurs, puis phrase par phrase. Changer de langue relance le jeu. */
+const LANG = (() => { const v = store.get('bastions.lang', null);
+  return v === 'fr' || v === 'en' ? v : (/^fr/i.test(navigator.language || 'fr') ? 'fr' : 'en'); })();
+document.documentElement.lang = LANG;
+const EN = {
+"Bastions": "Bastions",
+"Conquête de tours": "Tower conquest",
+"Jouer !": "Play!",
+"Jouer hors ligne": "Play offline",
+"Mise à jour…": "Updating…",
+"Campagne": "Campaign",
+"Défis": "Challenges",
+"Personnalisation": "Settings",
+"Règles": "Rules",
+"Menu": "Menu",
+"Pause": "Pause",
+"Couper ou remettre la musique": "Mute or unmute music",
+"Vitesse du jeu": "Game speed",
+"×1": "×1",
+"×1,5": "×1.5",
+"×2": "×2",
+"Tutoriel : apprendre les bases": "Tutorial: learn the basics",
+"Tableau des scores": "Scoreboard",
+"Défis du jour": "Daily challenges",
+"Créer un défi": "Create a challenge",
+"Masquer la création de défi": "Hide challenge creation",
+"Historique des défis": "Challenge history",
+"Retour au défi": "Back to challenges",
+"Réinitialiser l’historique": "Reset history",
+"Confirmer la réinitialisation": "Confirm reset",
+"Confirmer": "Confirm",
+"Difficulté": "Difficulty",
+"Nombre de parties": "Number of games",
+"Nombre d’adversaires": "Number of opponents",
+"Bâtiments spéciaux": "Special buildings",
+"Super-tour": "Super tower",
+"9 niveaux, jusqu’à 80 défenseurs. 30 défenseurs quand elle est neutre.": "9 levels, up to 80 defenders. 30 defenders when neutral.",
+"Tour de tir de zone": "Area-fire tower",
+"Tour classique qui tire en plus sur les unités et tours adverses à portée, à 50 % de sa cadence de production (+10 % de portée par palier de 10 défenseurs). 10 au départ, 50 au maximum.": "A regular tower that also fires at enemy units and towers in range, at 50% of its production rate (+10% range per 10-defender step). 10 at start, 50 maximum.",
+"Caserne de troupes blindées": "Armored troops barracks",
+"Envoie des blindés valant 10 unités chacun ; sans chemin, se remplit comme une tour classique. 20 défenseurs au départ, 30 au maximum.": "Sends armored units worth 10 units each; with no path, fills up like a regular tower. 20 defenders at start, 30 maximum.",
+"Créer et jouer le défi": "Create and play the challenge",
+"Aucun défi joué pour l’instant.": "No challenge played yet.",
+"Compte": "Account",
+"Connecté :": "Signed in as",
+"Connecté": "Signed in",
+". Ton avancement est enregistré dans le tableau en ligne.": ". Your progress is saved in the online sheet.",
+"Se déconnecter de cet appareil": "Sign out on this device",
+"Un Login unique et un code à 4 chiffres pour enregistrer tes temps en ligne et retrouver ton avancement sur n’importe quel appareil. N’utilise pas un code qui te sert ailleurs : il est lisible par l’administrateur du jeu.": "A unique Login and a 4-digit code to save your times online and get your progress back on any device. Don't use a code you use elsewhere: the game administrator can read it.",
+"N’utilise pas un code qui te sert ailleurs : il est lisible par l’administrateur du jeu.": "Don't use a code you use elsewhere: the game administrator can read it.",
+"Login": "Login",
+"Code à 4 chiffres": "4-digit code",
+"Créer mon Login": "Create my Login",
+"Créer mon code": "Create my code",
+"Me connecter": "Sign in",
+"Musique": "Music",
+"Dans les menus et pendant les parties (même réglage que le bouton 🔊).": "In menus and during games (same setting as the 🔊 button).",
+"Tours possédées": "Towers owned",
+"Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.": "Number of towers per player, shown at the top of the screen during games.",
+"Chronomètre": "Timer",
+"Affiché en haut de l’écran pendant les parties.": "Shown at the top of the screen during games.",
+"Langue": "Language",
+"Français": "Français",
+"English": "English",
+"Le jeu redémarre pour appliquer la langue.": "The game restarts to apply the language.",
+"Tours": "Towers",
+"Les skins se débloquent avec les étoiles de campagne.": "Skins unlock with campaign stars.",
+"Étoiles acquises": "Stars earned",
+"Classement en ligne": "Online ranking",
+"Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.": "Best times are saved automatically in the game's records sheet.",
+"Tester la connexion": "Test the connection",
+"Ta tour est bleue. Une tour gagne un niveau tous les 10 défenseurs et produit de 2 à 7 unités par seconde, +1 par niveau (50 défenseurs maximum).": "Your tower is blue. A tower gains a level every 10 defenders and produces 2 to 7 units per second, +1 per level (50 defenders maximum).",
+"Glisse d’une tour bleue vers une autre pour y envoyer sa production : 3 chemins maximum, partagés à parts égales.": "Drag from a blue tower to another one to send it its production: up to 3 paths, shared equally.",
+"Une tour qui envoie ne remplit plus son stock ; seuls les renforts reçus l’augmentent.": "A tower that sends troops no longer fills its stock; only incoming reinforcements increase it.",
+"Touche un chemin bleu pour le supprimer. Touche une tour bleue pour couper tous ses chemins, ou barre un chemin d’un trait.": "Tap a blue path to remove it. Tap a blue tower to cut all its paths, or strike a path through with a swipe.",
+"Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.": "A path can't cross a hill, a forest or the center of another tower (the line turns red). Go through a relay tower.",
+"Les unités adverses qui se croisent se combattent, même sur des chemins différents.": "Opposing units that cross each other fight, even on different paths.",
+"Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.": "Special buildings produce 20% more than regular towers.",
+"Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.": "Grey towers produce nothing but defend themselves. Eliminate all opponents to win: remaining grey towers don't count.",
+"Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.": "Special buildings: the super tower (golden star) goes up to 80; the barracks (rectangular building) sends square armored units worth 10 units and, with no path, fills up like a regular tower; the fire tower (dome and cannon) produces and sends troops like a regular tower, and also fires at enemies inside the dotted circle, at 50% of its production rate; its range grows by 10% with each 10-defender step.",
+"Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.": "An attacked grey special building strikes back at the towers that attacked it (3 at most), half as fast as an occupied tower and without gaining population. The counter-attack on a tower stops when that tower falls (it turns grey again, with 10 defenders) or after 15 s without a new attack from it.",
+"Le bouton ×1 en haut à droite accélère le jeu (×1,5 puis ×2). Le bouton 🔊 coupe ou remet la musique (menus et parties).": "The ×1 button at the top right speeds up the game (×1.5 then ×2). The 🔊 button mutes or unmutes the music (menus and games).",
+"Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.": "Campaign: 5 difficulties of 15 levels, in mixed order (level 15 brings together the 3 special buildings). A difficulty unlocks after 8 wins in the previous one. A win in under 3:20 earns a star.",
+"Cadres des parties (campagne et défis) : or, argent ou bronze pour ta place dans le top 3 en ligne ; vert pour une victoire ; rouge pour une défaite ; gris si la partie n’a pas encore été jouée. Sur la grille de campagne, le filigrane indique le bâtiment spécial et la bande de couleur le paysage.": "Game frames (campaign and challenges): gold, silver or bronze for your place in the online top 3; green for a win; red for a defeat; grey if the game hasn't been played yet. On the campaign grid, the watermark shows the special building and the color strip the landscape.",
+"Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.": "Challenges: three one-game daily challenges (two Normal, one Hard), the same for everyone and renewed every day at midnight (Paris time), plus challenges you create. Any game can be shared with a link that opens it directly.",
+"Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.": "Created challenges: special buildings are placed in the center in Normal, closer to you in Easy and Very easy, closer to the computer above Normal; two copies if only one option is enabled, one of each otherwise.",
+"Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.": "Times: counted at ×1 speed (playing at ×1.5 or ×2 doesn't change them). The top 3 of each game is saved online.",
+"Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps y est envoyé automatiquement en fin de partie (« Passer sans synchroniser » permet de continuer hors ligne).": "Account: a unique Login and a 4-digit code. A Login without a code chooses one at its next synced game end, and all the device's times are then poured into the sheet. Your progress is downloaded regularly from the online sheet; a new time is sent automatically at the end of a game (“Skip without syncing” lets you carry on offline).",
+"Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.": "Scoreboards: medals (gold, silver, bronze) across the whole campaign, with stars shown for reference (button at the bottom of Campaign), and medals of the daily challenges of the last 7 days (button at the bottom of Challenges). Ranked like the Olympic Games.",
+"Personnalisation : 22 skins de tours se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne.": "Settings: 22 tower skins unlock with stars (all at 45 stars). You also manage your account (Login and code), music, speed and the online ranking there.",
+"Ta progression reste enregistrée dans ce navigateur.": "Your progress stays saved in this browser.",
+"Revoir le tutoriel": "Replay the tutorial",
+"Top 3 en ligne": "Online top 3",
+"Ton meilleur": "Your best",
+"Tutoriel": "Tutorial",
+"Les bases du jeu, étape par étape, pendant la partie.": "The basics, step by step, during the game.",
+"Lancer la partie": "Start the game",
+"Retour": "Back",
+"Aucun record": "No record",
+"Indisponible": "Unavailable",
+"Chargement…": "Loading…",
+"—": "—",
+"Pas encore gagné": "Not won yet",
+"Pas encore joué": "Not played yet",
+"★ étoile obtenue": "★ star earned",
+"pas encore d’étoile": "no star yet",
+"défi réussi": "challenge completed",
+"Partie partagée": "Shared game",
+"Nouveau défi": "New challenge",
+"Enregistrer mon temps en ligne": "Save my time online",
+"Réessayer l’envoi": "Retry sending",
+"Passer sans synchroniser": "Skip without syncing",
+"Partager cette partie": "Share this game",
+"Profils de tes adversaires": "Your opponents' profiles",
+"Niveau suivant": "Next level",
+"Partie suivante": "Next game",
+"Rejouer ce niveau": "Replay this level",
+"Rejouer cette partie": "Replay this game",
+"Recommencer le défi": "Restart the challenge",
+"Rejouer le tutoriel": "Replay the tutorial",
+"Liste des niveaux": "Level list",
+"Plus aucun adversaire sur la carte.": "No opponents left on the map.",
+"Ta dernière tour est tombée.": "Your last tower has fallen.",
+"Tutoriel réussi : tu connais les bases. À toi la campagne !": "Tutorial completed: you know the basics. The campaign is yours!",
+"Tutoriel terminé. Tu peux le rejouer quand tu veux.": "Tutorial over. You can replay it whenever you like.",
+"Victoire": "Victory",
+"Défaite": "Defeat",
+"Crée ton Login ou connecte-toi pour enregistrer ce temps en ligne.": "Create your Login or sign in to save this time online.",
+"Ton temps n’est pas encore envoyé au classement en ligne.": "Your time hasn't been sent to the online ranking yet.",
+"Classement en ligne : envoi…": "Online ranking: sending…",
+"Classement en ligne injoignable (hors ligne) : temps non transmis.": "Online ranking unreachable (offline): time not sent.",
+"Classement en ligne indisponible (hors ligne) : temps non transmis.": "Online ranking unavailable (offline): time not sent.",
+"Temps non transmis.": "Time not sent.",
+"Hors du top 3.": "Outside the top 3.",
+"Suivant": "Next",
+"Passer le tutoriel": "Skip tutorial",
+"C’est parti !": "Let's go!",
+"Voici ta tour, en bleu. Le nombre indique ses défenseurs.": "This is your tower, in blue. The number shows its defenders.",
+"Sans chemin, une tour remplit sa garnison : 2 unités par seconde au départ, puis +1 par niveau. Les points sous la tour montrent son niveau (un niveau tous les 10 défenseurs).": "With no path, a tower fills its garrison: 2 units per second at first, then +1 per level. The dots under the tower show its level (one level every 10 defenders).",
+"Les tours grises sont neutres : elles ne produisent rien, mais se défendent avec leur garnison.": "Grey towers are neutral: they produce nothing, but defend themselves with their garrison.",
+"À toi : glisse ton doigt de ta tour jusqu’à cette tour grise pour y envoyer tes troupes.": "Your turn: drag your finger from your tower to this grey tower to send your troops there.",
+"Une tour qui envoie des troupes ne remplit plus sa garnison. Pour prendre une tour, il faut y envoyer plus d’unités qu’elle n’a de défenseurs.": "A tower that sends troops no longer fills its garrison. To take a tower, you must send it more units than it has defenders.",
+"Une tour peut avoir 3 chemins. Touche un chemin pour le couper, ou ta tour pour couper tous ses chemins. Les montagnes, les forêts et les autres tours bloquent les chemins.": "A tower can have 3 paths. Tap a path to cut it, or your tower to cut all its paths. Mountains, forests and other towers block paths.",
+"Laisse tes troupes prendre la tour grise…": "Let your troops take the grey tower…",
+"Bravo, elle est à toi ! Elle produit maintenant pour ton camp.": "Well done, it's yours! It now produces for your side.",
+"L’adversaire attaque aussi. Prends toutes ses tours pour gagner. Les unités ennemies qui se croisent se combattent.": "The opponent attacks too. Take all its towers to win. Enemy units that cross each other fight.",
+"En haut : le chronomètre (victoire en moins de 3:20 = une étoile), la pause, le son et la vitesse ×1, ×1,5 ou ×2. Bonne conquête !": "At the top: the timer (a win in under 3:20 = a star), pause, sound and speed ×1, ×1.5 or ×2. Happy conquering!",
+"Glisse ta tour vers une autre pour attaquer": "Drag your tower to another one to attack",
+"Touche l’écran pour reprendre": "Tap the screen to resume",
+"Chemin bloqué : colline, forêt ou tour sur le trajet": "Path blocked: hill, forest or tower in the way",
+"Ce chemin existe déjà": "This path already exists",
+"3 chemins maximum par tour": "3 paths maximum per tower",
+"Historique des défis réinitialisé": "Challenge history reset",
+"Défi supprimé de l’historique": "Challenge removed from history",
+"Test en cours…": "Testing…",
+"Classement en ligne joignable": "Online ranking reachable",
+"Classement injoignable : vérifie ta connexion Internet": "Ranking unreachable: check your Internet connection",
+"Déconnecté de cet appareil": "Signed out on this device",
+"Lien de partie invalide": "Invalid game link",
+"Copie impossible : recopie le lien à la main": "Copy failed: copy the link by hand",
+"Bats mon temps sur cette partie de Bastions !": "Beat my time on this Bastions game!",
+"Ce Login est déjà utilisé : choisis-en un autre.": "This Login is already taken: choose another one.",
+"Login inconnu : vérifie l’orthographe, ou crée-le.": "Unknown Login: check the spelling, or create it.",
+"Login invalide : 2 à 20 caractères, espaces et parenthèses acceptés, sans guillemets, et sans commencer par =, +, - ou @.": "Invalid Login: 2 to 20 characters, spaces and parentheses allowed, no quotes, and not starting with =, +, - or @.",
+"Le code doit compter exactement 4 chiffres.": "The code must have exactly 4 digits.",
+"Ce Login n’a pas encore de code : choisis-en un et touche « Créer mon code ».": "This Login has no code yet: choose one and tap “Create my code”.",
+"Tableau injoignable : vérifie ta connexion Internet.": "Sheet unreachable: check your Internet connection.",
+"Scores de la campagne": "Campaign scores",
+"Scores des défis du jour": "Daily challenge scores",
+"Fermer": "Close",
+"Total": "Total",
+"Sous-totaux": "Subtotals",
+"Aucun résultat en ligne pour le moment.": "No online results yet.",
+"Réussi": "Completed",
+"Échoué": "Failed",
+"En cours": "In progress",
+"Jouer": "Play",
+"Rejouer": "Replay",
+"Reprendre": "Resume",
+"Partager": "Share",
+"Supprimer": "Delete",
+"Supprimer ce défi de l’historique": "Remove this challenge from history",
+"reçu": "received",
+"Date inconnue": "Unknown date",
+"1 manche": "1 round",
+"Très facile": "Very easy",
+"Facile": "Easy",
+"Normal": "Normal",
+"Difficile": "Hard",
+"Très difficile": "Very hard",
+"T. facile": "V. easy",
+"T. difficile": "V. hard",
+"Normal 1": "Normal 1",
+"Normal 2": "Normal 2",
+"Prairie": "Meadow",
+"Savane": "Savanna",
+"Désert": "Desert",
+"Montagne enneigée": "Snowy mountain",
+"Marais": "Swamp",
+"Bastion": "Bastion",
+"Tour de guet": "Watchtower",
+"Donjon": "Keep",
+"Minaret": "Minaret",
+"Pyramide égyptienne": "Egyptian pyramid",
+"Champignon": "Mushroom",
+"Pagode": "Pagoda",
+"Pyramide inca": "Inca pyramid",
+"Clocher": "Bell tower",
+"Phare": "Lighthouse",
+"Big Ben": "Big Ben",
+"Château de sable": "Sandcastle",
+"Tour sylvestre": "Forest tower",
+"Tour de glace": "Ice tower",
+"Arc de Triomphe": "Arc de Triomphe",
+"Tour de lave": "Lava tower",
+"Tour du mage": "Mage tower",
+"Tour d’obsidienne": "Obsidian tower",
+"Citadelle": "Citadel",
+"Tour Eiffel": "Eiffel Tower",
+"Tour céleste": "Celestial tower",
+"Tour royale": "Royal tower",
+"Bleu": "Blue",
+"Rouge": "Red",
+"Vert": "Green",
+"Jaune": "Yellow",
+"agressif": "aggressive",
+"intermédiaire": "balanced",
+"défensif": "defensive",
+"super-tour": "super tower",
+"tour de tir": "fire tower",
+"caserne": "barracks",
+"L’art suprême de la guerre est de soumettre l’ennemi sans combat.": "The supreme art of war is to subdue the enemy without fighting.",
+"Toute guerre est fondée sur la ruse.": "All warfare is based on deception.",
+"Connais ton ennemi et connais-toi toi-même : en cent batailles, tu ne seras jamais en péril.": "Know your enemy and know yourself: in a hundred battles you will never be in peril.",
+"La rapidité est l’essence de la guerre.": "Speed is the essence of war.",
+"Je suis venu, j’ai vu, j’ai vaincu.": "I came, I saw, I conquered.",
+"Le sort en est jeté.": "The die is cast.",
+"Je ne vole pas la victoire.": "I will not steal victory.",
+"Nous trouverons un chemin, ou nous en tracerons un.": "We will either find a way or make one.",
+"Qui veut la paix prépare la guerre.": "If you want peace, prepare for war.",
+"Ce sont les hommes qui font la cité, et non les murailles.": "It is men who make a city, not walls.",
+"Les gens d’armes batailleront, et Dieu donnera la victoire.": "The soldiers will fight, and God will give the victory.",
+"Il vaut mieux vaincre l’ennemi par la faim que par le fer.": "It is better to defeat the enemy by hunger than by the sword.",
+"Qui veut tout défendre ne défend rien.": "He who defends everything defends nothing.",
+"La victoire appartient au plus persévérant.": "Victory belongs to the most persevering.",
+"À la guerre, les trois quarts sont des affaires morales.": "In war, three quarters is a matter of morale.",
+"La guerre n’est qu’une simple continuation de la politique par d’autres moyens.": "War is merely the continuation of policy by other means.",
+"À la guerre, tout est très simple, mais la chose la plus simple est difficile.": "Everything in war is very simple, but the simplest thing is difficult.",
+"La meilleure stratégie est d’être toujours très fort, d’abord en général, puis au point décisif.": "The best strategy is always to be very strong, first in general, then at the decisive point.",
+"Aucun plan ne survit au premier contact avec le gros des forces ennemies.": "No plan survives first contact with the enemy's main force.",
+"Rien, sauf une bataille perdue, n’est aussi triste qu’une bataille gagnée.": "Nothing except a battle lost can be half so melancholy as a battle won.",
+"Mon centre cède, ma droite recule, situation excellente, j’attaque.": "My center is yielding, my right is retreating, situation excellent, I am attacking.",
+"La France a perdu une bataille ! Mais la France n’a pas perdu la guerre !": "France has lost a battle! But France has not lost the war!",
+"Les plans ne sont rien ; la planification est tout.": "Plans are nothing; planning is everything.",
+"Un bon plan exécuté avec vigueur maintenant vaut mieux qu’un plan parfait la semaine prochaine.": "A good plan violently executed now is better than a perfect plan next week.",
+"Si vous voulez la paix, comprenez la guerre.": "If you want peace, understand war.",
+"Sun Tzu, L’Art de la guerre": "Sun Tzu, The Art of War",
+"Jules César": "Julius Caesar",
+"Jules César, au passage du Rubicon": "Julius Caesar, crossing the Rubicon",
+"Alexandre le Grand, selon Plutarque": "Alexander the Great, according to Plutarch",
+"Hannibal (attribué)": "Hannibal (attributed)",
+"Végèce (d’après)": "Vegetius (after)",
+"Nicias, selon Thucydide": "Nicias, according to Thucydides",
+"Jeanne d’Arc, à son procès": "Joan of Arc, at her trial",
+"Machiavel, L’Art de la guerre": "Machiavelli, The Art of War",
+"Frédéric le Grand": "Frederick the Great",
+"Napoléon Bonaparte": "Napoleon Bonaparte",
+"Carl von Clausewitz, De la guerre": "Carl von Clausewitz, On War",
+"Helmuth von Moltke (d’après)": "Helmuth von Moltke (after)",
+"Duc de Wellington": "Duke of Wellington",
+"Ferdinand Foch (attribué)": "Ferdinand Foch (attributed)",
+"Charles de Gaulle, 1940": "Charles de Gaulle, 1940",
+"Dwight D. Eisenhower": "Dwight D. Eisenhower",
+"George S. Patton": "George S. Patton",
+"Basil Liddell Hart": "Basil Liddell Hart",
+"Tu peux la rejouer : le temps déjà passé reste compté.": "You can replay it: the time already spent still counts."
+};
+// Messages construits avec des valeurs (temps, numéros, noms) : motifs → traduction
+const WX = s => EN[s] != null ? EN[s] : s;
+const RANK_EN = { '1er': '1st', '2e': '2nd', '3e': '3rd' };
+const plural = (n, one, many) => +n > 1 ? many : one;
+const EN_RX = [
+  [/^(\d+) ★ requises$/, m => m[1] + ' ★ required'],
+  [/^(.+), (\d+) étoiles requises$/, m => WX(m[1]) + ', ' + m[2] + ' stars required'],
+  [/^(\d+)\/(\d+) victoires, (\d+) ★$/, m => m[1] + '/' + m[2] + ' wins, ' + m[3] + ' ★'],
+  [/^🔒 (\d+) victoires en (.+) pour débloquer \((\d+)\/(\d+)\)$/, m => '🔒 ' + m[1] + ' wins in ' + WX(m[2]) + ' to unlock (' + m[3] + '/' + m[4] + ')'],
+  [/^(.+?) niveau (\d+), 1 contre (\d)(.*)$/, m => WX(m[1]) + ' level ' + m[2] + ', 1 versus ' + m[3]
+    + m[4].replace(/, gagné en (\S+)/, ', won in $1').replace(', perdu', ', lost')
+      .replace(/, (1er|2e|3e) du classement/, (x, r) => ', ' + RANK_EN[r] + ' in the ranking').replace(', étoile', ', star')],
+  [/^(Victoire|Défaite) – (.+)$/, m => WX(m[1]) + ' – ' + (trFull(m[2]) || m[2])],
+  [/^(.+), niveau (\d+)\/(\d+)$/, m => WX(m[1]) + ', level ' + m[2] + '/' + m[3]],
+  [/^Défi, partie (\d+)\/(\d+)$/, m => 'Challenge, game ' + m[1] + '/' + m[2]],
+  [/^Défi (\d+)\/(\d+)$/, m => 'Challenge ' + m[1] + '/' + m[2]],
+  [/^Défi (D\S+)$/, m => 'Challenge ' + m[1]],
+  [/^(T\. facile|Facile|Normal|Difficile|T\. difficile) (\d+)$/, m => WX(m[1]) + ' ' + m[2]],
+  [/^Victoire en (\S+) : étoile gagnée !$/, m => 'Won in ' + m[1] + ': star earned!'],
+  [/^Victoire en (\S+)\.$/, m => 'Won in ' + m[1] + '.'],
+  [/^Termine en moins de (\S+) pour gagner l’étoile\.$/, m => 'Finish in under ' + m[1] + ' to earn the star.'],
+  [/^Ton meilleur temps : (\S+)\.$/, m => 'Your best time: ' + m[1] + '.'],
+  [/^Ton meilleur temps reste (\S+)\.$/, m => 'Your best time remains ' + m[1] + '.'],
+  [/^Difficulté « (.+) » débloquée !$/, m => 'Difficulty \u201c' + WX(m[1]) + '\u201d unlocked!'],
+  [/^Partie (\d+)\/(\d+) gagnée en (\S+)\.$/, m => 'Game ' + m[1] + '/' + m[2] + ' won in ' + m[3] + '.'],
+  [/^Total : (\S+)\.$/, m => 'Total: ' + m[1] + '.'],
+  [/^Défi échoué à la partie (\d+)\/(\d+)\.$/, m => 'Challenge failed at game ' + m[1] + '/' + m[2] + '.'],
+  [/^Défi réussi en (\S+)\.$/, m => 'Challenge completed in ' + m[1] + '.'],
+  [/^Campagne terminée : les (\d+) niveaux sont conquis\.$/, m => 'Campaign complete: all ' + m[1] + ' levels conquered.'],
+  [/^Tu es (1er|2e|3e) du classement !$/, m => 'You are ' + RANK_EN[m[1]] + ' in the ranking!'],
+  [/^Tu es (1er|2e|3e) du classement \(ton meilleur temps, (\S+), est conservé\)\.$/, m => 'You are ' + RANK_EN[m[1]] + ' in the ranking (your best time, ' + m[2] + ', is kept).'],
+  [/^Top 3 : (.+)\.$/, m => 'Top 3: ' + m[1] + '.'],
+  [/^Encore (\d+) étoiles? pour débloquer « (.+) »$/, m => m[1] + ' more ' + plural(m[1], 'star', 'stars') + ' needed to unlock \u201c' + WX(m[2]) + '\u201d'],
+  [/^Ce niveau \((.+) (\d+)\) n’est pas encore débloqué pour toi\.$/, m => 'This level (' + WX(m[1]) + ' ' + m[2] + ') isn\u2019t unlocked for you yet.'],
+  [/^Connecté : (.+)$/, m => 'Signed in as ' + m[1]],
+  [/^(Lien|Texte) copié$/, m => (m[1] === 'Lien' ? 'Link' : 'Text') + ' copied'],
+  [/^Code incorrect \((\d+) essais? restants?\)\.$/, m => 'Wrong code (' + m[1] + ' ' + plural(m[1], 'attempt', 'attempts') + ' left).'],
+  [/^Trop de codes erronés : ce Login est bloqué (\d+) min\.$/, m => 'Too many wrong codes: this Login is locked for ' + m[1] + ' min.'],
+  [/^Erreur du tableau : (.+)$/, m => 'Sheet error: ' + m[1]],
+  [/^Ton Login « (.+) » n’a pas encore de code : choisis un code à 4 chiffres pour enregistrer ce temps\. Tous les temps de cet appareil seront versés dans le tableau\.$/,
+    m => 'Your Login \u201c' + m[1] + '\u201d has no code yet: choose a 4-digit code to save this time. All the times on this device will be poured into the sheet.'],
+  [/^Reprise à la manche (\d+) : les temps déjà acquis sont conservés\.$/, m => 'Resuming at round ' + m[1] + ': times already earned are kept.'],
+  [/^Gagne en moins de (\S+) pour obtenir l’étoile\.$/, m => 'Win in under ' + m[1] + ' to earn the star.'],
+  [/^Défi du jour, (.+)$/, m => 'Daily challenge, ' + WX(m[1])],
+  [/^(\d+) manches$/, m => m[1] + ' rounds'],
+  [/^manches? gagnées?$/, m => /s$/.test(m[0]) ? 'rounds won' : 'round won'],
+  [/^défi réussi, (\d+) manches? rejouées?$/, m => 'challenge completed, ' + m[1] + ' ' + plural(m[1], 'round', 'rounds') + ' replayed'],
+  [/^(Bleu|Rouge|Vert|Jaune) : (agressif|intermédiaire|défensif)$/, m => WX(m[1]) + ': ' + WX(m[2])],
+  [/^(super-tour|tour de tir|caserne) (activée|non activée)$/, m => WX(m[1]) + (m[2] === 'activée' ? ' enabled' : ' disabled')],
+  [/^« (.+) »$/, m => '\u201c' + (trFull(m[1]) || m[1]) + '\u201d'],
+  [/^— (.+)$/, m => '— ' + WX(m[1])],
+  [/^(\d\d\/\d\d\/\d{4}) à (\d\d:\d\d)$/, m => m[1] + ' at ' + m[2]],
+  [/^(🥇|🥈|🥉) (1er|2e|3e)$/, m => m[1] + ' ' + RANK_EN[m[2]]],
+  [/^Médailles (gagnées sur l’ensemble des niveaux de la campagne|des défis du jour sur les 7 derniers jours), classées comme aux Jeux olympiques : d’abord l’or, puis l’argent, puis le bronze\.( Les étoiles sont indiquées à titre indicatif et ne comptent pas dans le classement\.)?$/,
+    m => (m[1].startsWith('gagnées') ? 'Medals won across all campaign levels' : 'Daily challenge medals over the last 7 days')
+      + ', ranked like the Olympic Games: gold first, then silver, then bronze.' + (m[2] ? ' Stars are shown for reference and don\u2019t count in the ranking.' : '')]
+];
+
+function trFull(k) {
+  if (EN[k] != null) return EN[k];
+  for (const [re, f] of EN_RX) { const m = re.exec(k); if (m) return f(m); }
+  return null;
+}
+function tr(s) {
+  if (LANG !== 'en' || s == null) return s;
+  const str = String(s), k = str.replace(/\s+/g, ' ').trim();
+  if (!k || !/[A-Za-zÀ-ÿ]/.test(k)) return str;
+  let out = trFull(k);
+  if (out == null) {                               // message fait de plusieurs phrases connues
+    const parts = k.split(/(?<=[.!?…)])\s+(?=[A-ZÀ-Ý«🥇])/);
+    if (parts.length > 1) { const t = parts.map(trFull); if (t.every(x => x != null)) out = t.join(' '); }
+  }
+  if (out == null) return str;
+  return (/^\s/.test(str) ? ' ' : '') + out + (/\s$/.test(str) ? ' ' : '');
+}
+if (LANG === 'en') {
+  const seen = new WeakMap();
+  const trNode = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (seen.get(n) === v) return;
+      const t = tr(v); seen.set(n, t); if (t !== v) n.nodeValue = t;
+    } else if (n.nodeType === 1 && n.tagName !== 'SCRIPT' && n.tagName !== 'STYLE') {
+      for (const a of ['placeholder', 'aria-label', 'title']) { const v = n.getAttribute(a); if (v) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } }
+      n.childNodes.forEach(trNode);
+    }
+  };
+  trNode(document.body);
+  new MutationObserver(ms => { for (const m of ms) {
+    if (m.type === 'childList') m.addedNodes.forEach(trNode); else trNode(m.target);
+  } }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['placeholder', 'aria-label', 'title'] });
+}
+
 const cv = $('cv');
 let ctx = cv.getContext('2d');                // remplacé un instant pour dessiner les aperçus de skins
 const bg = document.createElement('canvas'), bgx = bg.getContext('2d');
@@ -1329,7 +1705,7 @@ const partLink = id => GAME_URL + '#p=' + encodeURIComponent(id);
 async function shareId(id) {
   const url = partLink(id);
   if (navigator.share) {
-    try { await navigator.share({ title: 'Bastions', text: 'Bats mon temps sur cette partie de Bastions !', url }); return; }
+    try { await navigator.share({ title: 'Bastions', text: tr('Bats mon temps sur cette partie de Bastions !'), url }); return; }
     catch (err) { if (err && err.name === 'AbortError') return; }
   }
   copyText(url, 'Lien');
@@ -1609,6 +1985,12 @@ function bindAcctForm(box, onDone) {
   });
 }
 bindAcctForm($('acctOff'), () => { toast('Connecté : ' + account.login); renderCustom(); });
+// Choix de la langue : enregistré, puis le jeu redémarre dans la langue choisie
+document.querySelectorAll('#segLang button').forEach(b => b.classList.toggle('on', b.dataset.v === LANG));
+$('segLang').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.v === LANG) return;
+  store.set('bastions.lang', b.dataset.v); location.reload();
+});
 $('btnLogout').onclick = () => { account = null; store.set('bastions.account', null); refreshAccount(); toast('Déconnecté de cet appareil'); };
 refreshAccount();
 
@@ -2026,17 +2408,23 @@ function aiThink(pl) {
       if (needy && dist(t, needy) < minDim * 0.6) { t.paths.push(needy.id); continue; }
     }
     if (t.stock < prof.threshold) continue;
+    // Règle : la toute première tour qu'un ordinateur attaque ne peut pas appartenir au joueur
+    // (sauf s'il n'a aucune autre cible atteignable, pour ne jamais bloquer la partie)
     let best = null, bc = Infinity;
-    for (const c of towers) {
-      if (c.owner === pl.id || t.paths.includes(c.id) || !canLink(t, c)) continue;
-      const need = Math.max(1, c.stock + 1 - friendIn(c, pl.id));
-      let cost = need * (c.owner === -1 ? prof.neutralW : c.owner === 0 ? prof.humanW : 1)
-               + dist(t, c) / (minDim * 0.05);
-      cost /= AI_VALUE[pl.profile][c.kind] || 1;     // attire l'IA vers les bâtiments spéciaux
-      cost *= 1 - noise + Math.random() * 2 * noise;
-      if (cost < bc) { bc = cost; best = c; }
+    for (const spareHuman of pl.attacked ? [false] : [true, false]) {
+      for (const c of towers) {
+        if (c.owner === pl.id || t.paths.includes(c.id) || !canLink(t, c)) continue;
+        if (spareHuman && c.owner === 0) continue;
+        const need = Math.max(1, c.stock + 1 - friendIn(c, pl.id));
+        let cost = need * (c.owner === -1 ? prof.neutralW : c.owner === 0 ? prof.humanW : 1)
+                 + dist(t, c) / (minDim * 0.05);
+        cost /= AI_VALUE[pl.profile][c.kind] || 1;     // attire l'IA vers les bâtiments spéciaux
+        cost *= 1 - noise + Math.random() * 2 * noise;
+        if (cost < bc) { bc = cost; best = c; }
+      }
+      if (best) break;
     }
-    if (best) t.paths.push(best.id);
+    if (best) { t.paths.push(best.id); pl.attacked = true; }
   }
 }
 
@@ -2116,8 +2504,8 @@ function render() {
   if (state === 'play' && paused && !tuto) {
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = `700 ${Math.round(minDim * 0.09)}px system-ui,sans-serif`; ctx.fillText('Pause', W / 2, H / 2);
-    ctx.font = `600 ${Math.round(minDim * 0.04)}px system-ui,sans-serif`; ctx.fillText('Touche l’écran pour reprendre', W / 2, H / 2 + minDim * 0.08);
+    ctx.font = `700 ${Math.round(minDim * 0.09)}px system-ui,sans-serif`; ctx.fillText(tr('Pause'), W / 2, H / 2);
+    ctx.font = `600 ${Math.round(minDim * 0.04)}px system-ui,sans-serif`; ctx.fillText(tr('Touche l’écran pour reprendre'), W / 2, H / 2 + minDim * 0.08);
   }
 }
 
@@ -3120,7 +3508,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_98';
+const APP_VERSION = '20261025_100';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
