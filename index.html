@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_122)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_134)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -266,6 +266,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #btnPlay:active{transform:translateX(-50%) translateY(3px);box-shadow:0 4px 0 rgba(14,26,46,.35)}
 #btnPlay:disabled{opacity:.55}
 #upd{position:absolute;left:50%;bottom:calc(6% + 84px);transform:translateX(-50%);width:min(72%,360px);text-align:center}
+#upd .bar.hidden{display:none}
 #upd p{margin:0 0 6px;color:#fff;font-weight:800;font-size:20px;text-shadow:0 2px 0 rgba(14,26,46,.6)}
 #upd .bar{height:16px;border-radius:8px;border:3px solid #0e1a2e;background:rgba(255,255,255,.75);overflow:hidden}
 #btnOffline{margin-top:10px;min-height:44px;padding:0 18px;border-radius:22px;border:3px solid #0e1a2e;background:#fff;color:#0e1a2e;font-size:16px;font-weight:800}
@@ -435,7 +436,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 <text x="540" y="480" font-family="system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-weight="700" font-size="58" text-anchor="middle" fill="#fff" stroke="#0e1a2e" stroke-opacity=".55" stroke-width="10" paint-order="stroke">Conquête de tours</text>
 
 </svg>
-    <div id="upd" class="hidden"><p>Mise à jour…</p><div class="bar"><span id="updBar"></span></div>
+    <div id="upd" class="hidden"><p id="updText">Mise à jour…</p><div class="bar hidden" id="updBarBox"><span id="updBar"></span></div>
       <button id="btnOffline" class="hidden">Jouer hors ligne</button></div>
     <button id="btnPlay" disabled>Jouer !</button>
   </div>
@@ -1228,6 +1229,12 @@ EN_RX.push(
   [/^Niveau actuel (\d)\/3 : (.+)$/, m => 'Current level ' + m[1] + '/3: ' + CIV_PASSIVE_EN(m[2])]
 );
 EN_RX.unshift([/^Passif : (.+) \((15 \/ 30 \/ 45) ★\)$/, m => 'Passive: ' + CIV_PASSIVE_EN(m[1]) + ' (' + m[2] + ' ★)']);   // avant la règle générale « (… ★) »
+Object.assign(EN, {
+  'Recherche de mise à jour…': 'Checking for updates…', 'Jeu à jour': 'Game up to date',
+  'Pas de connexion : tu peux jouer hors ligne avec la version installée.': 'No connection: you can play offline with the installed version.',
+  'GitHub ne répond pas : tu peux jouer hors ligne avec la version installée.': 'GitHub isn\u2019t responding: you can play offline with the installed version.',
+  'GitHub injoignable : tu peux jouer hors ligne avec la version installée.': 'GitHub unreachable: you can play offline with the installed version.'
+});
 function trFull(k) {
   if (EN[k] != null) return EN[k];
   for (const [re, f] of EN_RX) { const m = re.exec(k); if (m) { const r = f(m); if (r != null) return r; } }
@@ -3816,7 +3823,8 @@ function drawFresco() {
   const key = civ.key + ':' + W + 'x' + H + ':' + DPR;
   if (!frameCache || frameCache.key !== key) {
     const c = document.createElement('canvas'); c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
-    const g = c.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const g = c.getContext('2d', { willReadFrequently: true });   // rendu logiciel : n'occupe pas la mémoire graphique
+    g.setTransform(DPR, 0, 0, DPR, 0, 0);
     paintFresco(g, civ.key, W, H, VIEW.F);
     frameCache = { key, c };
   }
@@ -3867,20 +3875,21 @@ function paintFresco(g, kind, W, H, F) {
     }
     g.strokeStyle = '#2b1d16'; g.lineWidth = 2; g.strokeRect(F - 1, F - 1, W - 2 * F + 2, H - 2 * F + 2); g.strokeRect(1, 1, W - 2, H - 2);
   } else {                                         // mosaïque romaine : bordures sombres et méandre (grecque) rouge sur fond crème
-    const rows = 5, t = F / rows;
-    const meander = (r, c) => { c = ((c % 6) + 6) % 6; return r === 1 ? c <= 3 : r === 2 ? (c === 0 || c === 3) : r === 3 ? (c === 0 || c >= 3) : false; };
-    for (let y = 0; y < H; y += t) for (let x = 0; x < W; x += t) {
-      const inX = x >= F && x + t <= W - F, inY = y >= F && y + t <= H - F;
-      if (inX && inY) continue;
-      let r, c;
-      if (!inX && !inY) { r = -1; c = 0; }          // angles : damier
-      else if (!inY) { r = Math.floor((y < F ? y : H - y - t) / t); c = Math.floor((y < F ? x : W - x) / t); }
-      else { r = Math.floor((x < F ? x : W - x - t) / t); c = Math.floor((x < F ? H - y : y) / t); }
-      const base = r === -1 ? ((Math.floor(x / t) + Math.floor(y / t)) % 2 ? [150, 40, 35] : [236, 224, 196])
-        : r <= 0 || r >= rows - 1 ? [58, 40, 34] : meander(r, c) ? [158, 42, 36] : [236, 224, 196];
+    const rows = 5, t = F / rows, cols = 6;
+    const unit = document.createElement('canvas'); unit.width = Math.ceil(cols * t); unit.height = Math.ceil(rows * t);
+    const u = unit.getContext('2d');
+    const meander = (r, c) => r === 1 ? c <= 3 : r === 2 ? (c === 0 || c === 3) : r === 3 ? (c === 0 || c >= 3) : false;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {   // un motif : 6 tesselles de long, 5 de large
+      const base = r === 0 || r === rows - 1 ? [58, 40, 34] : meander(r, c) ? [158, 42, 36] : [236, 224, 196];
       const j = (rnd() - 0.5) * 16;
-      g.fillStyle = `rgb(${base[0] + j | 0},${base[1] + j | 0},${base[2] + j | 0})`;
-      g.fillRect(x + 0.4, y + 0.4, t - 0.8, t - 0.8);
+      u.fillStyle = `rgb(${base[0] + j | 0},${base[1] + j | 0},${base[2] + j | 0})`;
+      u.fillRect(c * t + 0.4, r * t + 0.4, t - 0.8, t - 0.8);
+    }
+    const pat = g.createPattern(unit, 'repeat');
+    g.fillStyle = '#2a1d18'; g.fillRect(0, 0, W, H);   // joints entre les tesselles
+    // chaque côté : motif posé depuis le bord extérieur vers l'intérieur
+    for (const [tx, ty, rot, len] of [[0, 0, 0, W], [W, H, Math.PI, W], [0, H, -Math.PI / 2, H], [W, 0, Math.PI / 2, H]]) {
+      g.save(); g.translate(tx, ty); g.rotate(rot); g.fillStyle = pat; g.fillRect(0, 0, len, F); g.restore();
     }
   }
   g.restore();
@@ -4165,25 +4174,37 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_122';
+const APP_VERSION = '20261025_134';
 async function checkUpdate() {
-  if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
+  const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
+  const show = (msg, bar) => { txt.textContent = msg; $('updBarBox').classList.toggle('hidden', !bar); box.classList.remove('hidden'); };
+  const offline = msg => { show(msg, false); off.classList.remove('hidden'); };
+  if (!navigator.onLine) { offline('Pas de connexion : tu peux jouer hors ligne avec la version installée.'); return; }
+  // L'écran d'accueil vérifie la version publiée sur GitHub avant d'autoriser « Jouer ! »
+  play.disabled = true; show('Recherche de mise à jour…', false);
+  const ctrl = new AbortController();
+  let gaveUp = false;
+  const slow = setTimeout(() => { gaveUp = true; offline('GitHub ne répond pas : tu peux jouer hors ligne avec la version installée.'); }, 10000);
+  // « Jouer hors ligne » : on abandonne la vérification ou le téléchargement et on entre dans le jeu
+  off.onclick = () => { gaveUp = true; ctrl.abort(); clearTimeout(slow); sessionStorage.removeItem('bastions.upd');
+    box.classList.add('hidden'); play.disabled = false; play.click(); };
   try {
-    const ctrl = new AbortController(), stop = setTimeout(() => ctrl.abort(), 5000);
     const res = await fetch('index.html?check=' + Date.now(), { cache: 'no-store', signal: ctrl.signal });
     const reader = res.body.getReader(), dec = new TextDecoder();
     let head = '';
     while (head.length < 3000) { const { value, done } = await reader.read(); if (done) break; head += dec.decode(value, { stream: true }); }
-    reader.cancel().catch(() => {}); clearTimeout(stop);
+    reader.cancel().catch(() => {});
     const m = /version (\d{8}_\d+)/.exec(head);
-    if (!m || m[1] === APP_VERSION) return;
-    if (sessionStorage.getItem('bastions.upd') === m[1]) return;     // déjà tenté pendant cette session : pas de boucle
+    if (!m || m[1] === APP_VERSION || sessionStorage.getItem('bastions.upd') === m[1]) {   // à jour (ou déjà tenté : pas de boucle)
+      if (gaveUp) return;
+      clearTimeout(slow); show('Jeu à jour', false); play.disabled = false;
+      setTimeout(() => box.classList.add('hidden'), 1200);
+      return;
+    }
     sessionStorage.setItem('bastions.upd', m[1]);
-    $('upd').classList.remove('hidden'); $('btnPlay').disabled = true;
-    // Synchronisation trop lente (plus de 10 s) : on propose de jouer tout de suite avec la version installée
-    const dl = new AbortController(), slow = setTimeout(() => $('btnOffline').classList.remove('hidden'), 10000);
-    $('btnOffline').onclick = () => { dl.abort(); sessionStorage.removeItem('bastions.upd'); };
-    const full = await fetch('index.html', { cache: 'no-cache', signal: dl.signal });   // le service de cache garde la nouvelle version
+    show('Mise à jour…', true);                      // nouvelle version : téléchargement puis relance
+    const full = await fetch('index.html', { cache: 'no-cache', signal: ctrl.signal });   // le service de cache garde la nouvelle version
     const r2 = full.body.getReader(), total = +full.headers.get('content-length') || 6e6;
     let got = 0;
     for (;;) {
@@ -4194,10 +4215,12 @@ async function checkUpdate() {
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg) await reg.update().catch(() => {});
     setTimeout(() => location.reload(), 400);
-  } catch (e) {                                     // réseau lent ou coupé : on garde la version actuelle
-    $('upd').classList.add('hidden'); $('btnOffline').classList.add('hidden'); $('btnPlay').disabled = false;
+  } catch (e) {                                     // GitHub injoignable : jeu hors ligne proposé
+    if (gaveUp && box.classList.contains('hidden')) return;
+    clearTimeout(slow); offline('GitHub injoignable : tu peux jouer hors ligne avec la version installée.');
   }
 }
+
 checkUpdate();
 fetchAll().then(ok => { if (ok && !$('menu').classList.contains('hidden')) showTab(menuTab); });
 setInterval(() => {
