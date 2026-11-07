@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_108)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_112)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -1172,12 +1172,12 @@ Object.assign(EN, {
   'Guerriers Aigles': 'Eagle Warriors', 'Guerriers Jaguars': 'Jaguar Warriors', 'Berserkers': 'Berserkers', 'Guèdes': 'Gaesatae',
   'Constructeurs': 'Builders', 'Légion': 'Legion', 'Tezcatlipoca': 'Tezcatlipoca', 'Quetzalcoatl': 'Quetzalcoatl', 'Loki': 'Loki',
   'Toutatis': 'Toutatis', 'Anubis': 'Anubis', 'Mars': 'Mars',
-  '30 s : tes unités se déplacent deux fois plus vite': '30 s: your units move twice as fast',
+  '40 s : tes unités se déplacent deux fois plus vite': '40 s: your units move twice as fast',
   '30 s : tes unités ont 1 chance sur 3 de survivre à un combat': '30 s: your units have a 1 in 3 chance to survive a fight',
   '15 s : tes unités envoyées en valent 2': '15 s: each unit you send is worth 2',
   '18 s : la production de tes tours est doublée': '18 s: your towers\u2019 production is doubled',
-  '15 s : production interne doublée, même pour les tours qui attaquent': '15 s: internal production doubled, even for attacking towers',
-  '15 s : tes unités ont 1 chance sur 2 de survivre à un combat': '15 s: your units have a 1 in 2 chance to survive a fight',
+  '12 s : production interne doublée, même pour les tours qui attaquent': '12 s: internal production doubled, even for attacking towers',
+  '20 s : tes unités ont 1 chance sur 2 de survivre à un combat': '20 s: your units have a 1 in 2 chance to survive a fight',
   'Divise par 2 la population de 3 tours adverses': 'Halves the population of 3 enemy towers',
   '+20 de capacité et +20 défenseurs pour 3 de tes tours': '+20 capacity and +20 defenders for 3 of your towers',
   'Prend possession d’une tour adverse avec sa population': 'Takes over an enemy tower with its population',
@@ -1191,7 +1191,7 @@ const CIV_COND_EN = s => s.replace(/^(\d+) tours conquises$/, '$1 towers conquer
   .replace(/^(\d+) unités tombées au combat \(tous joueurs\)$/, '$1 units fallen in battle (all players)')
   .replace(/^(\d+) de tes tours à 40 défenseurs ou plus en même temps$/, '$1 of your towers at 40 defenders or more at the same time');
 const CIV_PASSIVE_EN = s => s.replace(/^\+([\d /]+) % de production pour tes tours à 30 défenseurs ou plus$/, '+$1% production for your towers at 30 defenders or more')
-  .replace(/^\+([\d /]+) % de production pour tes tours des niveaux 1 à 3$/, '+$1% production for your level 1 to 3 towers')
+  .replace(/^\+([\d /]+) % de production pour tes tours des niveaux 1 à 4$/, '+$1% production for your level 1 to 4 towers')
   .replace(/^([\d /]+) % de chance qu’une de tes tours ignore une attaque$/, '$1% chance that one of your towers ignores an attack');
 EN_RX.push(
   [/^(.+) \(([\d /]+) ★\)$/, m => (trFull(m[1]) || CIV_PASSIVE_EN(m[1])) + ' (' + m[2] + ' ★)'],
@@ -1202,7 +1202,8 @@ EN_RX.push(
   [/^(\S+) (.+?) : (\d+ s : .+?)( \(35 ★\))?$/, m => EN[m[2]] && EN[m[3]] ? m[1] + ' ' + EN[m[2]] + ': ' + EN[m[3]] + (m[4] || '') : null],
   [/^✨ (.+?) : (.+)\. Condition : (.+?)( \(50 ★\))?$/, m => '✨ ' + WX(m[1]) + ': ' + WX(m[2]) + '. Condition: ' + CIV_COND_EN(m[3]) + (m[4] || '')],
   [/^(\d+) s$/, m => m[1] + ' s'],
-  [/^(.+) : (.+) !$/, m => EN[m[1]] ? WX(m[1]) + ': ' + (EN[m[2]] || (EN['30 s : ' + m[2]] || EN['15 s : ' + m[2]] || EN['18 s : ' + m[2]] || m[2]).replace(/^\d+ s: /, '')) + '!' : null],
+  [/^(.+) : (.+) !$/, m => { if (!EN[m[1]]) return null; const k = Object.keys(EN).find(x => x.replace(/^\d+ s : /, '') === m[2]);
+    return WX(m[1]) + ': ' + (EN[m[2]] || (k ? EN[k] : m[2]).replace(/^\d+ s: /, '')) + '!'; }],
   [/^(Tezcatlipoca|Quetzalcoatl|Loki|Toutatis|Anubis|Mars) !$/, m => m[1] + '!'],
   [/^(.+) : trace un cercle en glissant le doigt \(2 tours adverses au plus\)( — (\d+) tours? adverses? dans la zone)?$/,
     m => m[1] + ': draw a circle by sliding your finger (2 enemy towers at most)' + (m[2] ? ' — ' + m[3] + ' enemy tower' + (+m[3] > 1 ? 's' : '') + ' in the area' : '')],
@@ -1213,7 +1214,7 @@ EN_RX.push(
 Object.assign(EN, {
   'Civilisations': 'Civilizations', '✓ débloqué': '✓ unlocked', 'Débloqué à 15 étoiles': 'Unlocks at 15 stars',
   'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
-  'Peuples de raids : leurs petites tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small towers produce more, ideal for expanding fast.',
+  'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small and medium towers produce more, ideal for expanding fast.',
   'Défenseurs aguerris : leurs tours ignorent parfois les attaques ennemies.': 'Seasoned defenders: their towers sometimes ignore enemy attacks.',
   'Vitesse et frappes ciblées.': 'Speed and targeted strikes.', 'Résistance au combat et croissance.': 'Combat resilience and growth.',
   'Assaut brutal et ruse.': 'Brutal assault and cunning.', 'Production et colère du ciel.': 'Production and the wrath of the sky.',
@@ -3674,7 +3675,7 @@ $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data
 /* Onglet Civilisations : présentation, bonus débloqués selon les étoiles de campagne, choix */
 const CIV_INTRO = {
   amer: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.',
-  nord: 'Peuples de raids : leurs petites tours produisent davantage, idéal pour s’étendre vite.',
+  nord: 'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.',
   med: 'Défenseurs aguerris : leurs tours ignorent parfois les attaques ennemies.'
 };
 const FAC_INTRO = {
@@ -3729,23 +3730,23 @@ const CIVS = {
   amer: { name: 'Amérindiens', icon: '🪶', pct: [4, 8, 12],
     passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
     factions: {
-      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 30, desc: '30 s : tes unités se déplacent deux fois plus vite' },
-        god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'conq', need: 6, pick: { n: 3, who: 'enemy' } } },
+      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 40, desc: '40 s : tes unités se déplacent deux fois plus vite' },
+        god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'conq', need: 5, pick: { n: 3, who: 'enemy' } } },
       azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 30, desc: '30 s : tes unités ont 1 chance sur 3 de survivre à un combat' },
-        god: { name: 'Quetzalcoatl', desc: '+20 de capacité et +20 défenseurs pour 3 de tes tours', cond: 'conq', need: 6, pick: { n: 3, who: 'own' } } } } },
+        god: { name: 'Quetzalcoatl', desc: '+20 de capacité et +20 défenseurs pour 3 de tes tours', cond: 'conq', need: 5, pick: { n: 3, who: 'own' } } } } },
   nord: { name: 'Nordiques', icon: '🛡️', pct: [3, 6, 10],
-    passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 3',
+    passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
     factions: {
       viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, desc: '15 s : tes unités envoyées en valent 2' },
-        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse avec sa population', cond: 'dead', need: 200, pick: { n: 1, who: 'enemy' } } },
+        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse avec sa population', cond: 'dead', need: 400, pick: { n: 1, who: 'enemy' } } },
       celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 18, desc: '18 s : la production de tes tours est doublée' },
-        god: { name: 'Toutatis', desc: 'Le ciel tombe sur une zone (2 tours adverses au plus) : leur population est divisée par 2 et les unités adverses y sont détruites', cond: 'dead', need: 200, pick: { circle: true } } } } },
+        god: { name: 'Toutatis', desc: 'Le ciel tombe sur une zone (2 tours adverses au plus) : leur population est divisée par 2 et les unités adverses y sont détruites', cond: 'dead', need: 400, pick: { circle: true } } } } },
   med: { name: 'Méditerranéens', icon: '🏛️', pct: [4, 7, 10],
     passive: p => p + ' % de chance qu’une de tes tours ignore une attaque',
     factions: {
-      egypte: { name: 'Égyptiens', power: { name: 'Constructeurs', icon: '🧱', dur: 15, desc: '15 s : production interne doublée, même pour les tours qui attaquent' },
+      egypte: { name: 'Égyptiens', power: { name: 'Constructeurs', icon: '🧱', dur: 12, desc: '12 s : production interne doublée, même pour les tours qui attaquent' },
         god: { name: 'Anubis', desc: 'Tue une unité adverse sur deux sur le champ de bataille', cond: 'full', need: 3, pick: null } },
-      rome: { name: 'Romains', power: { name: 'Légion', icon: '🛡', dur: 15, desc: '15 s : tes unités ont 1 chance sur 2 de survivre à un combat' },
+      rome: { name: 'Romains', power: { name: 'Légion', icon: '🛡', dur: 20, desc: '20 s : tes unités ont 1 chance sur 2 de survivre à un combat' },
         god: { name: 'Mars', desc: 'Change une de tes tours en bâtiment spécial de ton choix, plein', cond: 'full', need: 3, pick: { n: 1, who: 'own', type: true } } } } }
 };
 const GOD_COND = {
@@ -3776,7 +3777,7 @@ function civProd(t) {
   if (!civ || t.owner !== 0) return 1;
   let k = 1;
   if (civ.key === 'amer' && t.stock >= 30) k += civ.pct;
-  if (civ.key === 'nord' && level(t) <= 3) k += civ.pct;
+  if (civ.key === 'nord' && level(t) <= 4) k += civ.pct;
   if (civOn('celte')) k *= 2;
   return k;
 }
@@ -3972,7 +3973,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_108';
+const APP_VERSION = '20261025_112';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
