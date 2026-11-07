@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_124)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_128)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -2573,9 +2573,12 @@ function aiThink(pl) {
 
 /* ================= Rendu ================= */
 function render() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);          // échelle de base rétablie à chaque image (évite toute dérive)
+  ctx.globalAlpha = 1;
   updateView();
   if (VIEW.F) { ctx.fillStyle = LAND.ground; ctx.fillRect(0, 0, W, H); }   // marges laissées par la réduction de la carte
   ctx.save(); ctx.translate(VIEW.ox, VIEW.oy); ctx.scale(VIEW.k, VIEW.k);   // carte légèrement réduite si fresque
+  if (bgx.isContextLost && bgx.isContextLost()) repairGfx();
   ctx.drawImage(bg, 0, 0, W, H);
   for (const t of towers) for (const id of t.paths) drawPath(t, towers[id], t.owner);
 
@@ -3616,7 +3619,8 @@ function frame(now) {
     if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); updateChrono(); positionHint(); renderPowers(); }
     tutoTick();
   }
-  render();
+  try { render(); }
+  catch (e) { console.error('Erreur de rendu :', e); }   // l'image suivante repart d'une échelle propre
   requestAnimationFrame(frame);
 }
 /* ================= Personnalisation : skins, réglages ================= */
@@ -3825,8 +3829,10 @@ function drawFresco() {
     const c = document.createElement('canvas'); c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
     const g = c.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
     paintFresco(g, civ.key, W, H, VIEW.F);
-    frameCache = { key, c };
+    frameCache = { key, c, g };
+    c.addEventListener('contextlost', () => { frameCache = null; });
   }
+  if (frameCache.g.isContextLost && frameCache.g.isContextLost()) { frameCache = null; return; }
   ctx.drawImage(frameCache.c, 0, 0, W, H);
 }
 // Dessine la bande décorative (épaisseur F) sur les quatre côtés
@@ -4125,6 +4131,19 @@ function drawGodScreen() {
 
 applyCustom();
 window.addEventListener('resize', resize);
+// Perte du contexte graphique : le navigateur peut effacer les canevas (mémoire graphique libérée, application
+// mise en arrière-plan). Décor et fresque sont alors redessinés, et le canevas principal remis à l'échelle.
+let gfxRepair = 0;
+let gfxLast = 0;
+function repairGfx() {
+  if (performance.now() - gfxLast < 1000) return;    // au plus une reconstruction par seconde
+  gfxLast = performance.now();
+  cancelAnimationFrame(gfxRepair); gfxRepair = requestAnimationFrame(() => { frameCache = null; resize(); });
+}
+cv.addEventListener('contextrestored', repairGfx);
+bg.addEventListener('contextrestored', repairGfx);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) repairGfx(); });
+window.addEventListener('pageshow', repairGfx);
 const mq = matchMedia('(prefers-color-scheme: dark)');
 if (mq.addEventListener) mq.addEventListener('change', buildBg);
 resize();
@@ -4172,7 +4191,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_124';
+const APP_VERSION = '20261025_128';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
