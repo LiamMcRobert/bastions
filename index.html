@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_134)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_136)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -188,10 +188,11 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #tuto p{margin:0 0 8px;font-size:16px;line-height:1.4}
 #tuto .tbtns{display:flex;gap:8px}
 #tuto .tbtns button{flex:1;margin:0;min-height:46px}
-#powers{position:absolute;right:6px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:8px;pointer-events:none}
-.pbtn{pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:1px;width:86px;padding:6px 4px;border-radius:14px;
-  border:2px solid var(--line);background:var(--panel);color:var(--panel-ink);font-size:11px;font-weight:800;line-height:1.15;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+#powers{position:absolute;left:0;right:0;bottom:24px;z-index:3;display:flex;flex-direction:row;justify-content:center;gap:8px;pointer-events:none}
+.pbtn{pointer-events:auto;display:flex;flex-direction:row;align-items:center;gap:6px;height:46px;max-width:48%;padding:0 10px;border-radius:14px;
+  border:2px solid var(--line);background:var(--panel);color:var(--panel-ink);font-size:12px;font-weight:800;line-height:1.1;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden}
 .pbtn .pi{font-size:20px;line-height:1}
+.pbtn .pn{display:flex;flex-direction:column;overflow:hidden;text-overflow:ellipsis}
 .pbtn small{font-size:11px;font-weight:700;color:var(--muted)}
 .pbtn.god{border-color:#f2b705}
 .pbtn.active{border-color:var(--accent);background:var(--accent);color:#fff}
@@ -3811,10 +3812,15 @@ function godProgress() {
 /* ================= Fresque de civilisation autour de la carte et filtres des pouvoirs ================= */
 // La carte est légèrement réduite (VIEW) pour laisser la place à la fresque sans rien cacher du jeu.
 const VIEW = { k: 1, ox: 0, oy: 0, F: 0 };
+// Bandeau inférieur réservé aux boutons de pouvoir : la carte est placée au-dessus, ils ne la recouvrent jamais
+const POWER_BAR = 60;
 function updateView() {
   const F = civ && state !== 'menu' ? Math.max(12, Math.min(22, Math.round(Math.min(W, H) * 0.045))) : 0;
-  VIEW.F = F; VIEW.k = F ? Math.min((W - 2 * F) / W, (H - 2 * F) / H) : 1;
-  VIEW.ox = (W - W * VIEW.k) / 2; VIEW.oy = (H - H * VIEW.k) / 2;
+  const B = civ && state !== 'menu' && (civ.power || civ.god) ? POWER_BAR : 0;
+  VIEW.F = F; VIEW.B = B;
+  VIEW.k = F || B ? Math.min((W - 2 * F) / W, (H - 2 * F - B) / H) : 1;
+  VIEW.ox = (W - W * VIEW.k) / 2; VIEW.oy = F + (H - 2 * F - B - H * VIEW.k) / 2;
+  if (B) $('powers').style.bottom = (F + 6) + 'px';
 }
 const toScreen = (x, y) => ({ x: VIEW.ox + x * VIEW.k, y: VIEW.oy + y * VIEW.k });
 let frameCache = null;
@@ -3917,14 +3923,14 @@ function renderPowers() {
   b1.classList.toggle('hidden', !civ.power);
   b1.disabled = civ.used;
   b1.classList.toggle('active', act);
-  b1.innerHTML = '<span class="pi">' + pw.icon + '</span><span>' + pw.name + '</span><small>'
-    + (act ? Math.ceil(civ.until - clock) + ' s' : civ.used ? 'utilisé' : 'prêt') + '</small>';
+  b1.innerHTML = '<span class="pi">' + pw.icon + '</span><span class="pn"><span>' + pw.name + '</span><small>'
+    + (act ? Math.ceil(civ.until - clock) + ' s' : civ.used ? 'utilisé' : 'prêt') + '</small></span>';
   b2.classList.toggle('hidden', !civ.god);
   if (civ.god) {
     const g = civ.f.god, pr = godProgress();
     b2.disabled = civ.godUsed || !pr.ready;
-    b2.innerHTML = '<span class="pi">✨</span><span>' + g.name + '</span><small>'
-      + (civ.godUsed ? 'utilisé' : pr.ready ? 'prêt' : pr.have + '/' + pr.need) + '</small>';
+    b2.innerHTML = '<span class="pi">✨</span><span class="pn"><span>' + g.name + '</span><small>'
+      + (civ.godUsed ? 'utilisé' : pr.ready ? 'prêt' : pr.have + '/' + pr.need) + '</small></span>';
   }
 }
 $('btnPower').onclick = () => {
@@ -4174,7 +4180,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_134';
+const APP_VERSION = '20261025_136';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
