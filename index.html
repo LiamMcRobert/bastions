@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_120)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_122)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -3734,14 +3734,14 @@ $('segSpeed').addEventListener('click', e => {
    chaque pouvoir de civilisation ≈ 15 à 18 s d'avantage. */
 const CIV_STARS = { passive: [15, 30, 45], power: 35, god: 50 };
 const CIVS = {
-  amer: { name: 'Amérindiens', icon: '🪶', pct: [4, 8, 12],
+  amer: { name: 'Amérindiens', icon: '🪶', pct: [3, 6, 10],
     passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
     factions: {
       maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 40, desc: '40 s : tes unités se déplacent deux fois plus vite' },
         god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'conq', need: 5, pick: { n: 3, who: 'enemy' } } },
       azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 30, desc: '30 s : tes unités ont 1 chance sur 3 de survivre à un combat' },
         god: { name: 'Quetzalcoatl', desc: '+20 de capacité et +20 défenseurs pour 3 de tes tours', cond: 'conq', need: 5, pick: { n: 3, who: 'own' } } } } },
-  nord: { name: 'Nordiques', icon: '🛡️', pct: [3, 6, 10],
+  nord: { name: 'Nordiques', icon: '🛡️', pct: [4, 8, 12],
     passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
     factions: {
       viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, desc: '15 s : tes unités envoyées en valent 2' },
@@ -4165,7 +4165,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_120';
+const APP_VERSION = '20261025_122';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
