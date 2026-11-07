@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_136)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_138)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -589,7 +589,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
-          <li>Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Pendant un pouvoir de civilisation, la carte se teinte : bleu pour la vitesse ou la production, rouge pour la force, vert pour la survie. Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.</li>
+          <li>Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Les pouvoirs de civilisation sont disponibles après 30 s de partie ; pendant leur effet, la carte se teinte en bleu (vitesse) ou en rouge (puissance des unités). Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.</li>
           <li>Ta progression reste enregistrée dans ce navigateur.</li>
         </ul>
         <button class="primary" id="btnTutoRules">Revoir le tutoriel</button>
@@ -922,7 +922,7 @@ const EN = {
 "Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.": "Scoreboards: medals (gold, silver, bronze) across the whole campaign, with stars shown for reference (button at the bottom of Campaign), and medals of the daily challenges of the last 7 days (button at the bottom of Challenges). Ranked like the Olympic Games.",
 "Personnalisation : 21 skins de tours (plus un skin réservé à chaque civilisation) se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Settings: 21 tower skins (plus one reserved for each civilization) unlock with stars (all at 45 stars). You also manage your account (Login and code), music, speed and the online ranking there. The flag at the top of the menu switches the language (French or English).",
 "Ta progression reste enregistrée dans ce navigateur.": "Your progress stays saved in this browser.",
-"Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Pendant un pouvoir de civilisation, la carte se teinte : bleu pour la vitesse ou la production, rouge pour la force, vert pour la survie. Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.": "Civilizations (tech-tree tab, from 15 stars): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans), each with its own fresco around the map. During a civilization power, the map is tinted: blue for speed or production, red for strength, green for survival. Passive power at 15, 30 and 45 stars; civilization power at 35 stars and divine power at 50, each usable once per game with the buttons at the bottom of the screen. Computers have no civilization.",
+"Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Les pouvoirs de civilisation sont disponibles après 30 s de partie ; pendant leur effet, la carte se teinte en bleu (vitesse) ou en rouge (puissance des unités). Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.": "Civilizations (tech-tree tab, from 15 stars): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans), each with its own fresco around the map. Civilization powers become available after 30 s of play; while active, the map is tinted blue (speed) or red (unit strength). Passive power at 15, 30 and 45 stars; civilization power at 35 stars and divine power at 50, each usable once per game with the buttons at the bottom of the screen. Computers have no civilization.",
 "Revoir le tutoriel": "Replay the tutorial",
 "Top 3 en ligne": "Online top 3",
 "Ton meilleur": "Your best",
@@ -1195,7 +1195,7 @@ const CIV_COND_EN = s => s.replace(/^(\d+) tours conquises$/, '$1 towers conquer
   .replace(/^(\d+) de tes tours à 40 défenseurs ou plus en même temps$/, '$1 of your towers at 40 defenders or more at the same time');
 const CIV_PASSIVE_EN = s => s.replace(/^\+([\d /]+) % de production pour tes tours à 30 défenseurs ou plus$/, '+$1% production for your towers at 30 defenders or more')
   .replace(/^\+([\d /]+) % de production pour tes tours des niveaux 1 à 4$/, '+$1% production for your level 1 to 4 towers')
-  .replace(/^\+([\d /]+) % de croissance interne pour tes tours qui envoient des troupes$/, '+$1% internal growth for your towers that send troops');
+  .replace(/^\+([\d /]+) % de production pour toutes tes tours$/, '+$1% production for all your towers');
 EN_RX.push(
   [/^(.+) \(([\d /]+) ★\)$/, m => (trFull(m[1]) || CIV_PASSIVE_EN(m[1])) + ' (' + m[2] + ' ★)'],
   [/^(\+?\d+ % .+)$/, m => { const t = CIV_PASSIVE_EN(m[1]); return t !== m[1] ? t : null; }],
@@ -1219,7 +1219,7 @@ Object.assign(EN, {
   'Civilisations': 'Civilizations', '✓ débloqué': '✓ unlocked', 'Débloqué à 15 étoiles': 'Unlocks at 15 stars',
   'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
   'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small and medium towers produce more, ideal for expanding fast.',
-  'Bâtisseurs méthodiques : leurs tours continuent de grossir pendant qu’elles envoient des troupes.': 'Methodical builders: their towers keep growing while they send troops.',
+  'Bâtisseurs prospères : toutes leurs tours produisent davantage.': 'Prosperous builders: all their towers produce more.',
   'Vitesse et frappes ciblées.': 'Speed and targeted strikes.', 'Résistance au combat et croissance.': 'Combat resilience and growth.',
   'Assaut brutal et ruse.': 'Brutal assault and cunning.', 'Production et colère du ciel.': 'Production and the wrath of the sky.',
   'Grands chantiers et maîtrise de la mort.': 'Great works and mastery of death.', 'Discipline et ingénierie militaire.': 'Discipline and military engineering.'
@@ -1236,6 +1236,12 @@ Object.assign(EN, {
   'GitHub ne répond pas : tu peux jouer hors ligne avec la version installée.': 'GitHub isn\u2019t responding: you can play offline with the installed version.',
   'GitHub injoignable : tu peux jouer hors ligne avec la version installée.': 'GitHub unreachable: you can play offline with the installed version.'
 });
+Object.assign(EN, {
+  '15 s : puissance de tes unités +50 %': '15 s: your units\u2019 strength +50%', '30 s : tes unités se déplacent deux fois plus vite': '30 s: your units move twice as fast',
+  'Tue toutes les unités adverses sur le champ de bataille': 'Kills all enemy units on the battlefield',
+  'Puissance au combat et croissance.': 'Combat strength and growth.', 'Vitesse et colère du ciel.': 'Speed and the wrath of the sky.'
+});
+EN_RX.push([/^dans (\d+) s$/, m => 'in ' + m[1] + ' s']);
 function trFull(k) {
   if (EN[k] != null) return EN[k];
   for (const [re, f] of EN_RX) { const m = re.exec(k); if (m) { const r = f(m); if (r != null) return r; } }
@@ -2346,8 +2352,7 @@ function update(dt) {
     // au rythme d'une tour classique (sinon, une fois prise, elle restait trop longtemps vulnérable)
     const rate = (armored && t.paths.length ? 1 / armorInterval(t.stock) : prodRate(level(t))) * (t.owner < 0 ? RIPOSTE_EFF : 1)
       * (t.kind !== 'tower' ? SPECIAL_BONUS : 1)   // bâtiments spéciaux : +20 % de production
-      * civProd(t);                                 // civilisation du joueur (passifs, Guèdes)
-    const builders = t.owner === 0 && civOn('egypte');   // Constructeurs : production interne doublée
+      * civProd(t);                                 // civilisation du joueur (passifs)
     if (t.paths.length) {
       t.acc += rate * dt;
       while (t.acc >= 1) {
@@ -2356,14 +2361,8 @@ function update(dt) {
         units.push({ from: t.id, to, owner: t.owner, p: 0, hp: (armored ? ARMOR : 1) * (t.owner === 0 ? civValue() : 1), big: armored,
           off: armored ? 0 : (Math.random() - 0.5) * baseR * 0.35 });
       }
-      // croissance interne d'une tour qui envoie : Constructeurs (100 %) et passif méditerranéen (3 / 5 / 7 %)
-      const keep = (builders ? 1 : 0) + (t.owner === 0 && civ && civ.key === 'med' ? civ.pct : 0);
-      if (keep && t.stock < t.cap) {
-        t.iacc = (t.iacc || 0) + rate * keep * dt;
-        while (t.iacc >= 1 && t.stock < t.cap) { t.iacc -= 1; t.stock++; }
-      }
     } else if (t.stock < t.cap) {
-      t.acc += rate * (builders ? 2 : 1) * dt;
+      t.acc += rate * dt;
       while (t.acc >= 1 && t.stock < t.cap) { t.acc -= 1; t.stock++; }
       if (t.stock >= t.cap) t.acc = 0;
     } else t.acc = 0;
@@ -2475,8 +2474,7 @@ function collide() {
       const x = g.f[i], y = g.r[j];
       if (x.p + y.p < 1 || x.owner === y.owner) break;
       const m = Math.min(x.hp, y.hp);              // un blindé encaisse jusqu'à 10 unités
-      const sx = civSurvive(x), sy = civSurvive(y); // Guerriers Jaguars, Légion : survie au combat
-      if (!sx) x.hp -= m; if (!sy) y.hp -= m; civLoss((x.owner === 0 && !sx ? m : 0) + (y.owner === 0 && !sy ? m : 0));
+      x.hp -= m; y.hp -= m; civLoss((x.owner === 0 ? m : 0) + (y.owner === 0 ? m : 0));
       if (x.hp <= 0) { x.dead = true; i++; }
       if (y.hp <= 0) { y.dead = true; j++; }
     }
@@ -2487,7 +2485,7 @@ function collide() {
   for (const u of units) {
     if (u.dead) continue;
     const p = unitPos(u);
-    u.cx = p.x; u.cy = p.y; u.r = u.big ? ur * (1.4 + u.hp / ARMOR) : ur;
+    u.cx = p.x; u.cy = p.y; u.r = u.big ? ur * (1.4 + u.hp / ARMOR) : ur * (u.hp > 1 ? 1.25 : 1);   // unité renforcée : un peu plus grosse
     const k = Math.floor(p.x / cell) * 4096 + Math.floor(p.y / cell);
     let arr = grid.get(k); if (!arr) grid.set(k, arr = []);
     arr.push(u); live.push(u);
@@ -2501,8 +2499,8 @@ function collide() {
         for (const v of arr) {
           if (v === u || v.dead || v.owner === u.owner) continue;
           if (Math.hypot(u.cx - v.cx, u.cy - v.cy) > (u.r + v.r) * 1.1) continue;
-          const m = Math.min(u.hp, v.hp), su = civSurvive(u), sv = civSurvive(v);
-          if (!su) u.hp -= m; if (!sv) v.hp -= m; civLoss((u.owner === 0 && !su ? m : 0) + (v.owner === 0 && !sv ? m : 0));
+          const m = Math.min(u.hp, v.hp);
+          u.hp -= m; v.hp -= m; civLoss((u.owner === 0 ? m : 0) + (v.owner === 0 ? m : 0));
           bursts.push({ x: (u.cx + v.cx) / 2, y: (u.cy + v.cy) / 2, life: 1 });
           if (v.hp <= 0) v.dead = true;
           if (u.hp <= 0) { u.dead = true; break; }
@@ -3137,7 +3135,7 @@ function drawTower(t) {
     ctx.font = `800 ${Math.round(r * 0.72)}px system-ui,-apple-system,sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round';
-    ctx.strokeText(t.stock, x, ty); ctx.fillStyle = '#fff'; ctx.fillText(t.stock, x, ty);
+    ctx.strokeText(Math.ceil(t.stock), x, ty); ctx.fillStyle = '#fff'; ctx.fillText(Math.ceil(t.stock), x, ty);
     const pr = Math.max(1.6, baseR * 0.075), gap = pr * 3, y0 = yb + r * 0.3 + pr * 2;
     ctx.fillStyle = sup ? GOLD_DARK : INK; ctx.globalAlpha = 0.75;
     for (let i = 0; i < lv; i++) { ctx.beginPath(); ctx.arc(x + (i - (lv - 1) / 2) * gap, y0, pr, 0, TAU); ctx.fill(); }
@@ -3213,7 +3211,7 @@ function drawTower(t) {
   ctx.font = `800 ${Math.round(r * 0.72)}px system-ui,-apple-system,sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round';
-  ctx.strokeText(t.stock, x, ty); ctx.fillStyle = '#fff'; ctx.fillText(t.stock, x, ty);
+  ctx.strokeText(Math.ceil(t.stock), x, ty); ctx.fillStyle = '#fff'; ctx.fillText(Math.ceil(t.stock), x, ty);
   // repères de niveau
   const pr = Math.max(1.6, baseR * 0.075), gap = pr * 3, y0 = yb + ry + pr * 3;
   ctx.fillStyle = sup ? GOLD_DARK : INK; ctx.globalAlpha = 0.75;
@@ -3273,7 +3271,7 @@ function drawBarracks(t, c, dk) {
   ctx.font = `800 ${Math.round(s * 0.62)}px system-ui,-apple-system,sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round';
-  ctx.strokeText(t.stock, x, ty); ctx.fillStyle = '#fff'; ctx.fillText(t.stock, x, ty);
+  ctx.strokeText(Math.ceil(t.stock), x, ty); ctx.fillStyle = '#fff'; ctx.fillText(Math.ceil(t.stock), x, ty);
 }
 
 /* ================= HUD et fin de partie ================= */
@@ -3691,11 +3689,11 @@ $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data
 const CIV_INTRO = {
   amer: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.',
   nord: 'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.',
-  med: 'Bâtisseurs méthodiques : leurs tours continuent de grossir pendant qu’elles envoient des troupes.'
+  med: 'Bâtisseurs prospères : toutes leurs tours produisent davantage.'
 };
 const FAC_INTRO = {
-  maya: 'Vitesse et frappes ciblées.', azte: 'Résistance au combat et croissance.',
-  viking: 'Assaut brutal et ruse.', celte: 'Production et colère du ciel.',
+  maya: 'Vitesse et frappes ciblées.', azte: 'Puissance au combat et croissance.',
+  viking: 'Assaut brutal et ruse.', celte: 'Vitesse et colère du ciel.',
   egypte: 'Grands chantiers et maîtrise de la mort.', rome: 'Discipline et ingénierie militaire.'
 };
 const unlockTag = (st, need) => st >= need ? '<span class="ok">✓ débloqué</span>' : '<span class="lock">🔒 ' + need + ' ★</span>';
@@ -3742,26 +3740,26 @@ $('segSpeed').addEventListener('click', e => {
    chaque pouvoir de civilisation ≈ 15 à 18 s d'avantage. */
 const CIV_STARS = { passive: [15, 30, 45], power: 35, god: 50 };
 const CIVS = {
-  amer: { name: 'Amérindiens', icon: '🪶', pct: [3, 6, 10],
+  amer: { name: 'Amérindiens', icon: '🪶', pct: [4, 8, 12],
     passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
     factions: {
-      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 40, desc: '40 s : tes unités se déplacent deux fois plus vite' },
+      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 30, kind: 'speed', desc: '30 s : tes unités se déplacent deux fois plus vite' },
         god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'conq', need: 5, pick: { n: 3, who: 'enemy' } } },
-      azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 30, desc: '30 s : tes unités ont 1 chance sur 3 de survivre à un combat' },
+      azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 15, kind: 'force', desc: '15 s : puissance de tes unités +50 %' },
         god: { name: 'Quetzalcoatl', desc: '+20 de capacité et +20 défenseurs pour 3 de tes tours', cond: 'conq', need: 5, pick: { n: 3, who: 'own' } } } } },
-  nord: { name: 'Nordiques', icon: '🛡️', pct: [4, 8, 12],
+  nord: { name: 'Nordiques', icon: '🛡️', pct: [5, 10, 15],
     passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
     factions: {
-      viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, desc: '15 s : tes unités envoyées en valent 2' },
+      viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, kind: 'force', desc: '15 s : puissance de tes unités +50 %' },
         god: { name: 'Loki', desc: 'Prend possession d’une tour adverse avec sa population', cond: 'dead', need: 200, pick: { n: 1, who: 'enemy' } } },
-      celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 18, desc: '18 s : la production de tes tours est doublée' },
+      celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 30, kind: 'speed', desc: '30 s : tes unités se déplacent deux fois plus vite' },
         god: { name: 'Toutatis', desc: 'Le ciel tombe sur une zone (2 tours adverses au plus) : leur population est divisée par 2 et les unités adverses y sont détruites', cond: 'dead', need: 200, pick: { circle: true } } } } },
-  med: { name: 'Méditerranéens', icon: '🏛️', pct: [3, 5, 7],
-    passive: p => '+' + p + ' % de croissance interne pour tes tours qui envoient des troupes',
+  med: { name: 'Méditerranéens', icon: '🏛️', pct: [3, 6, 9],
+    passive: p => '+' + p + ' % de production pour toutes tes tours',
     factions: {
-      egypte: { name: 'Égyptiens', power: { name: 'Constructeurs', icon: '🧱', dur: 12, desc: '12 s : production interne doublée, même pour les tours qui attaquent' },
-        god: { name: 'Anubis', desc: 'Tue une unité adverse sur deux sur le champ de bataille', cond: 'full', need: 3, pick: null } },
-      rome: { name: 'Romains', power: { name: 'Légion', icon: '🛡', dur: 20, desc: '20 s : tes unités ont 1 chance sur 2 de survivre à un combat' },
+      egypte: { name: 'Égyptiens', power: { name: 'Constructeurs', icon: '🧱', dur: 30, kind: 'speed', desc: '30 s : tes unités se déplacent deux fois plus vite' },
+        god: { name: 'Anubis', desc: 'Tue toutes les unités adverses sur le champ de bataille', cond: 'full', need: 3, pick: null } },
+      rome: { name: 'Romains', power: { name: 'Légion', icon: '🛡', dur: 15, kind: 'force', desc: '15 s : puissance de tes unités +50 %' },
         god: { name: 'Mars', desc: 'Change une de tes tours en bâtiment spécial de ton choix, plein', cond: 'full', need: 3, pick: { n: 1, who: 'own', type: true } } } } }
 };
 const GOD_COND = {
@@ -3786,20 +3784,21 @@ function civStart() {
     power: m.power, god: m.god, until: 0, used: false, godUsed: false, conq: 0, dead: 0 } : null;
   renderPowers();
 }
-const civOn = fac => civ && civ.fac === fac && clock < civ.until;
-// Multiplicateur de production d'une tour du joueur (passifs, Guèdes)
+// Les durées et le délai de 30 s se comptent sur le chronomètre (temps à la vitesse ×1)
+const POWER_DELAY = 30;
+const civActive = () => civ && scoreClock() < civ.until;
+const civOn = kind => civActive() && civ.f.power.kind === kind;
+// Multiplicateur de production d'une tour du joueur (passifs)
 function civProd(t) {
   if (!civ || t.owner !== 0) return 1;
   let k = 1;
   if (civ.key === 'amer' && t.stock >= 30) k += civ.pct;
   if (civ.key === 'nord' && level(t) <= 4) k += civ.pct;
-  if (civOn('celte')) k *= 2;
+  if (civ.key === 'med') k += civ.pct;
   return k;
 }
-const civSpeed = u => u.owner === 0 && civOn('maya') ? 2 : 1;
-const civValue = () => civOn('viking') ? 2 : 1;
-// Chance de survivre à un combat (Guerriers Jaguars, Légion)
-const civSurvive = u => u.owner === 0 && (civOn('azte') && Math.random() < 1 / 3 || civOn('rome') && Math.random() < 0.5);
+const civSpeed = u => u.owner === 0 && civOn('speed') ? 2 : 1;   // Guerriers Aigles, Guèdes, Constructeurs
+const civValue = () => civOn('force') ? 1.5 : 1;                 // Berserkers, Guerriers Jaguars, Légion : +50 %
 const civLoss = n => { if (civ && n > 0) civ.dead += n; };   // pertes du joueur (pouvoir divin nordique)
 const civConquest = () => { if (civ) civ.conq++; };
 function godProgress() {
@@ -3901,10 +3900,10 @@ function paintFresco(g, kind, W, H, F) {
   g.restore();
 }
 // Filtres des pouvoirs de civilisation : bleu (vitesse, production), rouge (force), vert (survie)
-const POWER_TINT = { maya: '60,140,255', celte: '60,140,255', egypte: '60,140,255', viking: '230,50,40', azte: '40,190,90', rome: '40,190,90' };
+const POWER_TINT = { speed: '60,140,255', force: '230,50,40' };   // bleu : vitesse ; rouge : puissance des unités
 function drawPowerTint() {
-  if (!civ || clock >= civ.until || state !== 'play') return;
-  const col = POWER_TINT[civ.fac]; if (!col) return;
+  if (!civActive() || state !== 'play') return;
+  const col = POWER_TINT[civ.f.power.kind]; if (!col) return;
   ctx.save();
   ctx.fillStyle = 'rgba(' + col + ',.12)'; ctx.fillRect(0, 0, W, H);
   const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.6);
@@ -3918,13 +3917,13 @@ function renderPowers() {
   const box = $('powers');
   if (!civ || (!civ.power && !civ.god) || state !== 'play' || pick) { box.classList.add('hidden'); return; }
   box.classList.remove('hidden');
-  const pw = civ.f.power, act = clock < civ.until;
+  const pw = civ.f.power, now = scoreClock(), act = now < civ.until, wait = Math.ceil(POWER_DELAY - now);
   const b1 = $('btnPower'), b2 = $('btnGod');
   b1.classList.toggle('hidden', !civ.power);
-  b1.disabled = civ.used;
+  b1.disabled = civ.used || wait > 0;              // disponible 30 s après le début de la partie
   b1.classList.toggle('active', act);
   b1.innerHTML = '<span class="pi">' + pw.icon + '</span><span class="pn"><span>' + pw.name + '</span><small>'
-    + (act ? Math.ceil(civ.until - clock) + ' s' : civ.used ? 'utilisé' : 'prêt') + '</small></span>';
+    + (act ? Math.ceil(civ.until - now) + ' s' : civ.used ? 'utilisé' : wait > 0 ? 'dans ' + wait + ' s' : 'prêt') + '</small></span>';
   b2.classList.toggle('hidden', !civ.god);
   if (civ.god) {
     const g = civ.f.god, pr = godProgress();
@@ -3934,8 +3933,8 @@ function renderPowers() {
   }
 }
 $('btnPower').onclick = () => {
-  if (!civ || civ.used || state !== 'play' || paused) return;
-  civ.used = true; civ.until = clock + civ.f.power.dur;
+  if (!civ || civ.used || state !== 'play' || paused || scoreClock() < POWER_DELAY) return;
+  civ.used = true; civ.until = scoreClock() + civ.f.power.dur;
   toast(civ.f.power.name + ' : ' + civ.f.power.desc.replace(/^\d+ s : /, '') + ' !');
   renderPowers();
 };
@@ -4040,12 +4039,12 @@ function applyGod(sel) {
           if (Math.hypot(p.x - c.x, p.y - c.y) <= c.r) { u.dead = true; n += u.hp; }
         }
         bursts.push({ x: c.x, y: c.y, life: 1, big: c.r });
+        addFx({ type: 'shade', x: c.x, y: c.y, r: c.r, dur: 0.5 });   // ombre du disque maintenue 0,5 s
       } });
       break;
     }
     case 'egypte': {                               // Anubis : champ de bataille teinté de rouge
-      let k = 0, n = 0;
-      for (const u of units) if (!u.dead && u.owner !== 0 && (k++ % 2 === 0)) { u.dead = true; n += u.hp; }
+      for (const u of units) if (!u.dead && u.owner !== 0) u.dead = true;
       addFx({ type: 'red', dur: 1 }); break;
     }
     case 'rome': {                                 // Mars : aura dorée (bonus)
@@ -4094,6 +4093,9 @@ function drawGodFx() {
         ctx.fillStyle = `rgba(190,180,215,${0.45 * a})`; ctx.beginPath(); ctx.arc(x - pr * 0.25, y - pr * 0.3, pr * 0.55, 0, TAU); ctx.fill();
       }
       ctx.restore();
+    } else if (f.type === 'shade') {
+      ctx.save(); ctx.fillStyle = `rgba(20,30,50,${0.45 * (1 - p * 0.6)})`;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, TAU); ctx.fill(); ctx.restore();
     } else if (f.type === 'disc') {
       const e = p * p, R0 = Math.hypot(W, H), r = R0 + (f.r - R0) * e;   // le disque « tombe » en se resserrant
       ctx.save();
@@ -4180,7 +4182,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_136';
+const APP_VERSION = '20261025_138';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
