@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_112)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_120)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -218,6 +218,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #civGrid .lock{color:var(--muted);font-weight:800;font-size:12px}
 #civGrid .fac:disabled{opacity:.5}
 .civtag{font-size:11px;font-weight:800;color:var(--accent)}
+#hud.hudhide{visibility:hidden}
 #pre{z-index:8}
 #board{z-index:8}
 .board{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:15px}
@@ -586,7 +587,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
-          <li>Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains). Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.</li>
+          <li>Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Pendant un pouvoir de civilisation, la carte se teinte : bleu pour la vitesse ou la production, rouge pour la force, vert pour la survie. Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.</li>
           <li>Ta progression reste enregistrée dans ce navigateur.</li>
         </ul>
         <button class="primary" id="btnTutoRules">Revoir le tutoriel</button>
@@ -919,7 +920,7 @@ const EN = {
 "Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.": "Scoreboards: medals (gold, silver, bronze) across the whole campaign, with stars shown for reference (button at the bottom of Campaign), and medals of the daily challenges of the last 7 days (button at the bottom of Challenges). Ranked like the Olympic Games.",
 "Personnalisation : 21 skins de tours (plus un skin réservé à chaque civilisation) se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Settings: 21 tower skins (plus one reserved for each civilization) unlock with stars (all at 45 stars). You also manage your account (Login and code), music, speed and the online ranking there. The flag at the top of the menu switches the language (French or English).",
 "Ta progression reste enregistrée dans ce navigateur.": "Your progress stays saved in this browser.",
-"Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains). Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.": "Civilizations (tech-tree tab, from 15 stars): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans). Passive power at 15, 30 and 45 stars; civilization power at 35 stars and divine power at 50, each usable once per game with the buttons at the bottom of the screen. Computers have no civilization.",
+"Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Pendant un pouvoir de civilisation, la carte se teinte : bleu pour la vitesse ou la production, rouge pour la force, vert pour la survie. Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Les ordinateurs n’ont pas de civilisation.": "Civilizations (tech-tree tab, from 15 stars): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans), each with its own fresco around the map. During a civilization power, the map is tinted: blue for speed or production, red for strength, green for survival. Passive power at 15, 30 and 45 stars; civilization power at 35 stars and divine power at 50, each usable once per game with the buttons at the bottom of the screen. Computers have no civilization.",
 "Revoir le tutoriel": "Replay the tutorial",
 "Top 3 en ligne": "Online top 3",
 "Ton meilleur": "Your best",
@@ -1188,11 +1189,11 @@ Object.assign(EN, {
   'Tour de tir': 'Fire tower', 'Caserne': 'Barracks'
 });
 const CIV_COND_EN = s => s.replace(/^(\d+) tours conquises$/, '$1 towers conquered')
-  .replace(/^(\d+) unités tombées au combat \(tous joueurs\)$/, '$1 units fallen in battle (all players)')
+  .replace(/^(\d+) de tes unités perdues \(au combat ou dans tes tours\)$/, '$1 of your units lost (in battle or in your towers)')
   .replace(/^(\d+) de tes tours à 40 défenseurs ou plus en même temps$/, '$1 of your towers at 40 defenders or more at the same time');
 const CIV_PASSIVE_EN = s => s.replace(/^\+([\d /]+) % de production pour tes tours à 30 défenseurs ou plus$/, '+$1% production for your towers at 30 defenders or more')
   .replace(/^\+([\d /]+) % de production pour tes tours des niveaux 1 à 4$/, '+$1% production for your level 1 to 4 towers')
-  .replace(/^([\d /]+) % de chance qu’une de tes tours ignore une attaque$/, '$1% chance that one of your towers ignores an attack');
+  .replace(/^\+([\d /]+) % de croissance interne pour tes tours qui envoient des troupes$/, '+$1% internal growth for your towers that send troops');
 EN_RX.push(
   [/^(.+) \(([\d /]+) ★\)$/, m => (trFull(m[1]) || CIV_PASSIVE_EN(m[1])) + ' (' + m[2] + ' ★)'],
   [/^(\+?\d+ % .+)$/, m => { const t = CIV_PASSIVE_EN(m[1]); return t !== m[1] ? t : null; }],
@@ -1205,6 +1206,7 @@ EN_RX.push(
   [/^(.+) : (.+) !$/, m => { if (!EN[m[1]]) return null; const k = Object.keys(EN).find(x => x.replace(/^\d+ s : /, '') === m[2]);
     return WX(m[1]) + ': ' + (EN[m[2]] || (k ? EN[k] : m[2]).replace(/^\d+ s: /, '')) + '!'; }],
   [/^(Tezcatlipoca|Quetzalcoatl|Loki|Toutatis|Anubis|Mars) !$/, m => m[1] + '!'],
+  [/^(Tezcatlipoca|Quetzalcoatl|Loki|Toutatis|Anubis|Mars) intervient$/, m => m[1] + ' intervenes'],
   [/^(.+) : trace un cercle en glissant le doigt \(2 tours adverses au plus\)( — (\d+) tours? adverses? dans la zone)?$/,
     m => m[1] + ': draw a circle by sliding your finger (2 enemy towers at most)' + (m[2] ? ' — ' + m[3] + ' enemy tower' + (+m[3] > 1 ? 's' : '') + ' in the area' : '')],
   [/^(.+) : choisis (\d+) (tours? adverses?|de tes tours classiques|de tes tours) \((\d+)\/(\d+)\)(, puis le type de bâtiment)?$/,
@@ -1215,7 +1217,7 @@ Object.assign(EN, {
   'Civilisations': 'Civilizations', '✓ débloqué': '✓ unlocked', 'Débloqué à 15 étoiles': 'Unlocks at 15 stars',
   'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
   'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small and medium towers produce more, ideal for expanding fast.',
-  'Défenseurs aguerris : leurs tours ignorent parfois les attaques ennemies.': 'Seasoned defenders: their towers sometimes ignore enemy attacks.',
+  'Bâtisseurs méthodiques : leurs tours continuent de grossir pendant qu’elles envoient des troupes.': 'Methodical builders: their towers keep growing while they send troops.',
   'Vitesse et frappes ciblées.': 'Speed and targeted strikes.', 'Résistance au combat et croissance.': 'Combat resilience and growth.',
   'Assaut brutal et ruse.': 'Brutal assault and cunning.', 'Production et colère du ciel.': 'Production and the wrath of the sky.',
   'Grands chantiers et maîtrise de la mort.': 'Great works and mastery of death.', 'Discipline et ingénierie militaire.': 'Discipline and military engineering.'
@@ -1667,8 +1669,8 @@ function buildGame(cfg) {
 function positionHint() {
   const el = $('hint');
   if (el.classList.contains('hidden')) return;
-  const t = towers.find(x => x.owner === 0); if (!t) return;
-  const r = rad(t), h = r * (0.5 + 0.12 * level(t)), ry = r * 0.45;
+  const t0 = towers.find(x => x.owner === 0); if (!t0) return;
+  const t = toScreen(t0.x, t0.y), r = rad(t0) * VIEW.k, h = r * (0.5 + 0.12 * level(t0)), ry = r * 0.45;
   const below = t.y + h * 0.45 + ry + 10, above = t.y - h * 0.55 - ry - r * 0.3 - 6;
   const w = el.offsetWidth, hh = el.offsetHeight;
   const left = Math.max(8, Math.min(W - w - 8, t.x - w / 2));
@@ -2346,8 +2348,10 @@ function update(dt) {
         units.push({ from: t.id, to, owner: t.owner, p: 0, hp: (armored ? ARMOR : 1) * (t.owner === 0 ? civValue() : 1), big: armored,
           off: armored ? 0 : (Math.random() - 0.5) * baseR * 0.35 });
       }
-      if (builders && t.stock < t.cap) {             // la tour qui attaque produit aussi en interne
-        t.iacc = (t.iacc || 0) + rate * dt;
+      // croissance interne d'une tour qui envoie : Constructeurs (100 %) et passif méditerranéen (3 / 5 / 7 %)
+      const keep = (builders ? 1 : 0) + (t.owner === 0 && civ && civ.key === 'med' ? civ.pct : 0);
+      if (keep && t.stock < t.cap) {
+        t.iacc = (t.iacc || 0) + rate * keep * dt;
         while (t.iacc >= 1 && t.stock < t.cap) { t.iacc -= 1; t.stock++; }
       }
     } else if (t.stock < t.cap) {
@@ -2391,8 +2395,7 @@ function arrive(u) {
     else if (src.owner === u.owner && t.aggr.length < MAX_PATHS
         && (t.kind === 'artillery' || canLink(t, src))) t.aggr.push({ id: src.id, owner: u.owner, last: clock });
   }
-  if (t.owner !== u.owner && civDodge(t)) { t.hit = 1; civDead(v); return; }   // Méditerranéens : attaque ignorée
-  if (t.owner !== u.owner) civDead(2 * Math.min(v, t.stock));   // attaquants et défenseurs tombés
+  if (t.owner !== u.owner && (u.owner === 0 || t.owner === 0)) civLoss(Math.min(v, t.stock));   // tes attaquants ou tes défenseurs tombés
   if (t.owner === u.owner) t.stock = Math.min(t.cap, t.stock + v);
   else if (v <= t.stock) { t.stock -= v; t.hit = 1; }
   else {
@@ -2427,7 +2430,7 @@ function fire(t, aggr) {
   }
   if (best) {
     if (--best.hp <= 0) best.dead = true;
-    civDead(1);
+    if (best.owner === 0) civLoss(1);
   } else {
     bd = R;
     for (const o of towers) {
@@ -2437,8 +2440,7 @@ function fire(t, aggr) {
       if (d <= bd) { bd = d; best = o; }
     }
     if (!best) return false;
-    if (civDodge(best)) { t.aim = Math.atan2(best.y - t.y, best.x - t.x); return true; }   // tir ignoré
-    best.stock--; best.hit = 1; pos = { x: best.x, y: best.y }; civDead(1);
+    best.stock--; best.hit = 1; pos = { x: best.x, y: best.y }; if (best.owner === 0) civLoss(1);
     if (t.owner < 0 && best.stock <= 0) {          // riposte neutre : la tour agresseuse redevient grise, à 10
       if (best.owner === 0) lostTower = true;
       best.owner = -1; best.stock = Math.min(best.cap, 10); best.paths = []; best.acc = 0; best.fx = 1; best.aggr = [];
@@ -2466,7 +2468,7 @@ function collide() {
       if (x.p + y.p < 1 || x.owner === y.owner) break;
       const m = Math.min(x.hp, y.hp);              // un blindé encaisse jusqu'à 10 unités
       const sx = civSurvive(x), sy = civSurvive(y); // Guerriers Jaguars, Légion : survie au combat
-      if (!sx) x.hp -= m; if (!sy) y.hp -= m; civDead((sx ? 0 : m) + (sy ? 0 : m));
+      if (!sx) x.hp -= m; if (!sy) y.hp -= m; civLoss((x.owner === 0 && !sx ? m : 0) + (y.owner === 0 && !sy ? m : 0));
       if (x.hp <= 0) { x.dead = true; i++; }
       if (y.hp <= 0) { y.dead = true; j++; }
     }
@@ -2492,7 +2494,7 @@ function collide() {
           if (v === u || v.dead || v.owner === u.owner) continue;
           if (Math.hypot(u.cx - v.cx, u.cy - v.cy) > (u.r + v.r) * 1.1) continue;
           const m = Math.min(u.hp, v.hp), su = civSurvive(u), sv = civSurvive(v);
-          if (!su) u.hp -= m; if (!sv) v.hp -= m; civDead((su ? 0 : m) + (sv ? 0 : m));
+          if (!su) u.hp -= m; if (!sv) v.hp -= m; civLoss((u.owner === 0 && !su ? m : 0) + (v.owner === 0 && !sv ? m : 0));
           bursts.push({ x: (u.cx + v.cx) / 2, y: (u.cy + v.cy) / 2, life: 1 });
           if (v.hp <= 0) v.dead = true;
           if (u.hp <= 0) { u.dead = true; break; }
@@ -2564,6 +2566,9 @@ function aiThink(pl) {
 
 /* ================= Rendu ================= */
 function render() {
+  updateView();
+  if (VIEW.F) { ctx.fillStyle = LAND.ground; ctx.fillRect(0, 0, W, H); }   // marges laissées par la réduction de la carte
+  ctx.save(); ctx.translate(VIEW.ox, VIEW.oy); ctx.scale(VIEW.k, VIEW.k);   // carte légèrement réduite si fresque
   ctx.drawImage(bg, 0, 0, W, H);
   for (const t of towers) for (const id of t.paths) drawPath(t, towers[id], t.owner);
 
@@ -2644,9 +2649,6 @@ function render() {
     }
     ctx.restore();
   }
-  if (civ && clock < civ.until && state === 'play') { // pouvoir de civilisation actif : liseré doré autour de l'écran
-    ctx.save(); ctx.strokeStyle = 'rgba(242,183,5,.55)'; ctx.lineWidth = 8; ctx.strokeRect(4, 4, W - 8, H - 8); ctx.restore();
-  }
   // Tutoriel : cercle pulsant autour de l'élément expliqué
   const tt = tutoTarget();
   if (tt) {
@@ -2654,6 +2656,11 @@ function render() {
     ctx.save(); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.globalAlpha = 0.6 + 0.4 * k;
     ctx.beginPath(); ctx.arc(tt.x, tt.y, rad(tt) + 14 + 6 * k, 0, TAU); ctx.stroke(); ctx.restore();
   }
+  drawGodFx();                                     // animations des pouvoirs divins sur la carte
+  ctx.restore();                                   // fin du dessin de la carte
+  drawFresco();                                    // fresque de la civilisation
+  drawPowerTint();                                 // filtre du pouvoir de civilisation actif
+  drawGodScreen();                                 // filtre d'Anubis et inscription du dieu
   if (state === 'play' && paused && !tuto && !pick) {
     ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -3295,7 +3302,7 @@ function nextExists() {
 }
 function endGame(win) {
   if (tuto) endTuto(true);
-  if (pick) { pick = null; $('pick').classList.add('hidden'); }
+  if (pick) { pick = null; $('pick').classList.add('hidden'); $('hud').classList.remove('hudhide'); }
   $('powers').classList.add('hidden');
   $('hint').classList.add('hidden');
   state = 'over'; drag = null; updateChips();
@@ -3406,8 +3413,8 @@ function renderCampaign() {
 
 function toMenu(tab) {
   if (tuto) endTuto(false);
-  if (pick) { pick = null; $('pick').classList.add('hidden'); }
-  $('powers').classList.add('hidden');
+  if (pick) { pick = null; $('pick').classList.add('hidden'); $('hud').classList.remove('hudhide'); }
+  $('powers').classList.add('hidden'); godFx = [];
   // quitter un défi en cours le classe comme abandonné dans l'historique
   if (current && current.kind === 'defi' && current.entry.status === 'en cours') { current.entry.status = 'abandonné'; saveHist(); }
   state = 'menu'; towers = []; units = []; drag = null; paused = false;
@@ -3454,7 +3461,7 @@ function addPath(a, b) {
   a.paths.push(b.id);
   if (!hintShown) { hintShown = true; $('hint').classList.add('hidden'); }
 }
-const ptOf = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+const ptOf = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - VIEW.ox) / VIEW.k, y: (e.clientY - r.top - VIEW.oy) / VIEW.k }; };
 
 cv.addEventListener('pointerdown', e => {
   if (pick) {                                      // pouvoir divin : choix des tours ou tracé de la zone
@@ -3676,7 +3683,7 @@ $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data
 const CIV_INTRO = {
   amer: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.',
   nord: 'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.',
-  med: 'Défenseurs aguerris : leurs tours ignorent parfois les attaques ennemies.'
+  med: 'Bâtisseurs méthodiques : leurs tours continuent de grossir pendant qu’elles envoient des troupes.'
 };
 const FAC_INTRO = {
   maya: 'Vitesse et frappes ciblées.', azte: 'Résistance au combat et croissance.',
@@ -3738,11 +3745,11 @@ const CIVS = {
     passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
     factions: {
       viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, desc: '15 s : tes unités envoyées en valent 2' },
-        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse avec sa population', cond: 'dead', need: 400, pick: { n: 1, who: 'enemy' } } },
+        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse avec sa population', cond: 'dead', need: 200, pick: { n: 1, who: 'enemy' } } },
       celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 18, desc: '18 s : la production de tes tours est doublée' },
-        god: { name: 'Toutatis', desc: 'Le ciel tombe sur une zone (2 tours adverses au plus) : leur population est divisée par 2 et les unités adverses y sont détruites', cond: 'dead', need: 400, pick: { circle: true } } } } },
-  med: { name: 'Méditerranéens', icon: '🏛️', pct: [4, 7, 10],
-    passive: p => p + ' % de chance qu’une de tes tours ignore une attaque',
+        god: { name: 'Toutatis', desc: 'Le ciel tombe sur une zone (2 tours adverses au plus) : leur population est divisée par 2 et les unités adverses y sont détruites', cond: 'dead', need: 200, pick: { circle: true } } } } },
+  med: { name: 'Méditerranéens', icon: '🏛️', pct: [3, 5, 7],
+    passive: p => '+' + p + ' % de croissance interne pour tes tours qui envoient des troupes',
     factions: {
       egypte: { name: 'Égyptiens', power: { name: 'Constructeurs', icon: '🧱', dur: 12, desc: '12 s : production interne doublée, même pour les tours qui attaquent' },
         god: { name: 'Anubis', desc: 'Tue une unité adverse sur deux sur le champ de bataille', cond: 'full', need: 3, pick: null } },
@@ -3751,7 +3758,7 @@ const CIVS = {
 };
 const GOD_COND = {
   conq: n => n + ' tours conquises',
-  dead: n => n + ' unités tombées au combat (tous joueurs)',
+  dead: n => n + ' de tes unités perdues (au combat ou dans tes tours)',
   full: n => n + ' de tes tours à 40 défenseurs ou plus en même temps'
 };
 const civLevel = st => st >= 45 ? 3 : st >= 30 ? 2 : st >= 15 ? 1 : 0;
@@ -3785,15 +3792,110 @@ const civSpeed = u => u.owner === 0 && civOn('maya') ? 2 : 1;
 const civValue = () => civOn('viking') ? 2 : 1;
 // Chance de survivre à un combat (Guerriers Jaguars, Légion)
 const civSurvive = u => u.owner === 0 && (civOn('azte') && Math.random() < 1 / 3 || civOn('rome') && Math.random() < 0.5);
-// Méditerranéens : une tour du joueur ignore une attaque
-const civDodge = t => civ && civ.key === 'med' && t.owner === 0 && Math.random() < civ.pct;
-const civDead = n => { if (civ) civ.dead += n; };
+const civLoss = n => { if (civ && n > 0) civ.dead += n; };   // pertes du joueur (pouvoir divin nordique)
 const civConquest = () => { if (civ) civ.conq++; };
 function godProgress() {
   const g = civ.f.god;
   const have = g.cond === 'conq' ? civ.conq : g.cond === 'dead' ? Math.floor(civ.dead)
     : towers.filter(t => t.owner === 0 && t.stock >= 40).length;
   return { have: Math.min(have, g.need), need: g.need, ready: have >= g.need };
+}
+
+/* ================= Fresque de civilisation autour de la carte et filtres des pouvoirs ================= */
+// La carte est légèrement réduite (VIEW) pour laisser la place à la fresque sans rien cacher du jeu.
+const VIEW = { k: 1, ox: 0, oy: 0, F: 0 };
+function updateView() {
+  const F = civ && state !== 'menu' ? Math.max(12, Math.min(22, Math.round(Math.min(W, H) * 0.045))) : 0;
+  VIEW.F = F; VIEW.k = F ? Math.min((W - 2 * F) / W, (H - 2 * F) / H) : 1;
+  VIEW.ox = (W - W * VIEW.k) / 2; VIEW.oy = (H - H * VIEW.k) / 2;
+}
+const toScreen = (x, y) => ({ x: VIEW.ox + x * VIEW.k, y: VIEW.oy + y * VIEW.k });
+let frameCache = null;
+function drawFresco() {
+  if (!VIEW.F || !civ) return;
+  const key = civ.key + ':' + W + 'x' + H + ':' + DPR;
+  if (!frameCache || frameCache.key !== key) {
+    const c = document.createElement('canvas'); c.width = Math.round(W * DPR); c.height = Math.round(H * DPR);
+    const g = c.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    paintFresco(g, civ.key, W, H, VIEW.F);
+    frameCache = { key, c };
+  }
+  ctx.drawImage(frameCache.c, 0, 0, W, H);
+}
+// Dessine la bande décorative (épaisseur F) sur les quatre côtés
+function paintFresco(g, kind, W, H, F) {
+  const rnd = mulberry32(777);
+  g.save();
+  g.beginPath(); g.rect(0, 0, W, H); g.rect(F, F, W - 2 * F, H - 2 * F); g.clip('evenodd');
+  // segments des quatre côtés : (x, y) de départ, direction, longueur
+  const sides = [[0, 0, 1, 0, W], [W, H, -1, 0, W], [0, H, 0, -1, H], [W, 0, 0, 1, H]];
+  if (kind === 'nord') {                           // bois sombre et tresse viking à deux brins dorés
+    const wood = g.createLinearGradient(0, 0, W, H); wood.addColorStop(0, '#4a2f1c'); wood.addColorStop(1, '#2e1c10');
+    g.fillStyle = wood; g.fillRect(0, 0, W, H);
+    for (const [x0, y0, dx, dy, L] of sides) {
+      const nx = -dy, ny = dx, mid = F / 2, amp = F * 0.28, step = F * 1.6;
+      for (const ph of [0, Math.PI]) {
+        g.beginPath();
+        for (let s = 0; s <= L; s += 2) {
+          const off = Math.sin(s / step * Math.PI * 2 + ph) * amp;
+          const px = x0 + dx * s + nx * (mid + off), py = y0 + dy * s + ny * (mid + off);
+          s ? g.lineTo(px, py) : g.moveTo(px, py);
+        }
+        g.strokeStyle = '#1a0f07'; g.lineWidth = F * 0.26; g.stroke();
+        g.strokeStyle = ph ? '#e0b45a' : '#c99a3a'; g.lineWidth = F * 0.16; g.stroke();
+      }
+    }
+    g.strokeStyle = '#c99a3a'; g.lineWidth = 2; g.strokeRect(F - 1, F - 1, W - 2 * F + 2, H - 2 * F + 2); g.strokeRect(1, 1, W - 2, H - 2);
+    for (const [cx, cy] of [[F / 2, F / 2], [W - F / 2, F / 2], [F / 2, H - F / 2], [W - F / 2, H - F / 2]]) {   // nœuds d'angle
+      g.fillStyle = '#e0b45a'; g.beginPath(); g.arc(cx, cy, F * 0.42, 0, TAU); g.fill();
+      g.strokeStyle = '#1a0f07'; g.lineWidth = 2; g.stroke(); g.beginPath(); g.arc(cx, cy, F * 0.18, 0, TAU); g.stroke();
+    }
+  } else if (kind === 'amer') {                    // grès et frise inca en gradins (rouge, noir, turquoise, jaune)
+    g.fillStyle = '#c98a45'; g.fillRect(0, 0, W, H);
+    const pal = ['#a8322b', '#2b1d16', '#2f8f83', '#e3b23c'];
+    for (const [x0, y0, dx, dy, L] of sides) {
+      const nx = -dy, ny = dx, u = F / 4, step = F * 1.5;
+      let i = 0;
+      for (let s = 0; s < L; s += step, i++) {
+        g.fillStyle = pal[i % pal.length];
+        for (let k = 0; k < 3; k++) {             // pyramide à trois gradins posée sur le bord intérieur
+          const w = step * (1 - k * 0.3), a = s + (step - w) / 2, h0 = F - u * 0.6 - k * u, h1 = h0 - u;
+          const p = [[a, h0], [a + w, h0], [a + w, h1], [a, h1]].map(([t, n]) => [x0 + dx * t + nx * n, y0 + dy * t + ny * n]);
+          g.beginPath(); p.forEach(([px, py], j) => j ? g.lineTo(px, py) : g.moveTo(px, py)); g.closePath(); g.fill();
+        }
+      }
+    }
+    g.strokeStyle = '#2b1d16'; g.lineWidth = 2; g.strokeRect(F - 1, F - 1, W - 2 * F + 2, H - 2 * F + 2); g.strokeRect(1, 1, W - 2, H - 2);
+  } else {                                         // mosaïque romaine : bordures sombres et méandre (grecque) rouge sur fond crème
+    const rows = 5, t = F / rows;
+    const meander = (r, c) => { c = ((c % 6) + 6) % 6; return r === 1 ? c <= 3 : r === 2 ? (c === 0 || c === 3) : r === 3 ? (c === 0 || c >= 3) : false; };
+    for (let y = 0; y < H; y += t) for (let x = 0; x < W; x += t) {
+      const inX = x >= F && x + t <= W - F, inY = y >= F && y + t <= H - F;
+      if (inX && inY) continue;
+      let r, c;
+      if (!inX && !inY) { r = -1; c = 0; }          // angles : damier
+      else if (!inY) { r = Math.floor((y < F ? y : H - y - t) / t); c = Math.floor((y < F ? x : W - x) / t); }
+      else { r = Math.floor((x < F ? x : W - x - t) / t); c = Math.floor((x < F ? H - y : y) / t); }
+      const base = r === -1 ? ((Math.floor(x / t) + Math.floor(y / t)) % 2 ? [150, 40, 35] : [236, 224, 196])
+        : r <= 0 || r >= rows - 1 ? [58, 40, 34] : meander(r, c) ? [158, 42, 36] : [236, 224, 196];
+      const j = (rnd() - 0.5) * 16;
+      g.fillStyle = `rgb(${base[0] + j | 0},${base[1] + j | 0},${base[2] + j | 0})`;
+      g.fillRect(x + 0.4, y + 0.4, t - 0.8, t - 0.8);
+    }
+  }
+  g.restore();
+}
+// Filtres des pouvoirs de civilisation : bleu (vitesse, production), rouge (force), vert (survie)
+const POWER_TINT = { maya: '60,140,255', celte: '60,140,255', egypte: '60,140,255', viking: '230,50,40', azte: '40,190,90', rome: '40,190,90' };
+function drawPowerTint() {
+  if (!civ || clock >= civ.until || state !== 'play') return;
+  const col = POWER_TINT[civ.fac]; if (!col) return;
+  ctx.save();
+  ctx.fillStyle = 'rgba(' + col + ',.12)'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.hypot(W, H) * 0.6);
+  g.addColorStop(0, 'rgba(' + col + ',0)'); g.addColorStop(1, 'rgba(' + col + ',.32)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
 }
 
 /* Boutons de pouvoir pendant la partie */
@@ -3837,6 +3939,7 @@ $('btnGod').onclick = () => {
   } else { el.style.top = 'auto'; el.style.bottom = '14px'; }
   el.classList.remove('hidden');
   $('powers').classList.add('hidden');
+  $('hud').classList.add('hudhide');                // barre du haut masquée : toutes les tours restent accessibles
 };
 
 /* Sélection en pause pour les pouvoirs divins (tours, zone, type de bâtiment) */
@@ -3880,49 +3983,138 @@ $('pickType').addEventListener('click', e => {
   [...$('pickType').children].forEach(x => x.classList.toggle('on', x === b));
   updatePick();
 });
-function closePick() { pick = null; $('pick').classList.add('hidden'); setPaused(false); renderPowers(); }
+function closePick() { pick = null; $('pick').classList.add('hidden'); $('hud').classList.remove('hudhide'); setPaused(false); renderPowers(); }
 $('pickCancel').onclick = closePick;
 $('pickOk').onclick = () => { if (!pick || $('pickOk').disabled) return; const sel = pick; closePick(); applyGod(sel); };
 
+/* Animations des pouvoirs divins (temps réel, indépendant de la vitesse du jeu) */
+const fxNow = () => performance.now() / 1000;
+let godFx = [];
+function addFx(o) { godFx.push(Object.assign({ t0: fxNow() }, o)); }
+function boltFx(t) {                               // éclair : du haut de la carte jusqu'à la tour (0,5 s)
+  const pts = [], n = 8, x0 = t.x + (Math.random() - 0.5) * W * 0.25, y0 = -H * 0.05;
+  for (let i = 0; i <= n; i++) {
+    const f = i / n, j = i && i < n ? (Math.random() - 0.5) * baseR * 2.2 : 0;
+    pts.push([x0 + (t.x - x0) * f + j, y0 + (t.y - y0) * f]);
+  }
+  addFx({ type: 'bolt', t, pts, dur: 0.5 });
+}
 function applyGod(sel) {
   const g = civ.f.god;
   civ.godUsed = true;
+  addFx({ type: 'title', text: g.name + ' intervient', dur: 2 });   // inscription au centre de l'écran
   switch (civ.fac) {
-    case 'maya':                                   // Tezcatlipoca
-      for (const t of sel.sel) { t.stock = Math.floor(t.stock / 2); t.hit = 1; } break;
-    case 'azte':                                   // Quetzalcoatl
-      for (const t of sel.sel) { t.cap += 20; t.stock = Math.min(t.cap, t.stock + 20); t.fx = 1; } break;
-    case 'viking': {                               // Loki
+    case 'maya':                                   // Tezcatlipoca : éclairs sur les tours visées
+      for (const t of sel.sel) { t.stock = Math.floor(t.stock / 2); t.hit = 1; boltFx(t); } break;
+    case 'azte':                                   // Quetzalcoatl : aura dorée sur les tours renforcées
+      for (const t of sel.sel) { t.cap += 20; t.stock = Math.min(t.cap, t.stock + 20); t.fx = 1; addFx({ type: 'aura', t, dur: 2 }); } break;
+    case 'viking': {                               // Loki : nuage autour de la tour conquise
       const t = sel.sel[0];
-      if (t) { t.owner = 0; t.paths = []; t.acc = 0; t.facc = 0; t.rr = 0; t.aggr = []; t.fx = 1; civConquest(); }
+      if (t) { t.owner = 0; t.paths = []; t.acc = 0; t.facc = 0; t.rr = 0; t.aggr = []; t.fx = 1; civConquest(); addFx({ type: 'cloud', t, dur: 2 }); }
       break;
     }
-    case 'celte': {                                // Toutatis
+    case 'celte': {                                // Toutatis : le ciel tombe (disque), effet à l'impact
       const c = sel.circle;
-      for (const t of circleTargets(c)) { t.stock = Math.floor(t.stock / 2); t.hit = 1; }
-      let n = 0;
-      for (const u of units) {
-        if (u.dead || u.owner === 0) continue;
-        const p = unitPos(u);
-        if (Math.hypot(p.x - c.x, p.y - c.y) <= c.r) { u.dead = true; n += u.hp; }
-      }
-      civDead(n); bursts.push({ x: c.x, y: c.y, life: 1, big: c.r });
+      addFx({ type: 'disc', x: c.x, y: c.y, r: c.r, dur: 1, onEnd: () => {
+        if (state !== 'play') return;
+        for (const t of circleTargets(c)) { t.stock = Math.floor(t.stock / 2); t.hit = 1; }
+        let n = 0;
+        for (const u of units) {
+          if (u.dead || u.owner === 0) continue;
+          const p = unitPos(u);
+          if (Math.hypot(p.x - c.x, p.y - c.y) <= c.r) { u.dead = true; n += u.hp; }
+        }
+        bursts.push({ x: c.x, y: c.y, life: 1, big: c.r });
+      } });
       break;
     }
-    case 'egypte': {                               // Anubis
+    case 'egypte': {                               // Anubis : champ de bataille teinté de rouge
       let k = 0, n = 0;
       for (const u of units) if (!u.dead && u.owner !== 0 && (k++ % 2 === 0)) { u.dead = true; n += u.hp; }
-      civDead(n); break;
+      addFx({ type: 'red', dur: 1 }); break;
     }
-    case 'rome': {                                 // Mars
+    case 'rome': {                                 // Mars : aura dorée (bonus)
       const t = sel.sel[0];
-      if (t) { t.kind = sel.type; t.cap = KINDS[sel.type].cap; t.stock = t.cap; t.paths = []; t.acc = 0; t.facc = 0; t.fx = 1; }
+      if (t) { t.kind = sel.type; t.cap = KINDS[sel.type].cap; t.stock = t.cap; t.paths = []; t.acc = 0; t.facc = 0; t.fx = 1; addFx({ type: 'aura', t, dur: 2 }); }
       break;
     }
   }
-  toast(g.name + ' !');
   renderPowers();
 }
+// Effets dessinés sur la carte (coordonnées de la carte)
+function drawGodFx() {
+  const now = fxNow();
+  for (const f of godFx) {
+    const p = Math.min(1, (now - f.t0) / f.dur);
+    if (f.type === 'bolt') {
+      const a = 1 - p;
+      ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.beginPath(); f.pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+      ctx.shadowColor = '#fff6a0'; ctx.shadowBlur = 18;
+      ctx.strokeStyle = `rgba(255,240,150,${a})`; ctx.lineWidth = 7; ctx.stroke();
+      ctx.shadowBlur = 0; ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 2.5; ctx.stroke();
+      const fl = ctx.createRadialGradient(f.t.x, f.t.y, 1, f.t.x, f.t.y, rad(f.t) * 2.2);
+      fl.addColorStop(0, `rgba(255,255,220,${0.8 * a})`); fl.addColorStop(1, 'rgba(255,255,220,0)');
+      ctx.fillStyle = fl; ctx.beginPath(); ctx.arc(f.t.x, f.t.y, rad(f.t) * 2.2, 0, TAU); ctx.fill();
+      ctx.restore();
+    } else if (f.type === 'aura') {
+      const a = (p < 0.15 ? p / 0.15 : p > 0.7 ? (1 - p) / 0.3 : 1), r = rad(f.t) * (1.7 + 0.15 * Math.sin(now * 8));
+      ctx.save();
+      const gr = ctx.createRadialGradient(f.t.x, f.t.y, rad(f.t) * 0.4, f.t.x, f.t.y, r);
+      gr.addColorStop(0, `rgba(255,214,90,${0.55 * a})`); gr.addColorStop(1, 'rgba(255,214,90,0)');
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(f.t.x, f.t.y, r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = `rgba(242,183,5,${0.9 * a})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.t.x, f.t.y, r * 0.8, 0, TAU); ctx.stroke();
+      for (let i = 0; i < 6; i++) {                // étincelles qui montent
+        const ang = i / 6 * TAU + now * 1.5, rise = ((now * 0.8 + i / 6) % 1);
+        ctx.fillStyle = `rgba(255,236,150,${a * (1 - rise)})`;
+        ctx.beginPath(); ctx.arc(f.t.x + Math.cos(ang) * r * 0.6, f.t.y - rise * r * 1.2, 2.5, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+    } else if (f.type === 'cloud') {
+      const a = (p < 0.15 ? p / 0.15 : p > 0.6 ? (1 - p) / 0.4 : 1), R = rad(f.t) * 1.35;
+      ctx.save();
+      for (let i = 0; i < 9; i++) {
+        const ang = i / 9 * TAU + now * 0.9, x = f.t.x + Math.cos(ang) * R, y = f.t.y + Math.sin(ang) * R * 0.75, pr = rad(f.t) * (0.55 + 0.1 * Math.sin(now * 3 + i));
+        ctx.fillStyle = `rgba(95,85,120,${0.55 * a})`; ctx.beginPath(); ctx.arc(x, y, pr, 0, TAU); ctx.fill();
+        ctx.fillStyle = `rgba(190,180,215,${0.45 * a})`; ctx.beginPath(); ctx.arc(x - pr * 0.25, y - pr * 0.3, pr * 0.55, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+    } else if (f.type === 'disc') {
+      const e = p * p, R0 = Math.hypot(W, H), r = R0 + (f.r - R0) * e;   // le disque « tombe » en se resserrant
+      ctx.save();
+      ctx.fillStyle = `rgba(0,0,0,${0.25 * p})`; ctx.beginPath(); ctx.arc(f.x + 6, f.y + 8, Math.max(f.r, r * 0.98), 0, TAU); ctx.fill();
+      const gr = ctx.createRadialGradient(f.x, f.y, r * 0.2, f.x, f.y, r);
+      gr.addColorStop(0, `rgba(150,175,215,${0.25 + 0.4 * p})`); gr.addColorStop(1, `rgba(70,95,140,${0.35 + 0.45 * p})`);
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = `rgba(30,45,80,${0.4 + 0.5 * p})`; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+// Effets à l'échelle de l'écran : champ de bataille rouge (Anubis), inscription du dieu ; puis nettoyage
+function drawGodScreen() {
+  const now = fxNow();
+  for (const f of godFx) {
+    const p = Math.min(1, (now - f.t0) / f.dur);
+    if (f.type === 'red') { ctx.fillStyle = `rgba(200,20,20,${0.38 * (1 - p)})`; ctx.fillRect(0, 0, W, H); }
+    else if (f.type === 'title') {
+      const a = p < 0.5 ? 1 : 1 - (p - 0.5) / 0.5;    // 1 s affichée, puis 1 s de fondu
+      ctx.save(); ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const txt = tr(f.text);
+      let fs = Math.round(minDim * 0.085);
+      ctx.font = `800 ${fs}px system-ui,-apple-system,sans-serif`;
+      const w = ctx.measureText(txt).width;            // la phrase tient toujours dans 90 % de la largeur
+      if (w > W * 0.9) { fs = Math.floor(fs * W * 0.9 / w); ctx.font = `800 ${fs}px system-ui,-apple-system,sans-serif`; }
+      ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(3, fs * 0.16); ctx.strokeStyle = 'rgba(20,15,5,.75)';
+      const ty = H * 0.38;                            // au-dessus des boutons de pouvoir (centrés à droite)
+      ctx.strokeText(txt, W / 2, ty); ctx.fillStyle = '#ffe08a'; ctx.fillText(txt, W / 2, ty);
+      ctx.restore();
+    }
+  }
+  for (const f of godFx) if (now - f.t0 >= f.dur && f.onEnd && !f.ended) { f.ended = true; f.onEnd(); }
+  godFx = godFx.filter(f => now - f.t0 < f.dur);
+}
+
 
 applyCustom();
 window.addEventListener('resize', resize);
@@ -3973,7 +4165,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_112';
+const APP_VERSION = '20261025_120';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !navigator.onLine || !('serviceWorker' in navigator)) return;
   try {
