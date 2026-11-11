@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_178)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_182)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -192,11 +192,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #tuto p{margin:0 0 8px;font-size:16px;line-height:1.4}
 #tuto .tbtns{display:flex;gap:8px}
 #tuto .tbtns button{flex:1;margin:0;min-height:46px}
-#powers{position:absolute;left:0;right:0;bottom:24px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
-#powers .mine{display:flex;flex-direction:row;justify-content:center;gap:8px;width:100%}
-#aiPowers{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:96%}
-#aiPowers:empty{display:none}
-.aip{display:flex;gap:6px;align-items:center;padding:1px 8px;border-radius:10px;border:2px solid;background:var(--panel);height:22px}
+#powers{position:absolute;left:6px;right:6px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);z-index:3;display:flex;flex-direction:row;
+  align-items:center;justify-content:center;gap:6px;pointer-events:none}
+#powers .mine{display:flex;flex-direction:row;justify-content:center;gap:6px;min-width:0;flex:0 1 auto}
+#powers .mine .pbtn{min-width:0;flex:0 1 auto;max-width:170px}
+#powers .aiside{display:flex;flex-direction:row;gap:4px;flex:none}
+.aip{display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;padding:2px 4px;border-radius:10px;border:2px solid;background:var(--panel);height:46px;width:30px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .aip i{position:relative;font-style:normal;font-size:14px;line-height:1;filter:grayscale(1);opacity:.6}
 .aip i.on{filter:none;opacity:1}
 .aip i.used{opacity:.35}
@@ -359,8 +360,9 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
     <div class="tbtns"><button id="tutoSkip" class="ghost">Passer le tutoriel</button><button id="tutoNext" class="primary">Suivant</button></div>
   </div>
   <div id="powers" class="hidden">
-    <div id="aiPowers"></div>
+    <div class="aiside" id="aiLeft"></div>
     <div class="mine"><button id="btnPower" class="pbtn"></button><button id="btnGod" class="pbtn god"></button></div>
+    <div class="aiside" id="aiRight"></div>
   </div>
   <div id="pick" class="hidden" role="dialog">
     <p id="pickText"></p>
@@ -2893,7 +2895,12 @@ function aiAttack(pl, t, prof, noise) {
 /* ================= Rendu ================= */
 function render() {
   updateView();
-  if (VIEW.F) { ctx.fillStyle = LAND.ground; ctx.fillRect(0, 0, W, H); }   // marges laissées par la réduction de la carte
+  // marges laissées par la réduction de la carte (fresque, ou seul bandeau des pouvoirs quand le joueur n'a pas
+  // de civilisation) : couleur du sol du paysage, assombrie comme le décor en mode sombre
+  if (VIEW.k < 1) {
+    ctx.fillStyle = (LAND || LANDS[0]).ground; ctx.fillRect(0, 0, W, H);
+    if (isDark()) { ctx.fillStyle = 'rgba(8,16,32,.38)'; ctx.fillRect(0, 0, W, H); }
+  }
   ctx.save(); ctx.translate(VIEW.ox, VIEW.oy); ctx.scale(VIEW.k, VIEW.k);   // carte légèrement réduite si fresque
   ctx.drawImage(bg, 0, 0, W, H);
   for (const t of towers) for (const id of t.paths) drawPath(t, towers[id], t.owner);
@@ -2951,7 +2958,7 @@ function render() {
     ctx.fillStyle = colorOf(u.owner); ctx.fillRect(x - hs + 1, y - hs + 1, hs * 2 - 2, hs * 2 - 2);
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x - hs * 0.45, y - hs * 0.45, hs * 0.9, hs * 0.9);
   }
-  for (const t of towers) { towerHalo(t); drawTower(t); drawCivFlag(t); }
+  for (const t of towers) { towerHalo(t); drawTower(t); }   // drapeau de faction dessiné en haut de chaque tour
   // Chocs entre unités
   for (const b of bursts) {
     ctx.save(); ctx.globalAlpha = b.life; ctx.fillStyle = '#fff6c2'; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1;
@@ -3500,6 +3507,39 @@ const BAN_DATA = {
   celte: ["data:image/webp;base64,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", 120, 48],
   viking: ["data:image/webp;base64,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", 100, 48]
 };
+// Mât de chaque illustration : position du sommet (fractions de la largeur et de la hauteur) et hauteur du drapeau
+const SPR_FLAG = {
+  bastion: [0.6, 0.0, 0.123],
+  guet: [0.499, 0.0, 0.123],
+  donjon: [0.636, 0.0, 0.127],
+  minaret: [0.645, 0.0, 0.128],
+  chasse: [0.637, 0.0, 0.125],
+  champignon: [0.632, 0.0, 0.129],
+  pagode: [0.528, 0.0, 0.123],
+  clocher: [0.536, 0.0, 0.128],
+  phare: [0.597, 0.0, 0.124],
+  bigben: [0.569, 0.0, 0.127],
+  sable: [0.575, 0.0, 0.123],
+  sylvestre: [0.59, 0.0, 0.126],
+  glace: [0.554, 0.0, 0.128],
+  arc: [0.596, 0.0, 0.13],
+  lave: [0.572, 0.0, 0.128],
+  mage: [0.538, 0.0, 0.129],
+  obsidienne: [0.513, 0.0, 0.126],
+  citadelle: [0.667, 0.0, 0.13],
+  eiffel: [0.494, 0.0, 0.123],
+  celeste: [0.542, 0.0, 0.124],
+  royale: [0.569, 0.0, 0.129],
+  maya: [0.5, 0.0, 0.128],
+  azte: [0.423, 0.0, 0.128],
+  rome: [0.543, 0.0, 0.128],
+  egypte: [0.445, 0.0, 0.127],
+  celte: [0.474, 0.0, 0.129],
+  viking: [0.517, 0.0, 0.129],
+  super: [0.519, 0.0, 0.129],
+  artillery: [0.616, 0.0, 0.129],
+  barracks: [0.819, 0.0, 0.129]
+};
 const SPR = {}, BAN = {};
 for (const k in SPR_DATA) { const [src, w, h] = SPR_DATA[k], img = new Image(); img.src = src; SPR[k] = { img, w, h, civ: !!FAC_CIV[k], v: {} }; }
 for (const k in BAN_DATA) { const [src, w, h] = BAN_DATA[k], img = new Image(); img.src = src; BAN[k] = { img, w, h }; }
@@ -3569,6 +3609,13 @@ function drawSpriteTower(t, key, c, dk) {
   if (t.fx > 0) { const k = 1 + (1 - t.fx) * 1.6; ctx.save(); ctx.globalAlpha = t.fx; ctx.strokeStyle = c; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.ellipse(x, yb, r * k, r * 0.42 * k, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
   ctx.drawImage(img, x - Wt / 2, yb - Ht + r * 0.18, Wt, Ht);
+  // drapeau de la civilisation du propriétaire, posé en haut de la tour à la place du drapeau de l'illustration ;
+  // taille minimale fixe pour rester lisible sur les petites tours
+  const oc = cOf(t.owner), FL = SPR_FLAG[key], B = oc && BAN[oc.fac];
+  if (oc && FL && B && B.img.complete && key !== oc.fac && !t.preview) {
+    const bh = Math.max(Math.max(15, Math.min(22, baseR * 0.75)), FL[2] * Ht * 1.25), bw = bh * B.w / B.h;
+    ctx.drawImage(B.img, x - Wt / 2 + FL[0] * Wt - bh * 0.07, yb - Ht + r * 0.18 + FL[1] * Ht - bh * 0.06, bw, bh);
+  }
   if (t.deny > 0) { ctx.save(); ctx.globalAlpha = t.deny; ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.ellipse(x, yb, r + 7, r * 0.45 + 5, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
   if (t.preview) return true;                       // aperçu dans Personnalisation : sans nombre ni niveaux
@@ -3776,7 +3823,7 @@ const chronoTime = () => current && current.kind === 'defi' ? sumTimes(current.e
 function updateChrono() { const el = $('chrono'); if (el) el.textContent = '⏱ ' + fmtTime(chronoTime()); }
 function buildChips() {
   $('chips').innerHTML = (chronoOn ? '<div class="chip" id="chrono">⏱ 0:00</div>' : '')
-    + `<div class="chip">${current ? current.label : ''}</div>` + (!countsOn ? '' : players.map(p =>
+    + (!countsOn ? '' : players.map(p =>
     `<div class="chip" id="chip${p.id}"><span class="dot" style="background:${COLORS[p.id]}"></span><span id="cnt${p.id}">1</span></div>`
   ).join(''));
 }
@@ -4497,12 +4544,11 @@ const VIEW = { k: 1, ox: 0, oy: 0, F: 0 };
 const POWER_BAR = 60;
 function updateView() {
   const F = civ && state !== 'menu' && !custom.noFresco ? Math.max(12, Math.min(22, Math.round(Math.min(W, H) * 0.045))) : 0;
-  const foeCiv = state !== 'menu' && players.some(p => !p.human && cOf(p.id));
-  const B = (civ && state !== 'menu' && (civ.power || civ.god) ? POWER_BAR : 0) + (foeCiv ? 26 : 0);
+  const B = 0;                                     // la carte garde toute la place : les pouvoirs se posent par-dessus
   VIEW.F = F; VIEW.B = B;
   VIEW.k = F || B ? Math.min((W - 2 * F) / W, (H - 2 * F - B) / H) : 1;
   VIEW.ox = (W - W * VIEW.k) / 2; VIEW.oy = F + (H - 2 * F - B - H * VIEW.k) / 2;
-  if (B) $('powers').style.bottom = (F + 6) + 'px';
+
 }
 const toScreen = (x, y) => ({ x: VIEW.ox + x * VIEW.k, y: VIEW.oy + y * VIEW.k });
 let frameCache = null;
@@ -4601,10 +4647,13 @@ function renderPowers() {
   if ((!mineOn && !foes.length) || state !== 'play' || pick) { box.classList.add('hidden'); return; }
   box.classList.remove('hidden');
   // Pouvoirs des ordinateurs : grisés, barrés une fois utilisés, liseré de leur couleur
-  $('aiPowers').innerHTML = foes.map(p => { const c = cOf(p.id), act = scoreClock() < c.until;
+  const chip = p => { const c = cOf(p.id), act = scoreClock() < c.until;
     return `<span class="aip" style="border-color:${COLORS[p.id]}" title="${NAMES[p.id]} : ${c.f.name}">`
       + `<i class="${act ? 'on' : c.used ? 'used' : ''}" title="${c.f.power.name}">${c.f.power.icon}</i>`
-      + `<i class="${c.godUsed ? 'used' : ''}" title="${c.f.god.name}">✨</i></span>`; }).join('');
+      + `<i class="${c.godUsed ? 'used' : ''}" title="${c.f.god.name}">✨</i></span>`; };
+  // de part et d'autre des boutons du joueur : rouge (et jaune) à gauche, vert à droite
+  $('aiLeft').innerHTML = foes.filter((p, i) => i % 2 === 0).map(chip).join('');
+  $('aiRight').innerHTML = foes.filter((p, i) => i % 2 === 1).map(chip).join('');
   $('powers').querySelector('.mine').classList.toggle('hidden', !mineOn);
   if (!mineOn) return;
   const pw = civ.f.power, now = scoreClock(), act = now < civ.until, wait = Math.ceil(POWER_DELAY - now);
@@ -4879,7 +4928,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_178';
+const APP_VERSION = '20261025_182';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
