@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_148)
+     Fichier  : index.html (paquet GitHub Pages, version 20261025_156)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -120,6 +120,8 @@ h3{margin:8px 0 4px;font-size:20px}
 .tierhead strong{font-size:16px}
 .tierhead span{font-size:12px;color:var(--muted);text-align:right}
 .tierhead.locked strong{color:var(--muted)}
+#campGrid .story{margin:2px 0 6px}
+.tiergrid button .foes{position:absolute;right:4px;top:4px;font-size:10px;line-height:1}
 .tiergrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .tiergrid button{position:relative;min-height:54px;border-radius:10px;border:2px solid var(--line);background:transparent;
   font-size:16px;font-weight:800;overflow:hidden;padding:0 0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
@@ -188,7 +190,15 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #tuto p{margin:0 0 8px;font-size:16px;line-height:1.4}
 #tuto .tbtns{display:flex;gap:8px}
 #tuto .tbtns button{flex:1;margin:0;min-height:46px}
-#powers{position:absolute;left:0;right:0;bottom:24px;z-index:3;display:flex;flex-direction:row;justify-content:center;gap:8px;pointer-events:none}
+#powers{position:absolute;left:0;right:0;bottom:24px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
+#powers .mine{display:flex;flex-direction:row;justify-content:center;gap:8px;width:100%}
+#aiPowers{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;max-width:96%}
+#aiPowers:empty{display:none}
+.aip{display:flex;gap:6px;align-items:center;padding:1px 8px;border-radius:10px;border:2px solid;background:var(--panel);height:22px}
+.aip i{position:relative;font-style:normal;font-size:14px;line-height:1;filter:grayscale(1);opacity:.6}
+.aip i.on{filter:none;opacity:1}
+.aip i.used{opacity:.35}
+.aip i.used::after{content:'';position:absolute;left:-2px;right:-2px;top:50%;height:2px;background:#d8433b;transform:rotate(-35deg)}
 .pbtn{pointer-events:auto;display:flex;flex-direction:row;align-items:center;gap:6px;height:46px;max-width:48%;padding:0 10px;border-radius:14px;
   border:2px solid var(--line);background:var(--panel);color:var(--panel-ink);font-size:12px;font-weight:800;line-height:1.1;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,.25);white-space:nowrap;overflow:hidden}
 .pbtn .pi{font-size:20px;line-height:1}
@@ -221,6 +231,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .civtag{font-size:11px;font-weight:800;color:var(--accent)}
 #hud.hudhide{visibility:hidden}
 #pre{z-index:8}
+#preCivSel{width:100%;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--field);color:var(--panel-ink);font-size:15px;padding:0 10px}
 #board{z-index:8}
 .board{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:15px}
 .board th{font-size:13px;color:var(--muted);text-align:center;padding:6px 4px;border-bottom:2px solid var(--line)}
@@ -294,6 +305,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 .hist.lose .badge{background:#d8433b}
 .hist .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px}
 .hist .chips span{font-size:13px;font-weight:700;padding:4px 9px;border-radius:8px;background:var(--field);color:var(--panel-ink)}
+.hist .foes{margin:4px 0 0;font-size:13px}
 .hist .specs{display:flex;gap:8px;align-items:center;margin:4px 0}
 .hist .specs span{display:flex;width:30px;height:30px}
 .hist .specs svg{width:100%;height:100%;fill:var(--muted);opacity:.35}
@@ -459,8 +471,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
     <div class="tbtns"><button id="tutoSkip" class="ghost">Passer le tutoriel</button><button id="tutoNext" class="primary">Suivant</button></div>
   </div>
   <div id="powers" class="hidden">
-    <button id="btnPower" class="pbtn"></button>
-    <button id="btnGod" class="pbtn god"></button>
+    <div id="aiPowers"></div>
+    <div class="mine"><button id="btnPower" class="pbtn"></button><button id="btnGod" class="pbtn god"></button></div>
   </div>
   <div id="pick" class="hidden" role="dialog">
     <p id="pickText"></p>
@@ -495,14 +507,13 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       </div>
 
       <section id="tab-campaign">
-        <button class="ghost" id="btnTutoCamp" style="margin-top:0">Tutoriel : apprendre les bases</button>
         <div class="camp" id="campGrid"></div>
-        <button class="ghost" id="btnBoardCamp" style="margin-top:16px">Tableau des scores</button>
       </section>
 
       <section id="tab-civ" class="hidden">
         <p class="lbl" style="margin-top:0">Civilisations</p>
         <p class="sub" id="civNote" style="margin:2px 0 0"></p>
+        <label class="tgl"><input type="checkbox" id="optFresco"><span><strong>Fresque</strong>Afficher la fresque de ma civilisation autour de la carte.</span></label>
         <div id="civGrid"></div>
       </section>
       <section id="tab-custom" class="hidden">
@@ -536,7 +547,8 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
         <div id="defiNew">
         <p class="lbl" style="margin-top:0">Défis du jour</p>
         <div id="dailyList"></div>
-        <button class="ghost" id="btnDefiNew" aria-expanded="false" style="margin-top:16px">Créer un défi</button>
+        <button class="ghost" id="btnMonth" style="margin-top:16px">Défis du mois (15)</button>
+        <button class="ghost" id="btnDefiNew" aria-expanded="false">Créer un défi</button>
         <div id="defiCreate" class="hidden">
         <p class="lbl">Nombre d’adversaires</p>
         <div class="seg" id="segOpp">
@@ -556,9 +568,13 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <label class="tgl"><input type="checkbox" data-opt="artillery"><span><strong>Tour de tir de zone</strong>Tour classique qui tire en plus sur les unités et tours adverses à portée, à 50 % de sa cadence de production (+10 % de portée par palier de 10 défenseurs). 10 au départ, 50 au maximum.</span></label>
         </div>
         <button id="btnFree" class="primary">Créer et jouer le défi</button>
+        <button class="ghost" id="btnHist">Mes défis créés et joués</button>
         </div>
-        <button class="ghost" id="btnHist" style="margin-top:16px">Historique des défis</button>
-        <button class="ghost" id="btnBoardDefi">Tableau des scores</button>
+        <button class="ghost" id="btnBoardDefi" style="margin-top:16px">Tableau des scores</button>
+        </div>
+        <div id="defiMonth" class="hidden">
+          <button class="ghost" id="btnMonthBack" style="margin-top:0">Retour aux défis du jour</button>
+          <div id="monthList"></div>
         </div>
         <div id="defiHist" class="hidden">
           <button class="ghost" id="btnHistBack" style="margin-top:0">Retour au défi</button>
@@ -576,19 +592,19 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
           <li>Le bouton ×1 en haut à droite accélère le jeu (×1,5 puis ×2). Le bouton 🔊 coupe ou remet la musique (menus et parties).</li>
           <li>Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.</li>
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
-          <li>Campagne : 5 difficultés de 15 niveaux, dans un ordre mélangé (le 15ᵉ niveau réunit les 3 bâtiments spéciaux). Une difficulté se débloque après 8 victoires dans la précédente. Une victoire en moins de 3:20 donne une étoile.</li>
-          <li>Cadres des parties (campagne et défis) : or, argent ou bronze pour ta place dans le top 3 en ligne ; vert pour une victoire ; rouge pour une défaite ; gris si la partie n’a pas encore été jouée. Sur la grille de campagne, le filigrane indique le bâtiment spécial et la bande de couleur le paysage.</li>
+          <li>Campagne : 5 chapitres de 5 parties, un par difficulté. Chef d’une jeune faction, tu t’imposes face aux clans locaux, puis tu rencontres les Méditerranéens, les Nordiques et les Amérindiens avant de conquérir le monde. Chaque partie se débloque en gagnant la précédente ; les bulles d’explication sont intégrées aux premières parties. Une victoire en moins de 3:20 donne une étoile.</li>
+          <li>Cadres des parties : vert pour une victoire, rouge pour une défaite, gris si la partie n’a pas encore été jouée ; dans les défis, or, argent ou bronze pour ta place dans le top 3 en ligne. Sur la grille de campagne, le filigrane indique les bâtiments spéciaux, les emblèmes les civilisations adverses et la bande de couleur le paysage.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 21 skins de tours (plus un skin réservé à chaque civilisation) se débloquent avec les étoiles (tous à 45 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).</li>
-          <li>Défis : trois défis du jour d’une partie (deux en Normal, un en Difficile), les mêmes pour tout le monde et renouvelés chaque jour à minuit (heure de Paris), et des défis à créer. Toute partie se partage par un lien qui l’ouvre directement.</li>
+          <li>Personnalisation : 21 skins de tours (plus un skin réservé à chaque civilisation) se débloquent avec les étoiles de campagne (tous à 20 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).</li>
+          <li>Défis : deux défis du jour (Normal et Difficile), renouvelés chaque jour à minuit (heure de Paris), quinze défis du mois (5 Normal, 5 Difficile, 5 Très difficile) et des défis à créer. Les défis du jour et du mois sont les mêmes pour tout le monde ; chaque carte indique les civilisations à affronter. Toute partie se partage par un lien qui l’ouvre directement.</li>
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
           <li>Compte : un Login unique et un code à 4 chiffres. Un Login qui n’a pas encore de code le choisit à sa prochaine fin de partie synchronisée, et tous les temps de l’appareil sont alors versés dans le tableau. Ton avancement est téléchargé régulièrement depuis le tableau en ligne ; un nouveau temps y est envoyé automatiquement en fin de partie (« Passer sans synchroniser » permet de continuer hors ligne).</li>
-          <li>Tableaux des scores : médailles (or, argent, bronze) de toute la campagne, avec les étoiles à titre indicatif (bouton en bas de Campagne), et médailles des défis du jour des 7 derniers jours (bouton en bas de Défis). Classement comme aux Jeux olympiques.</li>
+          <li>Tableau des scores (bouton en bas de Défis) : médailles (or, argent, bronze) des défis du jour des 7 derniers jours, et des défis du mois en cours. Classement comme aux Jeux olympiques. La campagne n’a pas de classement en ligne.</li>
           <li>Un chemin ne peut pas traverser une colline, une forêt ou le centre d’une autre tour (le tracé devient rouge). Passe par une tour relais.</li>
           <li>Les unités adverses qui se croisent se combattent, même sur des chemins différents.</li>
           <li>Bâtiments spéciaux : la super-tour (étoile dorée) monte jusqu’à 80 ; la caserne (bâtiment rectangulaire) envoie des blindés carrés valant 10 unités et, sans chemin, se remplit comme une tour classique ; la tour de tir (coupole et canon) produit et envoie des troupes comme une tour classique, et tire en plus sur les ennemis dans le cercle pointillé, à 50 % de sa cadence de production ; sa portée grandit de 10 % à chaque palier de 10 défenseurs.</li>
-          <li>Civilisations (onglet à l’arbre de technologies, dès 15 étoiles) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Les pouvoirs de civilisation sont disponibles après 25 s de partie ; pendant leur effet, la carte se teinte en bleu (vitesse) ou en rouge (puissance des unités). Pouvoir passif à 15, 30 et 45 étoiles ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Dans les défis, chaque ordinateur a aussi une civilisation, avec tous ses pouvoirs.</li>
+          <li>Civilisations (onglet à l’arbre de technologies) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Chacune a un pouvoir passif permanent, un pouvoir de civilisation (disponible après 25 s de partie ; la carte se teinte en bleu pour la vitesse ou en rouge pour la puissance) et un pouvoir divin, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Le choix se fait aussi avant chaque partie. En campagne, les civilisations s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles, et chaque ordinateur a aussi une civilisation.</li>
           <li>Ta progression reste enregistrée dans ce navigateur.</li>
         </ul>
         <button class="primary" id="btnTutoRules">Revoir le tutoriel</button>
@@ -601,6 +617,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   <div id="board" class="overlay hidden">
     <div class="panel">
       <h2 id="boardTitle"></h2>
+      <div class="seg" id="boardSeg"><button id="boardDay" class="on">Du jour</button><button id="boardMonth">Du mois</button></div>
       <p class="sub" id="boardNote"></p>
       <div id="boardTable"></div>
       <button class="primary" id="btnBoardClose">Fermer</button>
@@ -614,10 +631,22 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
       <div class="chips" id="preChips"></div>
       <div class="specs" id="preSpecs"></div>
       <div class="prebox">
-        <div><span>Top 3 en ligne</span><strong id="preRecord"></strong></div>
+        <div id="preRecRow"><span>Top 3 en ligne</span><strong id="preRecord"></strong></div>
         <div><span>Ton meilleur</span><strong id="preMine"></strong></div>
       </div>
       <p class="sub" id="preNote"></p>
+      <div id="preAcct" class="hidden acctform">
+        <p class="sub">Pour commencer, choisis ton pseudonyme et ton code à 4 chiffres : ils suivront ta faction tout au long de la campagne. Tu peux aussi jouer sans compte.</p>
+        <input class="acLogin" maxlength="16" placeholder="Pseudonyme" autocomplete="username">
+        <input class="acPin" inputmode="numeric" maxlength="4" placeholder="Code à 4 chiffres" autocomplete="off">
+        <p class="sub err hidden"></p>
+        <button class="acCreate primary">Créer mon compte</button><button class="acLogin2 ghost">Me connecter</button>
+      </div>
+      <div id="preCiv">
+        <p class="lbl" style="margin:6px 0 2px">Ta civilisation</p>
+        <select id="preCivSel" aria-label="Ta civilisation"></select>
+        <p class="sub" id="preFoes" style="margin:4px 0 0"></p>
+      </div>
       <label class="tgl hidden" id="preTutoRow"><input type="checkbox" id="optTuto"><span><strong>Tutoriel</strong>Les bases du jeu, étape par étape, pendant la partie.</span></label>
       <button id="btnPreGo" class="primary">Lancer la partie</button>
       <button id="btnPreBack" class="ghost">Retour</button>
@@ -663,8 +692,8 @@ const DARK   = ['#1b438a', '#8a231d', '#17643a', '#8a6a00'];
 const NEUTRAL = '#8e949c', NEUTRAL_DARK = '#4e535a';
 const NAMES = ['Bleu', 'Rouge', 'Vert', 'Jaune'];
 const MAX_STOCK = 50, MAX_PATHS = 3, TAU = Math.PI * 2;
-const TIER_LEVELS = 15, CAMPAIGN_SIZE = 5 * TIER_LEVELS;   // 5 difficultés × 15 niveaux
-const STAR_TIME = 200, UNLOCK_WINS = 8;        // étoile : victoire en moins de 3:20 (temps compté à la vitesse ×1) ; 8 victoires débloquent la difficulté suivante
+const TIER_LEVELS = 5, CAMPAIGN_SIZE = 5 * TIER_LEVELS;   // 5 chapitres (difficultés) × 5 parties
+const STAR_TIME = 200;                          // étoile : victoire en moins de 3:20 (temps compté à la vitesse ×1)
 const ASPECT = 1.7;   // proportion de référence (portrait) pour espacer les tours générées
 
 /* Production par seconde : 2 au niveau 1, puis +1 par niveau (7 au niveau 6) */
@@ -681,7 +710,8 @@ const TIERS = [
 /* Retard ajouté aux décisions de l'IA (temps de jeu) selon aiLevel :
    3 s (Très facile, 0,1) → 2 s (Facile, 0,3) → 1 s (Normal, 0,5) → 0 s (Difficile et au-delà, 0,75) */
 // Délai supplémentaire d'1 s (temps de jeu, soit 1 s réelle en ×2) pour toutes les difficultés sauf Très difficile
-const aiDelay = l => aiDelayBase(l) + (l < 0.85 ? 1 : 0);
+// + 2 s supplémentaires en Très facile, + 0,5 s en Facile
+const aiDelay = l => aiDelayBase(l) + (l < 0.85 ? 1 : 0) + (l < 0.2 ? 2 : l < 0.4 ? 0.5 : 0);
 const DELAY_PTS = [[0.1, 3], [0.3, 2], [0.5, 1], [0.75, 0]];
 function aiDelayBase(l) {
   if (l <= DELAY_PTS[0][0]) return DELAY_PTS[0][1];
@@ -762,67 +792,85 @@ const OPP_MIX = [                                  // nombre d'adversaires des 1
 ];
 const FINAL_OPP = [1, 2, 2, 3, 3];                 // 15e niveau de chaque difficulté
 const TIER_SHORT = ['T. facile', 'Facile', 'Normal', 'Difficile', 'T. difficile'];
-const levelId = (ti, k) => 'C1-' + ti + String(k).padStart(2, '0');   // identifiant unique d'un niveau
+// identifiant unique d'un niveau : C1-051 à C1-455 (numéros 51 à 55, distincts de l'ancienne campagne)
+const levelId = (ti, k) => 'C1-' + ti + String(50 + k);
 function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+/* ================= Campagne : 5 chapitres de 5 parties (une difficulté par chapitre) =================
+   Histoire : le joueur devient le chef d'une jeune faction qui doit survivre parmi les clans locaux, puis
+   rencontre les grandes civilisations. Les civilisations que le joueur peut adopter s'ouvrent chapitre après chapitre. */
+const FAC_CIV = { maya: 'amer', azte: 'amer', viking: 'nord', celte: 'nord', egypte: 'med', rome: 'med' };
+const ALL3 = ['super', 'artillery', 'barracks'];
+const CHAPTERS = [
+  { theme: 'Affirmer sa faction', allowed: [],
+    story: 'Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.',
+    levels: [
+      { title: 'Le premier bastion', opp: 1, specials: [], civs: [], land: 0, tuto: 'basics' },
+      { title: 'La super-tour', opp: 1, specials: ['super'], civs: [], land: 1, tuto: 'super' },
+      { title: 'La tour de tir', opp: 1, specials: ['artillery'], civs: [], land: 0, tuto: 'artillery' },
+      { title: 'La caserne', opp: 1, specials: ['barracks'], civs: [], land: 4, tuto: 'barracks' },
+      { title: 'Deux clans rivaux', opp: 2, specials: ALL3, civs: [], land: 1, tuto: 'two' }] },
+  { theme: 'Rencontre avec les Méditerranéens', allowed: [],
+    story: 'Au sud, deux peuples puissants convoitent tes terres : les Romains et les Égyptiens.',
+    levels: [
+      { title: 'Les légions de Rome', opp: 1, specials: ['super'], civs: ['rome'], land: 1, tuto: 'rome' },
+      { title: 'Le siège', opp: 1, specials: ['barracks'], civs: ['rome'], land: 0 },
+      { title: 'Les bâtisseurs du Nil', opp: 1, specials: ['artillery'], civs: ['egypte'], land: 2, tuto: 'egypte' },
+      { title: 'Le regard d’Anubis', opp: 1, specials: ['super'], civs: ['egypte'], land: 2 },
+      { title: 'L’alliance du Sud', opp: 2, specials: ALL3, civs: ['rome', 'egypte'], land: 1 }] },
+  { theme: 'Rencontre avec les Nordiques', allowed: ['rome', 'egypte'],
+    story: 'Tu peux adopter la civilisation des Romains ou des Égyptiens. Au nord, Celtes et Vikings descendent sur tes frontières.',
+    levels: [
+      { title: 'Les druides', opp: 1, specials: ['artillery'], civs: ['celte'], land: 4, tuto: 'celte' },
+      { title: 'Le ciel nous tombe sur la tête', opp: 1, specials: ['super'], civs: ['celte'], land: 0 },
+      { title: 'Les drakkars', opp: 1, specials: ['barracks'], civs: ['viking'], land: 3, tuto: 'viking' },
+      { title: 'La fureur des Berserkers', opp: 1, specials: ['super', 'barracks'], civs: ['viking'], land: 3 },
+      { title: 'Le Grand Nord', opp: 2, specials: ALL3, civs: ['celte', 'viking'], land: 3 }] },
+  { theme: 'Rencontre avec les Amérindiens', allowed: ['rome', 'egypte', 'celte', 'viking'],
+    story: 'Les civilisations nordiques s’ouvrent à toi. Par-delà l’océan, Mayas et Aztèques défendent leurs empires.',
+    levels: [
+      { title: 'Les cités de jade', opp: 1, specials: ['artillery'], civs: ['maya'], land: 1, tuto: 'maya' },
+      { title: 'Les Guerriers Aigles', opp: 1, specials: ['super', 'artillery'], civs: ['maya'], land: 4 },
+      { title: 'Tenochtitlan', opp: 1, specials: ['barracks'], civs: ['azte'], land: 4, tuto: 'azte' },
+      { title: 'Le Serpent à plumes', opp: 1, specials: ['super', 'barracks'], civs: ['azte'], land: 1 },
+      { title: 'Les empires du soleil', opp: 2, specials: ALL3, civs: ['maya', 'azte'], land: 2 }] },
+  { theme: 'Conquête du monde', allowed: null,
+    story: 'Toutes les civilisations te sont ouvertes. Il est temps de conquérir le monde.',
+    levels: [
+      { title: 'Le pacte des mers', opp: 2, specials: ['super', 'artillery'], civs: ['rome', 'celte'], land: 0, tuto: 'world' },
+      { title: 'Le duel du désert', opp: 1, specials: ['barracks', 'artillery'], civs: ['egypte'], land: 2 },
+      { title: 'Les trois fronts', opp: 3, specials: ['super', 'barracks'], civs: ['maya', 'viking', 'rome'], land: 1 },
+      { title: 'Les empires coalisés', opp: 2, specials: ALL3, civs: ['azte', 'egypte'], land: 4 },
+      { title: 'La conquête du monde', opp: 3, specials: ALL3, civs: ['viking', 'maya', 'egypte'], land: 3 }] }
+];
 let CAMP_PLAN = null;
-// [STRAT] plan calculé une seule fois (graines fixes) : la campagne est identique pour tous les joueurs
 function campaignPlan() {
   if (CAMP_PLAN) return CAMP_PLAN;
   const plan = [];
-  for (let ti = 0; ti < TIERS.length; ti++) {
-    for (let attempt = 0; ; attempt++) {           // tirage glouton, recommencé en cas d'impasse
-      const r = mulberry32(9001 + ti * 131 + attempt * 7);
-      const opps = shuffle(OPP_MIX[ti].slice(), r);
-      const pool = opps.map((opp, i) => ({ opp, variant: VARIANTS[i % 4] }));
-      const order = [];
-      let prev = plan.length ? plan[plan.length - 1] : null, ok = true;
-      while (pool.length) {
-        const cand = pool.filter(c => !prev || c.variant !== prev.variant);
-        if (!cand.length) { ok = false; break; }
-        const pref = cand.filter(c => !prev || c.opp !== prev.opp);       // varier aussi le format si possible
-        const pick = (pref.length ? pref : cand)[Math.floor(r() * (pref.length ? pref : cand).length)];
-        pool.splice(pool.indexOf(pick), 1); order.push(pick); prev = pick;
-      }
-      if (!ok) continue;
-      let land = plan.length ? plan[plan.length - 1].land : -1;
-      order.push({ opp: FINAL_OPP[ti], variant: 'all' });
-      order.forEach((o, i) => {
-        let l; do { l = Math.floor(r() * LANDS.length); } while (l === land);
-        land = l;
-        const k = i + 1, n = ti * TIER_LEVELS + k;
-        plan.push({ ti, k, n, id: levelId(ti, k), opp: o.opp, variant: o.variant, land: l, seed: n * 7919 + 2027 });
-      });
-      break;
-    }
-  }
+  CHAPTERS.forEach((ch, ti) => ch.levels.forEach((l, i) => {
+    const k = i + 1, n = ti * TIER_LEVELS + k;
+    plan.push(Object.assign({ ti, k, n, id: levelId(ti, k), seed: n * 7919 + 2027 }, l));
+  }));
   return (CAMP_PLAN = plan);
 }
 function campaignLevel(n) {
   const L = campaignPlan()[n - 1], tier = TIERS[L.ti], d = (n - 1) / (CAMPAIGN_SIZE - 1);
   return {
-    name: tier.name + ', niveau ' + L.k + '/' + TIER_LEVELS,
-    id: L.id,
-    seed: L.seed,
-    opponents: L.opp,
+    name: L.title, id: L.id, seed: L.seed, opponents: L.opp,
     neutrals: Math.round(5 + L.opp * 2 + d * 4),
     neutralStock: [Math.round(2 + d * 12), Math.round(10 + d * 30)],
-    playerStart: tier.playerStart,
-    aiStart: tier.aiStart,
-    aiLevel: tier.aiLevel,
-    tier: tier.name,
-    pool: L.ti === 0 ? ['defensif', 'equilibre'] : null,
-    profiles: null,
-    specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER.slice() : [L.variant],   // une seule option → 2 exemplaires
-    specialG: SPECIAL_G[L.ti],
-    specialPop: SPECIAL_POP[L.ti],
-    stockBias: STOCK_BIAS[L.ti],
-    land: L.land
+    playerStart: tier.playerStart, aiStart: tier.aiStart, aiLevel: tier.aiLevel, tier: tier.name,
+    pool: L.ti === 0 ? ['defensif', 'equilibre'] : null, profiles: null,
+    specials: L.specials.slice(), specialG: SPECIAL_G[L.ti], specialPop: SPECIAL_POP[L.ti], stockBias: STOCK_BIAS[L.ti],
+    land: L.land,
+    aiCivs: L.civs.map(f => [FAC_CIV[f], f]),     // civilisations des ordinateurs
+    allowed: CHAPTERS[L.ti].allowed               // factions que le joueur peut adopter (null : toutes)
   };
 }
 // Progression : meilleur temps de score (secondes à la vitesse ×1) de chaque niveau gagné, par identifiant
 const campBest = () => (progress.camp = progress.camp || { best: {} }).best;
-function tierWins(ti) { const b = campBest(); let w = 0; for (let k = 1; k <= TIER_LEVELS; k++) if (b[levelId(ti, k)] != null) w++; return w; }
-const tierUnlocked = ti => ti === 0 || tierWins(ti - 1) >= UNLOCK_WINS;
+// Campagne linéaire : un niveau s'ouvre quand le précédent est gagné
+const levelOpen = n => n === 1 || campBest()[campaignPlan()[n - 2].id] != null;
+const tierUnlocked = ti => levelOpen(ti * TIER_LEVELS + 1);
 
 /* ================= État du jeu ================= */
 const $ = id => document.getElementById(id);
@@ -1219,7 +1267,7 @@ Object.assign(EN, {
   'Civilisations': 'Civilizations', '✓ débloqué': '✓ unlocked', 'Débloqué à 15 étoiles': 'Unlocks at 15 stars',
   'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
   'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small and medium towers produce more, ideal for expanding fast.',
-  'Bâtisseurs prospères : toutes leurs tours produisent davantage.': 'Prosperous builders: all their towers produce more.',
+  'Bâtisseurs prospères : toutes leurs tours produisent davantage.': 'Prosperous builders: all their towers produce more.', 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
   'Vitesse et frappes ciblées.': 'Speed and targeted strikes.', 'Résistance au combat et croissance.': 'Combat resilience and growth.',
   'Assaut brutal et ruse.': 'Brutal assault and cunning.', 'Production et colère du ciel.': 'Production and the wrath of the sky.',
   'Grands chantiers et maîtrise de la mort.': 'Great works and mastery of death.', 'Discipline et ingénierie militaire.': 'Discipline and military engineering.'
@@ -1270,6 +1318,99 @@ EN_RX.push(
   [/^(.+) : touche (\d+) de tes tours \((\d+)\/(\d+)\)$/, m => m[1] + ': tap ' + m[2] + ' of your towers (' + m[3] + '/' + m[4] + ')'],
   [/^(.+) : touche une tour adverse classique$/, m => m[1] + ': tap a regular enemy tower'],
   [/^(.+) : touche une de tes tours classiques$/, m => m[1] + ': tap one of your regular towers']
+);
+Object.assign(EN, {
+  '15 s : +25 % de production par ligne d’attaque de chaque tour, et tes unités de puissance 1 (hors casernes) vont 50 % plus vite': '15 s: +25% production per attack line from each tower, and your strength-1 units (not from barracks) move 50% faster',
+  'Ta civilisation': 'Your civilization', 'Aucune civilisation': 'No civilization', 'Civilisations débloquées à 15 étoiles': 'Civilizations unlock at 15 stars',
+  'Adversaires sans civilisation.': 'Opponents without a civilization.', 'Fresque': 'Fresco',
+  'Afficher la fresque de ma civilisation autour de la carte.': 'Show my civilization\u2019s fresco around the map.'
+});
+EN_RX.push(
+  [/^Adversaires : (.+)$/, m => 'Opponents: ' + m[1].split(', ').map(x => x.replace(/^(\S+) — (.+) \((.+)\)$/, (z, a, b, c) => WX(a) + ' — ' + WX(b) + ' (' + WX(c) + ')')).join(', ')],
+  [/^(🪶|🛡️|🏛️) (.+) \((.+)\)$/, m => m[1] + ' ' + WX(m[2]) + ' (' + WX(m[3]) + ')']
+);
+Object.assign(EN, {
+  "Campagne : 5 chapitres de 5 parties, un par difficulté. Chef d’une jeune faction, tu t’imposes face aux clans locaux, puis tu rencontres les Méditerranéens, les Nordiques et les Amérindiens avant de conquérir le monde. Chaque partie se débloque en gagnant la précédente ; les bulles d’explication sont intégrées aux premières parties. Une victoire en moins de 3:20 donne une étoile.": "Campaign: 5 chapters of 5 games, one per difficulty. As the leader of a young faction, you assert yourself against the local clans, then meet the Mediterraneans, the Northmen and the Native Americans before conquering the world. Each game unlocks when you win the previous one; explanation bubbles are built into the first games. A win in under 3:20 earns a star.",
+  "Cadres des parties : vert pour une victoire, rouge pour une défaite, gris si la partie n’a pas encore été jouée ; dans les défis, or, argent ou bronze pour ta place dans le top 3 en ligne. Sur la grille de campagne, le filigrane indique les bâtiments spéciaux, les emblèmes les civilisations adverses et la bande de couleur le paysage.": "Game frames: green for a win, red for a loss, grey if not played yet; in challenges, gold, silver or bronze for your place in the online top 3. On the campaign grid, the watermark shows the special buildings, the emblems the opposing civilizations and the coloured strip the landscape.",
+  "Personnalisation : 21 skins de tours (plus un skin réservé à chaque civilisation) se débloquent avec les étoiles de campagne (tous à 20 étoiles). On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Customization: 21 tower skins (plus one reserved for each civilization) unlock with campaign stars (all at 20 stars). It also manages your account (Login and code), music, speed and the online leaderboard. The flag at the top of the menu switches the language (French or English).",
+  "Défis : deux défis du jour (Normal et Difficile), renouvelés chaque jour à minuit (heure de Paris), quinze défis du mois (5 Normal, 5 Difficile, 5 Très difficile) et des défis à créer. Les défis du jour et du mois sont les mêmes pour tout le monde ; chaque carte indique les civilisations à affronter. Toute partie se partage par un lien qui l’ouvre directement.": "Challenges: two daily challenges (Normal and Hard), renewed every day at midnight (Paris time), fifteen monthly challenges (5 Normal, 5 Hard, 5 Very hard) and challenges you create. Daily and monthly challenges are the same for everyone; each card shows the civilizations you will face. Any game can be shared with a link that opens it directly.",
+  "Tableau des scores (bouton en bas de Défis) : médailles (or, argent, bronze) des défis du jour des 7 derniers jours, et des défis du mois en cours. Classement comme aux Jeux olympiques. La campagne n’a pas de classement en ligne.": "Leaderboard (button at the bottom of Challenges): medals (gold, silver, bronze) from the daily challenges of the last 7 days, and from the current month’s challenges. Ranked like the Olympic Games. The campaign has no online ranking.",
+  "Civilisations (onglet à l’arbre de technologies) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Chacune a un pouvoir passif permanent, un pouvoir de civilisation (disponible après 25 s de partie ; la carte se teinte en bleu pour la vitesse ou en rouge pour la puissance) et un pouvoir divin, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Le choix se fait aussi avant chaque partie. En campagne, les civilisations s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles, et chaque ordinateur a aussi une civilisation.": "Civilizations (tech-tree tab): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans), each with its own fresco around the map. Each has a permanent passive power, a civilization power (available after 25 s of play; the map turns blue for speed or red for strength) and a divine power, each usable once per game with the buttons at the bottom of the screen. You can also choose before each game. In the campaign, civilizations open up chapter by chapter; in challenges, all are available, and each computer has a civilization too.",
+  "Affirmer sa faction": "Asserting your faction",
+  "Rencontre avec les Méditerranéens": "Meeting the Mediterraneans",
+  "Rencontre avec les Nordiques": "Meeting the Northmen",
+  "Rencontre avec les Amérindiens": "Meeting the Native Americans",
+  "Conquête du monde": "Conquering the world",
+  "Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.": "You have just taken the lead of a young faction. The local clans will show you no mercy: assert yourself.",
+  "Au sud, deux peuples puissants convoitent tes terres : les Romains et les Égyptiens.": "In the south, two mighty peoples covet your lands: the Romans and the Egyptians.",
+  "Tu peux adopter la civilisation des Romains ou des Égyptiens. Au nord, Celtes et Vikings descendent sur tes frontières.": "You can adopt the civilization of the Romans or the Egyptians. In the north, Celts and Vikings are marching on your borders.",
+  "Les civilisations nordiques s’ouvrent à toi. Par-delà l’océan, Mayas et Aztèques défendent leurs empires.": "The Northern civilizations are open to you. Across the ocean, Maya and Aztecs defend their empires.",
+  "Toutes les civilisations te sont ouvertes. Il est temps de conquérir le monde.": "All civilizations are open to you. It is time to conquer the world.",
+  "Le premier bastion": "The first bastion",
+  "La super-tour": "The super tower",
+  "La tour de tir": "The shooting tower",
+  "La caserne": "The barracks",
+  "Deux clans rivaux": "Two rival clans",
+  "Les légions de Rome": "The legions of Rome",
+  "Le siège": "The siege",
+  "Les bâtisseurs du Nil": "The builders of the Nile",
+  "Le regard d’Anubis": "The gaze of Anubis",
+  "L’alliance du Sud": "The southern alliance",
+  "Les druides": "The druids",
+  "Le ciel nous tombe sur la tête": "The sky is falling on our heads",
+  "Les drakkars": "The longships",
+  "La fureur des Berserkers": "The fury of the Berserkers",
+  "Le Grand Nord": "The Far North",
+  "Les cités de jade": "The jade cities",
+  "Les Guerriers Aigles": "The Eagle Warriors",
+  "Tenochtitlan": "Tenochtitlan",
+  "Le Serpent à plumes": "The Feathered Serpent",
+  "Les empires du soleil": "The empires of the sun",
+  "Le pacte des mers": "The pact of the seas",
+  "Le duel du désert": "The desert duel",
+  "Les trois fronts": "The three fronts",
+  "Les empires coalisés": "The allied empires",
+  "La conquête du monde": "The conquest of the world",
+  "Pour commencer, choisis ton pseudonyme et ton code à 4 chiffres : ils suivront ta faction tout au long de la campagne. Tu peux aussi jouer sans compte.": "To begin, choose your username and your 4-digit code: they will follow your faction throughout the campaign. You can also play without an account.",
+  "Pseudonyme": "Username", "Adversaires :": "Opponents:",
+  "Créer mon compte": "Create my account",
+  "Défis du mois (15)": "Monthly challenges (15)",
+  "Retour aux défis du jour": "Back to daily challenges",
+  "Mes défis créés et joués": "My created and played challenges",
+  "Du jour": "Daily",
+  "Du mois": "Monthly",
+  "Scores des défis du mois": "Monthly challenge scores",
+  "Enregistrement de ton temps…": "Saving your time…",
+  "Temps enregistré dans ton compte.": "Time saved to your account.",
+  "Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie. En campagne, les civilisations que tu peux adopter s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles.": "Each civilization has a permanent passive power, a civilization power and a divine power, each usable once per game. In the campaign, the civilizations you can adopt open up chapter by chapter; in challenges, all are available.",
+  "Nouveau : la super-tour, marquée d’une étoile dorée. Elle monte jusqu’à 80 défenseurs et produit 20 % de plus que les autres tours. Prends-la avant l’adversaire !": "New: the super tower, marked with a golden star. It holds up to 80 defenders and produces 20% more than other towers. Take it before your opponent!",
+  "Nouveau : la tour de tir. En plus de produire, elle tire sur les unités et les tours adverses dans son cercle en pointillés.": "New: the shooting tower. As well as producing, it fires at enemy units and towers within its dotted circle.",
+  "Nouveau : la caserne. Quand elle envoie des troupes, ce sont des blindés (attaque 10, vie 10). Sans chemin, elle se remplit comme une tour classique.": "New: the barracks. When it sends troops, they are armoured units (attack 10, life 10). Without a path, it fills up like a regular tower.",
+  "Attention : un bâtiment spécial gris riposte contre la tour qui l’attaque.": "Careful: a grey special building strikes back at the tower attacking it.",
+  "Deux clans s’allient contre toi. Ils se battent aussi entre eux : profite de leurs combats pour t’étendre.": "Two clans join forces against you. They also fight each other: use their battles to expand.",
+  "Les Romains ont une civilisation. Leur pouvoir, Experts de siège, double l’attaque de leurs unités pendant 15 s : surveille les tours qu’ils visent.": "The Romans have a civilization. Their power, Siege Experts, doubles their units’ attack for 15 s: watch the towers they target.",
+  "Leur pouvoir divin, Mars, change une de leurs tours en caserne pleine. Les pouvoirs adverses s’affichent en bas de l’écran, barrés une fois utilisés.": "Their divine power, Mars, turns one of their towers into a full barracks. Opponents’ powers are shown at the bottom of the screen, crossed out once used.",
+  "Les Égyptiens font grandir leurs tours plus vite avec Grands bâtisseurs : attaque-les avant qu’elles ne soient pleines.": "The Egyptians make their towers grow faster with Master Builders: attack them before they fill up.",
+  "Leur pouvoir divin, Anubis, tue la moitié de tes unités en mouvement : évite d’envoyer toutes tes troupes au même endroit au même moment.": "Their divine power, Anubis, kills half of your moving units: avoid sending all your troops to the same place at the same time.",
+  "Les Celtes augmentent la production de leurs tours de 50 % avec Guèdes. Leur pouvoir divin, Toutatis, fait tomber le ciel sur une zone.": "The Celts boost their towers’ production by 50% with Woad. Their divine power, Toutatis, makes the sky fall on an area.",
+  "Tu peux maintenant adopter une civilisation, Romains ou Égyptiens, dans l’encart de lancement de chaque partie.": "You can now adopt a civilization, Romans or Egyptians, in the launch panel of each game.",
+  "Les Vikings produisent des Berserkers (2/2 avec 1 d’armure) : tes unités classiques ne peuvent pas les blesser. Tes blindés et des tours bien garnies les arrêtent.": "The Vikings produce Berserkers (2/2 with 1 armour): your regular units cannot hurt them. Your armoured units and well-garrisoned towers stop them.",
+  "Leur pouvoir divin, Loki, peut voler une de tes tours classiques avec toute sa garnison.": "Their divine power, Loki, can steal one of your regular towers with its whole garrison.",
+  "Les Mayas accélèrent leurs troupes et produisent davantage quand ils attaquent sur plusieurs fronts : ils frappent loin et vite.": "The Maya speed up their troops and produce more when attacking on several fronts: they strike far and fast.",
+  "Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours. Les civilisations nordiques te sont maintenant ouvertes.": "Their divine power, Tezcatlipoca, halves the garrison of three of your towers. The Northern civilizations are now open to you.",
+  "Les Aztèques produisent des guerriers jaguars (2/2) qui encaissent un combat de plus que tes unités.": "The Aztecs produce jaguar warriors (2/2) who survive one more fight than your units.",
+  "Leur pouvoir divin, Quetzalcoatl, ajoute 30 défenseurs à deux de leurs tours.": "Their divine power, Quetzalcoatl, adds 30 defenders to two of their towers.",
+  "Dernier chapitre : toutes les civilisations peuvent se dresser contre toi, et tu peux choisir la tienne parmi toutes. Bonne conquête !": "Final chapter: any civilization may rise against you, and you can choose yours from all of them. Good conquest!"
+});
+EN_RX.push(
+  [/^Chapitre (\d) — (.+)$/, m => 'Chapter ' + m[1] + ' — ' + WX(m[2])],
+  [/^Chapitre (\d)$/, m => 'Chapter ' + m[1]],
+  [/^(Très facile|Facile|Normal|Difficile|Très difficile) — (.+)$/, m => WX(m[1]) + ' — ' + WX(m[2])],
+  [/^(Très facile|Facile|Normal|Difficile|Très difficile), (\d+)\/5 victoires, (\d+) ★$/, m => WX(m[1]) + ', ' + m[2] + '/5 wins, ' + m[3] + ' ★'],
+  [/^🔒 (.+)$/, m => '🔒 ' + WX(m[1])],
+  [/^Défi du mois, (Normal|Difficile|Très difficile) (\d)$/, m => 'Monthly challenge, ' + WX(m[1]) + ' ' + m[2]],
+  [/^Défi du jour, (Normal|Difficile)$/, m => 'Daily challenge, ' + WX(m[1])],
+  [/^Adversaires : (.+)$/, m => 'Opponents: ' + m[1]]
 );
 function trFull(k) {
   if (EN[k] != null) return EN[k];
@@ -1403,11 +1544,11 @@ function resize() {
 const LANDS = [
   { name: 'Prairie', stars: 0, ground: '#a3d06a', patch: '#93c25c', rock: '#a9b0b5', rockShade: '#737c82', snow: '#ffffff',
     tree: '#47a53f', tree2: '#2f8236', trunk: '#7a5230', tuft: '#6f9f3e', plants: ['leafy', 'pine'], small: 'tuft' },
-  { name: 'Savane', stars: 9, ground: '#dcc46c', patch: '#cdb05a', rock: '#b88f5e', rockShade: '#85633f', snow: null,
+  { name: 'Savane', stars: 3, ground: '#dcc46c', patch: '#cdb05a', rock: '#b88f5e', rockShade: '#85633f', snow: null,
     tree: '#86a23d', tree2: '#62802c', trunk: '#6b4a2a', tuft: '#9c873a', plants: ['acacia', 'acacia', 'bush'], small: 'tuft' },
-  { name: 'Désert', stars: 21, ground: '#efd69c', patch: '#e3c584', rock: '#d0955f', rockShade: '#9d653a', snow: null,
+  { name: 'Désert', stars: 7, ground: '#efd69c', patch: '#e3c584', rock: '#d0955f', rockShade: '#9d653a', snow: null,
     tree: '#5f9e4a', tree2: '#4a8239', trunk: '#6b4a2a', tuft: '#c4a26a', plants: ['cactus'], small: 'pebble' },
-  { name: 'Montagne enneigée', stars: 36, ground: '#eef3f7', patch: '#dde7ef', rock: '#8f9ba8', rockShade: '#5f6b78', snow: '#ffffff',
+  { name: 'Montagne enneigée', stars: 12, ground: '#eef3f7', patch: '#dde7ef', rock: '#8f9ba8', rockShade: '#5f6b78', snow: '#ffffff',
     tree: '#2f6b4a', tree2: '#24563b', trunk: '#5b4330', tuft: '#b4c2ce', plants: ['snowpine'], small: 'pebble' },
   { name: 'Marais', stars: 0, ground: '#76895a', patch: '#4f6f66', rock: '#7d8a76', rockShade: '#56614f', snow: null,
     tree: '#5b7a3a', tree2: '#46602c', trunk: '#4e3d2a', tuft: '#4d6633', plants: ['reed', 'reed', 'deadtree'], small: 'tuft', water: true }
@@ -1704,6 +1845,7 @@ function buildGame(cfg) {
   $('hud').classList.remove('hidden');
   $('btnPause').textContent = '❚❚';
   if (!hintShown) { $('hint').classList.remove('hidden'); positionHint(); }
+  anubisZones = [];
   civStart();                                      // civilisation du joueur pour cette partie
   pickBattleTrack();                               // thème de bataille tiré au hasard, repris du début
   musicSync();
@@ -1777,14 +1919,28 @@ function decodeChallenge(id) {
 const parisDay = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris' }).format(new Date());
 function hashStr(str) { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 function dailyChallenges(day = parisDay()) {
-  // 3 défis d'une partie : deux en Normal (cartes différentes), un en Difficile
-  return [[2, 'Normal 1', 'n1'], [2, 'Normal 2', 'n2'], [3, 'Difficile', 'd']].map(([diff, label, key]) => {
+  // 2 défis d'une partie : un en Normal, un en Difficile
+  return [[2, 'Normal', 'n'], [3, 'Difficile', 'd']].map(([diff, label, key]) => {
     const h = hashStr(day + '-' + key), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
     const id = encodeChallenge(diff, 1, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
     return { label, day, ch: decodeChallenge(id) };
   });
 }
 
+// 15 défis du mois (une partie chacun), identiques pour tous : 5 Normal, 5 Difficile, 5 Très difficile
+const parisMonth = () => parisDay().slice(0, 7);
+function monthlyChallenges(month = parisMonth()) {
+  return Array.from({ length: 15 }, (_, i) => {
+    const diff = i < 5 ? 2 : i < 10 ? 3 : 4, h = hashStr(month + '-m' + i), opp = 1 + (h % 3), mask = (h >>> 3) % 8;
+    const id = encodeChallenge(diff, 1, opp, SPECIAL_ORDER.filter(k => mask & SPEC_BITS[k]), h % 2176782336);
+    return { label: TIERS[diff].name + ' ' + (i % 5 + 1), month, ch: decodeChallenge(id) };
+  });
+}
+// Civilisations à affronter dans un défi (première partie), affichées sur sa carte
+function foesLine(ch) {
+  const g = ch.games[0], list = aiCivsFor(g.seed, g.opponents);
+  return '<p class="sub foes"><span>Adversaires :</span> ' + list.map(([k, f], i) => `<span style="color:${COLORS[i + 1]}">●</span> ${CIVS[k].icon} <span>${CIVS[k].factions[f].name}</span>`).join(', ') + '</p>';
+}
 /* Comparaison de deux résultats : une victoire bat toujours une défaite ; entre victoires, le temps le plus
    court l'emporte ; entre défaites, le plus de manches gagnées, puis le temps le plus court */
 function better(a, b) {
@@ -1895,24 +2051,33 @@ const mineHtml = (best, n) => !best ? none('Pas encore joué')
 const boxHtml = (id, best, n) => `<div class="prebox"><div><span>Top 3 en ligne</span><strong>${podiumHtml(id)}</strong></div>`
   + `<div><span>Ton meilleur</span><strong>${mineHtml(best, n)}</strong></div></div>`;
 // Défis du jour : trois cartes en tête de l'onglet
-function renderDaily() {
-  $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => {
-    const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
-    const cls = won ? rankClass(ch.id, true) : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
-    const d = day.split('-').reverse().join('/');
-    return `<div class="hist${cls}">
-      <div class="when"><strong>Défi du jour, ${label}</strong><span class="badge">${d}</span></div>
-      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span><span>${ch.games.length} manche${ch.games.length > 1 ? 's' : ''}</span></div>
-      <div class="specs">${specIcons(ch)}</div>
+function defiCard(full, badge, ch) {
+  const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
+  const cls = won ? rankClass(ch.id, true) : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
+  return `<div class="hist${cls}">
+      <div class="when"><strong>${full}</strong><span class="badge">${badge}</span></div>
+      <div class="chips"><span>1v${ch.games[0].opponents}</span><span>${TIERS[ch.difficulty].name}</span></div>
+      <div class="specs">${specIcons(ch)}</div>${foesLine(ch)}
       ${boxHtml(ch.id, best, ch.games.length)}
-      <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}<button data-daily="${ch.id}" data-label="${label}">${S.list.length ? 'Rejouer' : 'Jouer'}</button></div>
+      <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}<button data-daily="${ch.id}" data-label="${full}">${S.list.length ? 'Rejouer' : 'Jouer'}</button></div>
     </div>`;
-  }).join('');
+}
+function renderMonthly() {
+  const list = monthlyChallenges(), m = list[0].month.split('-').reverse().join('/');
+  $('monthList').innerHTML = [2, 3, 4].map(d => `<p class="lbl">${TIERS[d].name}</p>`
+    + list.filter(x => x.ch.difficulty === d).map(x => defiCard('Défi du mois, ' + x.label, m, x.ch)).join('')).join('');
+}
+function renderDaily() {
+  $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => defiCard('Défi du jour, ' + label, day.split('-').reverse().join('/'), ch)).join('');
 }
 function renderDefiTab() {
   renderDaily();
-  fetchRecords(dailyChallenges().map(x => x.ch.id)).then(ok => { if (ok) renderDaily(); });
+  if (!$('defiMonth').classList.contains('hidden')) renderMonthly();
+  const ids = dailyChallenges().map(x => x.ch.id).concat(monthlyChallenges().map(x => x.ch.id));
+  fetchRecords(ids).then(ok => { if (ok) { renderDaily(); if (!$('defiMonth').classList.contains('hidden')) renderMonthly(); } });
 }
+$('btnMonth').onclick = () => { $('defiNew').classList.add('hidden'); $('defiMonth').classList.remove('hidden'); renderMonthly(); renderDefiTab(); };
+$('btnMonthBack').onclick = () => { $('defiMonth').classList.add('hidden'); $('defiNew').classList.remove('hidden'); renderDefiTab(); };
 // Historique : une carte par défi (essais regroupés). Cadre vert : réussi avec le meilleur temps connu ;
 // jaune : réussi sans battre le record en ligne ; rouge : jamais réussi ; gris : abandonné ou en cours
 function renderHist() {
@@ -1965,7 +2130,7 @@ function onDefiClick(e) {
   if (rs) { const x = findEntry(rs.dataset.resume); if (x && canResume(x)) preDefi(x.challenge, x.source, null, x); }
   if (rp) { const x = findEntry(rp.dataset.replay); if (x) preDefi(x.challenge, x.source); }
   if (sh) shareId(sh.dataset.share);
-  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, 'du jour', 'Défi du jour, ' + dy.dataset.label); }
+  if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, 'du jour', dy.dataset.label); }
 }
 $('histList').addEventListener('click', onDefiClick);
 $('dailyList').addEventListener('click', onDefiClick);
@@ -1992,8 +2157,10 @@ function showOnline(id, time) {
   el.textContent = 'Classement en ligne : envoi…';
   $('syncOn').classList.add('hidden'); $('syncOff').classList.add('hidden');
   $('overSync').classList.remove('hidden');          // seul « Passer sans synchroniser » est proposé pendant l'envoi
+  if (/^C/.test(id)) el.textContent = 'Enregistrement de ton temps…';
   submitScore(id, time, ctrl.signal).then(r => {
     if (ctrl.signal.aborted) return;                 // le joueur a choisi de passer
+    if (r && /^C/.test(id)) { syncStop = null; $('overSync').classList.add('hidden'); el.textContent = 'Temps enregistré dans ton compte.'; return; }
     syncStop = null; $('overSync').classList.add('hidden');
     if (!r) {                                        // hors ligne : on peut réessayer ou passer
       el.textContent = 'Classement en ligne injoignable (hors ligne) : temps non transmis.';
@@ -2084,7 +2251,7 @@ async function fetchAll(force) {
       const res = await fetch(scoreUrl, { signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
       const data = await res.json();
       if (!data || !data.ok || !data.scores) return false;
-      for (const id of Object.keys(data.scores)) remote[id] = cleanTop(data.scores[id].top);
+      for (const id of Object.keys(data.scores)) if (/^D/.test(id)) remote[id] = cleanTop(data.scores[id].top);   // défis seulement
       allPlayers = data.players || {};
       lastFetch = Date.now();
       pullMine();
@@ -2178,6 +2345,7 @@ function sendPending() {
 }
 $('btnSyncSend').onclick = sendPending;
 bindAcctForm($('syncOff'), sendPending);
+bindAcctForm($('preAcct'), () => $('preAcct').classList.add('hidden'));
 $('btnSyncSkip').onclick = () => {
   if (syncStop) { syncStop.abort(); syncStop = null; }
   $('overSync').classList.add('hidden'); pendingScore = null; $('overOnline').textContent = 'Temps non transmis.';
@@ -2190,7 +2358,7 @@ const dayMinus = (day, k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCD
 // argents et bronzes ; classement comme aux Jeux olympiques (or, puis argent, puis bronze), et total des trois.
 // Campagne : les 75 niveaux, étoiles à titre indicatif. Défis : défis du jour des 7 derniers jours glissants.
 function boardRows(kind) {
-  const camp = kind === 'campaign', ids = camp ? campaignPlan().map(L => L.id)
+  const camp = false, ids = kind === 'month' ? monthlyChallenges().map(d => d.ch.id)
     : [0, 1, 2, 3, 4, 5, 6].flatMap(k => dailyChallenges(dayMinus(parisDay(), k)).map(d => d.ch.id));
   const rows = new Map();                             // clé : nom en minuscules
   const row = name => { const k = name.toLowerCase(); if (!rows.has(k)) rows.set(k, { login: name, m: [0, 0, 0], stars: null }); return rows.get(k); };
@@ -2202,9 +2370,11 @@ function boardRows(kind) {
   return [...rows.values()].sort((a, b) => b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.login.localeCompare(b.login));
 }
 function renderBoard(kind) {
-  const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '', camp = kind === 'campaign';
-  $('boardTitle').textContent = camp ? 'Scores de la campagne' : 'Scores des défis du jour';
-  $('boardNote').textContent = (camp ? 'Médailles gagnées sur l’ensemble des niveaux de la campagne'
+  const rows = boardRows(kind), me = account ? account.login.toLowerCase() : '', camp = false;
+  boardKind = kind;
+  $('boardDay').classList.toggle('on', kind !== 'month'); $('boardMonth').classList.toggle('on', kind === 'month');
+  $('boardTitle').textContent = kind === 'month' ? 'Scores des défis du mois' : 'Scores des défis du jour';
+  $('boardNote').textContent = (kind === 'month' ? 'Médailles des 15 défis du mois en cours'
     : 'Médailles des défis du jour sur les 7 derniers jours')
     + ', classées comme aux Jeux olympiques : d’abord l’or, puis l’argent, puis le bronze.'
     + (camp ? ' Les étoiles sont indiquées à titre indicatif et ne comptent pas dans le classement.' : '');
@@ -2217,14 +2387,16 @@ function renderBoard(kind) {
   $('boardTable').innerHTML = rows.length ? `<table class="board"><thead>${head}</thead><tbody>${body}${foot}</tbody></table>`
     : '<p class="sub">Aucun résultat en ligne pour le moment.</p>';
 }
+let boardKind = 'defi';
+$('boardDay').onclick = () => renderBoard('defi');
+$('boardMonth').onclick = () => renderBoard('month');
 async function openBoard(kind) {
   $('boardTable').innerHTML = '<p class="sub">Chargement…</p>';
   $('board').classList.remove('hidden');
   renderBoard(kind);
   const ok = await fetchAll(true);
-  if (!$('board').classList.contains('hidden')) { if (ok) renderBoard(kind); else $('boardTable').innerHTML = '<p class="sub">Tableau injoignable : vérifie ta connexion Internet.</p>'; }
+  if (!$('board').classList.contains('hidden')) { if (ok) renderBoard(boardKind); else $('boardTable').innerHTML = '<p class="sub">Tableau injoignable : vérifie ta connexion Internet.</p>'; }
 }
-$('btnBoardCamp').onclick = () => openBoard('campaign');
 $('btnBoardDefi').onclick = () => openBoard('defi');
 $('btnBoardClose').onclick = () => $('board').classList.add('hidden');
 
@@ -2244,6 +2416,7 @@ function startTutoLevel() {
   buildGame(TUTO_CFG);
   startTuto();
 }
+let tutoSteps = null;
 const TUTO_STEPS = [
   { text: 'Voici ta tour, en bleu. Le nombre indique ses défenseurs.', target: myBase },
   { text: 'Sans chemin, une tour remplit sa garnison : 2 unités par seconde au départ, puis +1 par niveau. Les points sous la tour montrent son niveau (un niveau tous les 10 défenseurs).', target: myBase },
@@ -2258,7 +2431,32 @@ const TUTO_STEPS = [
   { text: 'L’adversaire attaque aussi. Prends toutes ses tours pour gagner. Les unités ennemies qui se croisent se combattent.', target: () => towers.find(t => t.owner === 1) },
   { text: 'En haut : le chronomètre (victoire en moins de 3:20 = une étoile), la pause, le son et la vitesse ×1, ×1,5 ou ×2. Bonne conquête !', target: null }
 ];
-function startTuto() {
+// Bulles d'explication intégrées à la campagne (premières parties de chaque nouveauté)
+const ofKind = k => () => towers.find(t => t.kind === k) || null;
+const firstFoe = () => towers.find(t => t.owner === 1) || null;
+const TUTO_SETS = {
+  basics: TUTO_STEPS,
+  super: [{ text: 'Nouveau : la super-tour, marquée d’une étoile dorée. Elle monte jusqu’à 80 défenseurs et produit 20 % de plus que les autres tours. Prends-la avant l’adversaire !', target: ofKind('super') }],
+  artillery: [{ text: 'Nouveau : la tour de tir. En plus de produire, elle tire sur les unités et les tours adverses dans son cercle en pointillés.', target: ofKind('artillery') }],
+  barracks: [{ text: 'Nouveau : la caserne. Quand elle envoie des troupes, ce sont des blindés (attaque 10, vie 10). Sans chemin, elle se remplit comme une tour classique.', target: ofKind('barracks') },
+    { text: 'Attention : un bâtiment spécial gris riposte contre la tour qui l’attaque.', target: ofKind('barracks') }],
+  two: [{ text: 'Deux clans s’allient contre toi. Ils se battent aussi entre eux : profite de leurs combats pour t’étendre.', target: firstFoe }],
+  rome: [{ text: 'Les Romains ont une civilisation. Leur pouvoir, Experts de siège, double l’attaque de leurs unités pendant 15 s : surveille les tours qu’ils visent.', target: firstFoe },
+    { text: 'Leur pouvoir divin, Mars, change une de leurs tours en caserne pleine. Les pouvoirs adverses s’affichent en bas de l’écran, barrés une fois utilisés.', target: null }],
+  egypte: [{ text: 'Les Égyptiens font grandir leurs tours plus vite avec Grands bâtisseurs : attaque-les avant qu’elles ne soient pleines.', target: firstFoe },
+    { text: 'Leur pouvoir divin, Anubis, tue la moitié de tes unités en mouvement : évite d’envoyer toutes tes troupes au même endroit au même moment.', target: null }],
+  celte: [{ text: 'Les Celtes augmentent la production de leurs tours de 50 % avec Guèdes. Leur pouvoir divin, Toutatis, fait tomber le ciel sur une zone.', target: firstFoe },
+    { text: 'Tu peux maintenant adopter une civilisation, Romains ou Égyptiens, dans l’encart de lancement de chaque partie.', target: null }],
+  viking: [{ text: 'Les Vikings produisent des Berserkers (2/2 avec 1 d’armure) : tes unités classiques ne peuvent pas les blesser. Tes blindés et des tours bien garnies les arrêtent.', target: firstFoe },
+    { text: 'Leur pouvoir divin, Loki, peut voler une de tes tours classiques avec toute sa garnison.', target: null }],
+  maya: [{ text: 'Les Mayas accélèrent leurs troupes et produisent davantage quand ils attaquent sur plusieurs fronts : ils frappent loin et vite.', target: firstFoe },
+    { text: 'Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours. Les civilisations nordiques te sont maintenant ouvertes.', target: null }],
+  azte: [{ text: 'Les Aztèques produisent des guerriers jaguars (2/2) qui encaissent un combat de plus que tes unités.', target: firstFoe },
+    { text: 'Leur pouvoir divin, Quetzalcoatl, ajoute 30 défenseurs à deux de leurs tours.', target: null }],
+  world: [{ text: 'Dernier chapitre : toutes les civilisations peuvent se dresser contre toi, et tu peux choisir la tienne parmi toutes. Bonne conquête !', target: null }]
+};
+function startTuto(steps) {
+  tutoSteps = steps || TUTO_STEPS;
   tuto = { i: -1, prey: null };
   hintShown = true; $('hint').classList.add('hidden');
   nextTuto();
@@ -2266,15 +2464,15 @@ function startTuto() {
 function nextTuto() {
   if (!tuto) return;
   tuto.i++;
-  const st = TUTO_STEPS[tuto.i];
+  const st = tutoSteps[tuto.i];
   if (!st) { endTuto(true); return; }
-  if (st.wait && tuto.i === 3) tuto.prey = nearNeutral();
+  if (st.wait && tutoSteps === TUTO_STEPS && tuto.i === 3) tuto.prey = nearNeutral();
   tuto.info = !st.wait;
   paused = tuto.info; drag = null;
   $('btnPause').textContent = paused ? '▶' : '❚❚';
   $('tutoText').textContent = st.text;
   $('tutoNext').classList.toggle('hidden', !tuto.info);
-  $('tutoNext').textContent = tuto.i === TUTO_STEPS.length - 1 ? 'C’est parti !' : 'Suivant';
+  $('tutoNext').textContent = tuto.i === tutoSteps.length - 1 ? 'C’est parti !' : 'Suivant';
   $('tuto').classList.remove('hidden');
   placeTuto();
   musicSync();
@@ -2294,16 +2492,38 @@ function endTuto(done) {
   if (state === 'play') { paused = false; $('btnPause').textContent = '❚❚'; musicSync(); }
 }
 // Vérifié à chaque image : passe à l'étape suivante quand l'action demandée est faite
-function tutoTick() { if (tuto && !tuto.info) { const st = TUTO_STEPS[tuto.i]; if (st && st.wait && st.wait()) nextTuto(); else placeTuto(); } }
-function tutoTarget() { if (!tuto) return null; const st = TUTO_STEPS[tuto.i]; return st && st.target ? st.target() : null; }
+function tutoTick() { if (tuto && !tuto.info) { const st = tutoSteps[tuto.i]; if (st && st.wait && st.wait()) nextTuto(); else placeTuto(); } }
+function tutoTarget() { if (!tuto) return null; const st = tutoSteps[tuto.i]; return st && st.target ? st.target() : null; }
 $('tutoNext').onclick = nextTuto;
 $('tutoSkip').onclick = () => endTuto(true);
-$('btnTutoRules').onclick = startTutoLevel;
-$('btnTutoCamp').onclick = startTutoLevel;
+$('btnTutoRules').onclick = () => preCampaign(1, true);   // la campagne intègre le tutoriel
 
 /* ================= Avant chaque partie : record en ligne, meilleur temps personnel, lancement ================= */
 let preStart = null;
-function showPre({ title, chips, specials, id, mine, note, start }) {
+// Sélecteur de civilisation et civilisations adverses de la partie (foes : liste [civ, faction] ou null)
+function renderPreCiv(foes, allowed) {
+  const sel = $('preCivSel'), ok = f => !allowed || allowed.includes(f);
+  sel.innerHTML = '<option value="">Aucune civilisation</option>'
+    + Object.keys(CIVS).map(k => Object.keys(CIVS[k].factions).filter(ok).map(f => `<option value="${k}:${f}">${CIVS[k].icon} ${CIVS[k].factions[f].name} (${CIVS[k].name})</option>`).join('')).join('');
+  sel.disabled = !!allowed && !allowed.length;
+  const cur = custom.civ ? custom.civ + ':' + (custom.fac || Object.keys(CIVS[custom.civ].factions)[0]) : '';
+  sel.value = cur && ok(cur.split(':')[1]) ? cur : '';
+  preAllowed = allowed;
+  $('preFoes').textContent = foes && foes.length
+    ? 'Adversaires : ' + foes.map(([k, f], i) => NAMES[i + 1] + ' — ' + CIVS[k].factions[f].name + ' (' + CIVS[k].name + ')').join(', ')
+    : 'Adversaires sans civilisation.';
+}
+$('preCivSel').addEventListener('change', e => {
+  const [k, f] = e.target.value.split(':');
+  custom.civ = k || null; custom.fac = f || null;
+  if (!custom.civ && custom.skin === 'civ') custom.skin = 'Bastion';
+  store.set('bastions.custom', custom); applyCustom();
+});
+let preAllowed = null;
+function showPre({ title, chips, specials, id, mine, note, start, foes, allowed, campaign }) {
+  renderPreCiv(foes, allowed);
+  $('preAcct').classList.add('hidden');
+  $('preRecRow').classList.toggle('hidden', !!campaign);   // la campagne n'a plus de classement en ligne
   $('preTitle').textContent = title;
   $('preChips').innerHTML = chips.map(c => `<span>${escapeHtml(c)}</span>`).join('');
   $('preSpecs').innerHTML = specIcons({ specials });
@@ -2323,20 +2543,18 @@ $('btnPreGo').onclick = () => { const go = preStart; hidePre(); if (go) go(); };
 $('btnPreBack').onclick = hidePre;
 // Campagne
 function preCampaign(n, forceTuto) {
-  const L = campaignPlan()[n - 1], t = campBest()[L.id];
+  const L = campaignPlan()[n - 1], t = campBest()[L.id], cfg = campaignLevel(n);
   showPre({
-    title: TIERS[L.ti].name + ', niveau ' + L.k + '/' + TIER_LEVELS,
-    chips: ['1v' + L.opp, TIERS[L.ti].name, LANDS[L.land].name],
-    specials: L.variant === 'none' ? [] : L.variant === 'all' ? SPECIAL_ORDER : [L.variant],
-    id: L.id,
-    mine: t == null ? none('Pas encore gagné')
-      : fmtTime(t) + '<small>' + (t < STAR_TIME ? '★ étoile obtenue' : 'pas encore d’étoile') + '</small>',
-    note: 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
-    start: () => { startCampaign(n); if (L.ti === 0 && $('optTuto').checked) startTuto(); }
+    title: TIERS[L.ti].name + ' — ' + L.title,
+    chips: ['1v' + L.opp, 'Chapitre ' + (L.ti + 1), LANDS[L.land].name],
+    specials: L.specials, id: L.id, campaign: true,
+    mine: t == null ? none('Pas encore gagné') : fmtTime(t) + '<small>' + (t < STAR_TIME ? '★ étoile obtenue' : 'pas encore d’étoile') + '</small>',
+    note: (L.k === 1 ? CHAPTERS[L.ti].story + ' ' : '') + 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
+    foes: cfg.aiCivs, allowed: cfg.allowed,
+    start: () => { startCampaign(n); if (L.tuto && (forceTuto || t == null)) startTuto(TUTO_SETS[L.tuto]); }
   });
-  // Très facile : tutoriel proposé (coché tant qu'il n'a jamais été suivi jusqu'au bout)
-  $('preTutoRow').classList.toggle('hidden', L.ti !== 0);
-  $('optTuto').checked = L.ti === 0 && (forceTuto || !tutoDone);
+  // Début de campagne : pseudonyme et code du joueur (la partie peut aussi se jouer sans compte)
+  $('preAcct').classList.toggle('hidden', !(n === 1 && !account));
 }
 // Défi (nouveau, reçu, du jour, rejoué ou repris)
 function preDefi(ch, source, title, entry) {
@@ -2350,7 +2568,8 @@ function preDefi(ch, source, title, entry) {
       : best.status === 'réussi' ? fmtTime(best.total) + '<small>défi réussi</small>'
       : best.times.length + '/' + n + '<small>manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + '</small>',
     note: entry ? 'Reprise à la manche ' + (entry.times.length + 1) + ' : les temps déjà acquis sont conservés.' : '',
-    start: () => entry ? resumeAttempt(entry) : startAttempt(ch, source)
+    start: () => entry ? resumeAttempt(entry) : startAttempt(ch, source),
+    foes: (g => aiCivsFor(g.seed, g.opponents))(ch.games[entry ? Math.min(entry.times.length, ch.games.length - 1) : 0])
   });
 }
 
@@ -2360,6 +2579,7 @@ function preDefi(ch, source, title, entry) {
 /* ================= Simulation ================= */
 function update(dt) {
   clock += dt;
+  anubisTick();                                    // zones d'Anubis actives
   for (const t of towers) {
     t.fx = Math.max(0, t.fx - dt * 1.4);
     t.hit = Math.max(0, t.hit - dt * 4);
@@ -2388,9 +2608,10 @@ function update(dt) {
         t.acc -= 1;
         const to = t.paths[t.rr % t.paths.length]; t.rr++;
         const boost = !armored && civBoostO(t.owner), pw = armored ? ARMOR : boost ? 2 : 1;
+        const bers = boost && cOf(t.owner).fac === 'viking';
         units.push({ from: t.id, to, owner: t.owner, p: 0, hp: pw, pw, big: armored,
-          fixed: boost ? 2 : 0,                      // renforce ou consomme toujours 2, même blessée en route
-          bers: boost && cOf(t.owner).fac === 'viking',   // Berserker : invincible face aux unités de puissance 1
+          atk: armored ? ARMOR : boost ? 2 : 0,      // 0 : attaque de base (1, ou 2 pendant Experts de siège)
+          arm: bers ? 1 : 0, bers,                   // Berserker 2/2(1) ; guerrier jaguar 2/2(0)
           off: armored ? 0 : (Math.random() - 0.5) * baseR * 0.35 });
       }
       if (!armored && civFacO(t.owner, 'egypte') && t.stock < t.cap) {   // Grands bâtisseurs (hors casernes) : la tour qui envoie garde
@@ -2430,16 +2651,18 @@ function update(dt) {
 /* Une unité vaut u.hp (1, ou jusqu'à 10 pour un blindé) : chaque point élimine un défenseur */
 function arrive(u) {
   const t = towers[u.to];
-  // valeur apportée : 2 pour les unités de puissance 2 (même blessées), double pour les unités de puissance 1
-  // pendant Experts de siège, sinon la vie restante de l'unité
-  const v = u.fixed ? u.fixed : civFacO(u.owner, 'rome') && pwOf(u) === 1 ? u.hp * 2 : u.hp;
+  // à l'arrivée, c'est l'attaque de l'unité qui consomme la garnison adverse ou renforce une tour alliée
+  const v = atkOf(u);
   if (u.owner < 0 && t.owner < 0) return;          // riposte arrivée sur une tour déjà redevenue grise
   // Un bâtiment spécial neutre attaqué retient son agresseur (3 au maximum)
   if (t.owner < 0 && t.kind !== 'tower' && u.owner >= 0) {
     const src = towers[u.from], known = t.aggr.find(a => a.id === src.id && a.owner === u.owner);
     if (known) known.last = clock;                 // nouvelle attaque : la riposte est prolongée
     else if (src.owner === u.owner && t.aggr.length < MAX_PATHS
-        && (t.kind === 'artillery' || canLink(t, src))) t.aggr.push({ id: src.id, owner: u.owner, last: clock });
+        && (t.kind === 'artillery' || canLink(t, src))) {
+      t.aggr.push({ id: src.id, owner: u.owner, last: clock });
+      t.acc = Math.max(t.acc, 1);                   // riposte immédiate dès la première attaque
+    }
   }
   if (t.owner !== u.owner) { civLossO(u.owner, Math.min(v, t.stock)); civLossO(t.owner, Math.min(v, t.stock)); }   // attaquants et défenseurs tombés
   if (t.owner === u.owner) t.stock = Math.min(t.cap, t.stock + v);
@@ -2468,14 +2691,15 @@ function fire(t, aggr) {
   const R = rangeR(t);
   let best = null, bd = R, pos = null;
   for (const u of units) {
-    if (u.dead || u.owner === t.owner) continue;
+    if (u.dead || u.owner === t.owner || armOf(u) >= 1) continue;   // un tir ne blesse pas une unité en armure
     if (aggr && !aggr.some(a => a.owner === u.owner)) continue;
     const p = unitPos(u), d = Math.hypot(p.x - t.x, p.y - t.y);
     if (d <= bd) { bd = d; best = u; pos = p; }
   }
-  if (best) {
-    if (--best.hp <= 0) best.dead = true;
-    civLossO(best.owner, 1);
+  if (best) {                                      // un tir inflige 1 dégât, encaissé d'abord par l'armure
+    const d = Math.max(0, 1 - armOf(best));
+    best.hp -= d; civLossO(best.owner, Math.min(d, best.hp + d));
+    if (best.hp <= 0) best.dead = true;
   } else {
     bd = R;
     for (const o of towers) {
@@ -2511,12 +2735,9 @@ function collide() {
     while (i < g.f.length && j < g.r.length) {
       const x = g.f[i], y = g.r[j];
       if (x.p + y.p < 1 || x.owner === y.owner) break;
-      if (x.bers && pwOf(y) === 1) { y.dead = true; j++; continue; }   // Berserker : victoire sans perte
-      if (y.bers && pwOf(x) === 1) { x.dead = true; i++; continue; }
-      const m = Math.min(x.hp, y.hp);              // un blindé encaisse jusqu'à 10 unités
-      x.hp -= m; y.hp -= m; civLossO(x.owner, m); civLossO(y.owner, m);
-      if (x.hp <= 0) { x.dead = true; i++; }
-      if (y.hp <= 0) { y.dead = true; j++; }
+      if (!fight(x, y)) { i++; continue; }         // personne ne peut blesser l'autre : elles se croisent
+      if (x.dead) i++;
+      if (y.dead) j++;
     }
   }
   // [STRAT] unités adverses qui se croisent sur des chemins différents : grille spatiale
@@ -2539,13 +2760,9 @@ function collide() {
         for (const v of arr) {
           if (v === u || v.dead || v.owner === u.owner) continue;
           if (Math.hypot(u.cx - v.cx, u.cy - v.cy) > (u.r + v.r) * 1.1) continue;
-          if (u.bers && pwOf(v) === 1) { v.dead = true; bursts.push({ x: v.cx, y: v.cy, life: 1 }); continue; }   // Berserker
-          if (v.bers && pwOf(u) === 1) { u.dead = true; bursts.push({ x: u.cx, y: u.cy, life: 1 }); break; }
-          const m = Math.min(u.hp, v.hp);
-          u.hp -= m; v.hp -= m; civLossO(u.owner, m); civLossO(v.owner, m);
+          if (!fight(u, v)) continue;                 // elles se croisent sans pouvoir se blesser
           bursts.push({ x: (u.cx + v.cx) / 2, y: (u.cy + v.cy) / 2, life: 1 });
-          if (v.hp <= 0) v.dead = true;
-          if (u.hp <= 0) { u.dead = true; break; }
+          if (u.dead) break;
         }
       }
     }
@@ -2566,7 +2783,7 @@ function checkEnd() {
 /* ================= IA ================= */
 function computeIncoming() {
   inc = towers.map(() => [0, 0, 0, 0, 0]);         // case 4 : unités neutres (riposte)
-  for (const u of units) inc[u.to][u.owner < 0 ? 4 : u.owner] += u.hp;
+  for (const u of units) inc[u.to][u.owner < 0 ? 4 : u.owner] += atkOf(u);
 }
 const enemyIn  = (t, o) => inc[t.id].reduce((s, v, k) => k === o ? s : s + v, 0);
 const friendIn = (t, o) => inc[t.id][o];
@@ -2663,6 +2880,16 @@ function render() {
     ctx.restore();
   }
   const ur = unitR();
+  // Halos : blindés (blanc), unités de puissance 2 (or), unités renforcées par un pouvoir en cours (bleu ou rouge)
+  for (const u of units) {
+    const boosted = pwOf(u) === 1 && (civFacO(u.owner, 'maya') || civFacO(u.owner, 'rome'));
+    if (!u.big && pwOf(u) < 2 && !boosted) continue;
+    const { x, y } = unitPos(u), R = ur * (u.big ? 4.2 : 3.2);
+    const col = u.big ? '255,255,255' : boosted ? (civFacO(u.owner, 'maya') ? '90,160,255' : '255,80,60') : u.bers ? '255,120,60' : '255,215,90';
+    const g = ctx.createRadialGradient(x, y, ur * 0.5, x, y, R);
+    g.addColorStop(0, `rgba(${col},.75)`); g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+  }
   for (let o = -1; o < 4; o++) {
     ctx.beginPath(); let any = false;
     for (const u of units) {
@@ -2680,7 +2907,7 @@ function render() {
     ctx.fillStyle = colorOf(u.owner); ctx.fillRect(x - hs + 1, y - hs + 1, hs * 2 - 2, hs * 2 - 2);
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x - hs * 0.45, y - hs * 0.45, hs * 0.9, hs * 0.9);
   }
-  for (const t of towers) drawTower(t);
+  for (const t of towers) { towerHalo(t); drawTower(t); drawCivFlag(t); }
   // Chocs entre unités
   for (const b of bursts) {
     ctx.save(); ctx.globalAlpha = b.life; ctx.fillStyle = '#fff6c2'; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1;
@@ -2715,6 +2942,11 @@ function render() {
     ctx.save(); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.globalAlpha = 0.6 + 0.4 * k;
     ctx.beginPath(); ctx.arc(tt.x, tt.y, rad(tt) + 14 + 6 * k, 0, TAU); ctx.stroke(); ctx.restore();
   }
+  for (const z of anubisZones) {                   // zones d'Anubis : cercle rouge pulsant tant qu'elles sont actives
+    const k = 0.5 + 0.5 * Math.sin(performance.now() / 120);
+    ctx.save(); ctx.fillStyle = `rgba(200,20,20,${0.22 + 0.1 * k})`; ctx.strokeStyle = 'rgba(140,10,10,.85)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
   drawGodFx();                                     // animations des pouvoirs divins sur la carte
   ctx.restore();                                   // fin du dessin de la carte
   drawFresco();                                    // fresque de la civilisation
@@ -2747,28 +2979,28 @@ function drawPath(a, b, o) {
 
 /* ================= Skins de tours (déblocables avec les étoiles de campagne) ================= */
 // 15 skins ; tout est débloqué à 45 étoiles, soit 60 % des 75 étoiles de la campagne
-const SKINS = [                                     // 21 skins communs ; tout est débloqué à 45 étoiles
+const SKINS = [                                     // 21 skins communs ; tout est débloqué à 20 étoiles
   { name: 'Bastion',            stars: 0,  wall: 'stone',   roof: 'crenel' },
-  { name: 'Tour de guet',       stars: 2,  wall: 'wood',    roof: 'cone', flag: true },
-  { name: 'Donjon',             stars: 4,  wall: 'brick',   roof: 'crenel', windows: true, flag: true },
-  { name: 'Minaret',            stars: 7,  wall: 'smooth',  roof: 'dome', windows: true, gold: true },
-  { name: 'Château de cartes',  stars: 9,  shape: 'cards' },
-  { name: 'Champignon',         stars: 11, wall: 'smooth',  roof: 'mushroom' },
-  { name: 'Pagode',             stars: 13, wall: 'wood',    roof: 'pagoda' },
-  { name: 'Clocher',            stars: 16, wall: 'stone',   roof: 'spire', windows: true },
-  { name: 'Phare',              stars: 18, wall: 'stripes', roof: 'lantern' },
-  { name: 'Big Ben',            stars: 20, shape: 'bigben' },
-  { name: 'Château de sable',   stars: 22, shape: 'sand' },
-  { name: 'Tour sylvestre',     stars: 25, wall: 'vines',   roof: 'canopy' },
-  { name: 'Tour de glace',      stars: 27, wall: 'ice',     roof: 'spikes' },
-  { name: 'Arc de Triomphe',    stars: 29, shape: 'arc' },
-  { name: 'Tour de lave',       stars: 31, wall: 'lava',    roof: 'crenel' },
-  { name: 'Tour du mage',       stars: 34, wall: 'stone',   roof: 'mage', windows: true },
-  { name: 'Tour d’obsidienne',  stars: 36, shape: 'obsidian' },
-  { name: 'Citadelle',          stars: 38, wall: 'brick',   roof: 'crenel', trim: true, flag: true, windows: true },
-  { name: 'Tour Eiffel',        stars: 40, shape: 'eiffel' },
-  { name: 'Tour céleste',       stars: 43, wall: 'stars',   roof: 'orb', trim: true },
-  { name: 'Tour royale',        stars: 45, wall: 'smooth',  roof: 'crenel', trim: true, goldMerlon: true, flag: true }
+  { name: 'Tour de guet',       stars: 1,  wall: 'wood',    roof: 'cone', flag: true },
+  { name: 'Donjon',             stars: 2,  wall: 'brick',   roof: 'crenel', windows: true, flag: true },
+  { name: 'Minaret',            stars: 3,  wall: 'smooth',  roof: 'dome', windows: true, gold: true },
+  { name: 'Château de cartes',  stars: 4,  shape: 'cards' },
+  { name: 'Champignon',         stars: 5, wall: 'smooth',  roof: 'mushroom' },
+  { name: 'Pagode',             stars: 6, wall: 'wood',    roof: 'pagoda' },
+  { name: 'Clocher',            stars: 7, wall: 'stone',   roof: 'spire', windows: true },
+  { name: 'Phare',              stars: 8, wall: 'stripes', roof: 'lantern' },
+  { name: 'Big Ben',            stars: 9, shape: 'bigben' },
+  { name: 'Château de sable',   stars: 10, shape: 'sand' },
+  { name: 'Tour sylvestre',     stars: 11, wall: 'vines',   roof: 'canopy' },
+  { name: 'Tour de glace',      stars: 12, wall: 'ice',     roof: 'spikes' },
+  { name: 'Arc de Triomphe',    stars: 13, shape: 'arc' },
+  { name: 'Tour de lave',       stars: 14, wall: 'lava',    roof: 'crenel' },
+  { name: 'Tour du mage',       stars: 15, wall: 'stone',   roof: 'mage', windows: true },
+  { name: 'Tour d’obsidienne',  stars: 16, shape: 'obsidian' },
+  { name: 'Citadelle',          stars: 17, wall: 'brick',   roof: 'crenel', trim: true, flag: true, windows: true },
+  { name: 'Tour Eiffel',        stars: 18, shape: 'eiffel' },
+  { name: 'Tour céleste',       stars: 19, wall: 'stars',   roof: 'orb', trim: true },
+  { name: 'Tour royale',        stars: 20, wall: 'smooth',  roof: 'crenel', trim: true, goldMerlon: true, flag: true }
 ];
 // Skins réservés à une civilisation : disponibles dès qu'elle est choisie
 const CIV_SKINS = {
@@ -3171,6 +3403,33 @@ function drawShapeTower(S, t, x, y, r, lv, c, dk, OL, sup) {
   return { ty, yb };
 }
 
+// Halo des tours renforcées : pouvoir de civilisation en cours qui agit sur les tours, ou Quetzalcoatl
+function towerHalo(t) {
+  const c = cOf(t.owner); if (!c) return;
+  const fac = civActiveO(t.owner) ? c.fac : null;
+  const power = fac === 'celte' || fac === 'egypte' || ((fac === 'azte' || fac === 'viking') && t.kind !== 'barracks')
+    || (fac === 'maya' && t.paths.some(id => towers[id].owner !== t.owner));
+  if (!power && !t.qb) return;
+  const r = rad(t), k = 0.5 + 0.5 * Math.sin(performance.now() / 300), R = r * (1.9 + 0.15 * k);
+  const col = power ? (c.f.power.kind === 'speed' ? '90,160,255' : '255,90,60') : '255,214,90';
+  const g = ctx.createRadialGradient(t.x, t.y, r * 0.6, t.x, t.y, R);
+  g.addColorStop(0, `rgba(${col},${0.45 + 0.15 * k})`); g.addColorStop(1, `rgba(${col},0)`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(t.x, t.y, R, 0, TAU); ctx.fill();
+}
+// Drapeau à l'emblème de la civilisation du propriétaire (aucun pour les tours grises ou sans civilisation)
+function drawCivFlag(t) {
+  const c = cOf(t.owner); if (!c) return;
+  const r = rad(t), x = t.x - r * 1.05, yb = t.y - r * 0.1, yt = yb - r * 1.45, fw = r * 0.85, fh = r * 0.6;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(40,30,20,.9)'; ctx.lineWidth = Math.max(1.5, r * 0.07);
+  ctx.beginPath(); ctx.moveTo(x, yb); ctx.lineTo(x, yt); ctx.stroke();
+  ctx.fillStyle = colorOf(t.owner); ctx.strokeStyle = darkOf(t.owner); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x, yt); ctx.lineTo(x - fw, yt + fh * 0.1); ctx.lineTo(x - fw * 0.85, yt + fh * 0.55); ctx.lineTo(x - fw, yt + fh); ctx.lineTo(x, yt + fh); ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.font = `${Math.round(fh * 0.72)}px system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(CIVS[c.key].icon, x - fw * 0.48, yt + fh * 0.52);
+  ctx.restore();
+}
 function drawTower(t) {
   const c = colorOf(t.owner), dk = darkOf(t.owner);
   if (t.kind === 'barracks') { drawBarracks(t, c, dk); return; }
@@ -3355,7 +3614,7 @@ function toast(msg) {
 }
 function nextExists() {
   if (!current) return false;
-  if (current.kind === 'campaign') return current.index % TIER_LEVELS !== 0;   // suivant dans la même difficulté
+  if (current.kind === 'campaign') return current.index < CAMPAIGN_SIZE;   // niveau suivant (ouvert par la victoire)
   if (current.kind === 'defi') return current.index + 1 < current.entry.challenge.games.length && current.entry.status === 'en cours';
   return false;
 }
@@ -3428,7 +3687,7 @@ function showTab(name) {
   document.querySelectorAll('#menu [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
   menuTab = name;
   ['campaign', 'free', 'civ', 'custom', 'rules'].forEach(t => $('tab-' + t).classList.toggle('hidden', t !== name));
-  if (name === 'campaign') { renderCampaign(); fetchRecords(campaignPlan().map(L => L.id)).then(ok => { if (ok && $('campGrid').offsetParent) renderCampaign(); }); }
+  if (name === 'campaign') renderCampaign();       // plus de classement en ligne pour la campagne
   if (name === 'free') renderDefiTab();
   if (name === 'custom') renderCustom();
   if (name === 'civ') renderCivs();
@@ -3444,29 +3703,25 @@ const starSvg = cls => `<svg viewBox="0 0 24 24"${cls ? ` class="${cls}"` : ''}>
 function renderCampaign() {
   const best = campBest(), plan = campaignPlan(), lostSet = progress.camp.lost || {};
   let html = '';
-  for (let ti = 0; ti < TIERS.length; ti++) {
-    const open = tierUnlocked(ti), wins = tierWins(ti);
-    let stars = 0;
-    for (let k = 1; k <= TIER_LEVELS; k++) { const t = best[levelId(ti, k)]; if (t != null && t < STAR_TIME) stars++; }
-    html += `<div class="tierhead${open ? '' : ' locked'}"><strong>${TIERS[ti].name}</strong><span>`
-      + (open ? wins + '/' + TIER_LEVELS + ' victoires, ' + stars + ' ★'
-              : '🔒 ' + UNLOCK_WINS + ' victoires en ' + TIERS[ti - 1].name + ' pour débloquer (' + tierWins(ti - 1) + '/' + UNLOCK_WINS + ')')
-      + '</span></div><div class="tiergrid">';
-    for (let k = 1; k <= TIER_LEVELS; k++) {
-      const L = plan[ti * TIER_LEVELS + k - 1], t = best[L.id], done = t != null, star = done && t < STAR_TIME;
-      // cadre vert : record absolu ; bleu : victoire ; rouge : perdu sans jamais gagner ; gris : pas encore joué
-      const rank = done ? myRank(L.id) : -1, lost = !done && lostSet[L.id];
-      const cls = rank >= 0 ? RANK_CLASS[rank] : done ? 'won' : lost ? 'lost' : '';
-      const wm = L.variant === 'all' ? `<span class="wm all">${ICONS.super}${ICONS.artillery}${ICONS.barracks}</span>`
-        : L.variant !== 'none' ? `<span class="wm">${ICONS[L.variant]}</span>` : '';
-      html += `<button data-n="${L.n}" class="${cls}"${open ? '' : ' disabled'}`
-        + ` aria-label="${TIERS[ti].name} niveau ${k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${rank >= 0 ? ', ' + RANK_LABEL[rank] + ' du classement' : ''}${star ? ', étoile' : ''}">`
-        + wm + (star ? `<span class="pf">${starSvg('')}</span>` : '')
-        + `<span class="n">${k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
+  CHAPTERS.forEach((C, ti) => {
+    const open = tierUnlocked(ti), lv = plan.slice(ti * TIER_LEVELS, (ti + 1) * TIER_LEVELS);
+    const wins = lv.filter(L => best[L.id] != null).length, stars = lv.filter(L => best[L.id] < STAR_TIME).length;
+    html += `<div class="tierhead${open ? '' : ' locked'}"><strong>Chapitre ${ti + 1} — ${C.theme}</strong><span>`
+      + (open ? TIERS[ti].name + ', ' + wins + '/' + TIER_LEVELS + ' victoires, ' + stars + ' ★' : '🔒 ' + TIERS[ti].name) + '</span></div>'
+      + (open ? `<p class="sub story">${C.story}</p>` : '') + '<div class="tiergrid">';
+    for (const L of lv) {
+      const t = best[L.id], done = t != null, star = done && t < STAR_TIME, lost = !done && lostSet[L.id], can = levelOpen(L.n);
+      const cls = done ? 'won' : lost ? 'lost' : '';
+      const wm = L.specials.length ? `<span class="wm${L.specials.length > 1 ? ' all' : ''}">${L.specials.map(k => ICONS[k]).join('')}</span>` : '';
+      const foes = L.civs.length ? `<span class="foes">${L.civs.map(f => CIVS[FAC_CIV[f]].icon).join('')}</span>` : '';
+      html += `<button data-n="${L.n}" class="${cls}"${can ? '' : ' disabled'}`
+        + ` aria-label="${TIERS[ti].name} niveau ${L.k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${star ? ', étoile' : ''}">`
+        + wm + foes + (star ? `<span class="pf">${starSvg('')}</span>` : '')
+        + `<span class="n">${L.k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
         + `<span class="land" style="background:${LANDS[L.land].ground}"></span></button>`;
     }
     html += '</div>';
-  }
+  });
   $('campGrid').innerHTML = html;
 }
 
@@ -3732,9 +3987,9 @@ $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data
 
 /* Onglet Civilisations : présentation, bonus débloqués selon les étoiles de campagne, choix */
 const CIV_INTRO = {
-  amer: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.',
+  amer: 'Bâtisseurs prospères : toutes leurs tours produisent davantage.',
   nord: 'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.',
-  med: 'Bâtisseurs prospères : toutes leurs tours produisent davantage.'
+  med: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.'
 };
 const FAC_INTRO = {
   maya: 'Vitesse et frappes ciblées.', azte: 'Puissance au combat et croissance.',
@@ -3743,25 +3998,26 @@ const FAC_INTRO = {
 };
 const unlockTag = (st, need) => st >= need ? '<span class="ok">✓ débloqué</span>' : '<span class="lock">🔒 ' + need + ' ★</span>';
 function renderCivs() {
-  const st = totalStars(), open = st >= CIV_STARS.passive[0], lvl = civLevel(st);
-  $('civNote').textContent = 'Tes étoiles de campagne : ' + st + '. Le pouvoir passif se renforce à 15, 30 et 45 étoiles ; '
-    + 'le pouvoir de civilisation se débloque à 35 étoiles et le pouvoir divin à 50, chacun utilisable une fois par partie.';
+  const st = 0, open = true, lvl = 3;
+  $('optFresco').checked = !custom.noFresco;
+  $('civNote').textContent = 'Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie. '
+    + 'En campagne, les civilisations que tu peux adopter s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles.';
   $('civGrid').innerHTML = Object.keys(CIVS).map(k => {
     const c = CIVS[k], on = custom.civ === k && open;
     const facs = Object.keys(c.factions).map(fk => {
       const f = c.factions[fk], fon = on && (custom.fac || Object.keys(c.factions)[0]) === fk;
       return `<button class="fac${fon ? ' on' : ''}" data-civ="${k}" data-fac="${fk}"${open ? '' : ' disabled'}>`
         + `<strong>${f.name}</strong><span class="intro">${FAC_INTRO[fk]}</span>`
-        + `<span class="pw${st >= CIV_STARS.power ? '' : ' off'}">${f.power.icon} ${f.power.name} : ${f.power.desc}</span>${unlockTag(st, CIV_STARS.power)}`
-        + `<span class="pw${st >= CIV_STARS.god ? '' : ' off'}">✨ ${f.god.name} : ${f.god.desc}. Condition : ${GOD_COND[f.god.cond](f.god.need)}</span>${unlockTag(st, CIV_STARS.god)}</button>`;
+        + `<span class="pw">${f.power.icon} ${f.power.name} : ${f.power.desc}</span>`
+        + `<span class="pw">✨ ${f.god.name} : ${f.god.desc}. Condition : ${GOD_COND[f.god.cond](f.god.need)}</span></button>`;
     }).join('');
-    const lv = lvl ? 'Niveau actuel ' + lvl + '/3 : ' + c.passive(c.pct[lvl - 1]) : 'Débloqué à 15 étoiles';
     return `<div class="civ${on ? ' on' : ''}"><div class="civhead">${c.icon} <strong>${c.name}</strong></div>`
       + `<p class="sub intro">${CIV_INTRO[k]}</p>`
-      + `<p class="sub"><span>Passif : ${c.passive(c.pct.join(' / '))} (15 / 30 / 45 ★)</span><span class="${lvl ? 'ok' : 'lock'}">${lv}</span>`
+      + `<p class="sub"><span>Passif : ${c.passive(c.pct[2])}</span>`
       + `<span>Skin réservé : ${CIV_SKINS[k].name}</span></p><div class="facs">${facs}</div></div>`;
   }).join('') + `<button class="ghost" data-civ=""${custom.civ ? '' : ' disabled'}>Aucune civilisation</button>`;
 }
+$('optFresco').addEventListener('change', e => { custom.noFresco = !e.target.checked; store.set('bastions.custom', custom); });
 $('civGrid').addEventListener('click', e => {
   const b = e.target.closest('[data-civ]'); if (!b || b.disabled) return;
   custom.civ = b.dataset.civ || null; custom.fac = b.dataset.fac || null;
@@ -3783,24 +4039,23 @@ $('segSpeed').addEventListener('click', e => {
    Passif à 3 niveaux (15, 30, 45 étoiles) ; pouvoir de civilisation à 35 étoiles et pouvoir divin à 50,
    chacun utilisable une fois par partie. Valeurs équilibrées : chaque passif ≈ +7 % au niveau 3,
    chaque pouvoir de civilisation ≈ 15 à 18 s d'avantage. */
-const CIV_STARS = { passive: [15, 30, 45], power: 35, god: 50 };
 const CIVS = {
-  amer: { name: 'Amérindiens', icon: '🪶', pct: [4, 8, 12],
-    passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
+  amer: { name: 'Amérindiens', icon: '🪶', pct: [3, 6, 9],
+    passive: p => '+' + p + ' % de production pour toutes tes tours',
     factions: {
-      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 14, kind: 'speed', desc: '14 s : tes unités de puissance 1 (hors casernes) vont 50 % plus vite' },
+      maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 15, kind: 'speed', desc: '15 s : +25 % de production par ligne d’attaque de chaque tour, et tes unités de puissance 1 (hors casernes) vont 50 % plus vite' },
         god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'own10', need: 7, pick: { n: 3, who: 'enemy' } } },
       azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 15, kind: 'force', desc: '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2' },
-        god: { name: 'Quetzalcoatl', desc: '+30 défenseurs (et +30 de capacité) pour 2 de tes tours', cond: 'own10', need: 7, pick: { n: 2, who: 'own' } } } } },
+        god: { name: 'Quetzalcoatl', desc: '+30 défenseurs (et +30 de capacité) pour 2 de tes tours', cond: 'own10', need: 7, pick: { n: 2, who: 'own', regular: true } } } } },
   nord: { name: 'Nordiques', icon: '🛡️', pct: [5, 10, 15],
     passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
     factions: {
       viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 12, kind: 'force', desc: '12 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1' },
-        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse classique (pas un bâtiment spécial) avec sa population', cond: 'dead', need: 500, pick: { n: 1, who: 'enemy', regular: true } } },
+        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse classique (pas un bâtiment spécial) avec sa population', cond: 'dead', need: 600, pick: { n: 1, who: 'enemy', regular: true } } },
       celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 12, kind: 'speed', desc: '12 s : production de tes tours +50 % (hors casernes)' },
-        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites', cond: 'dead', need: 500, pick: { point: true } } } } },
-  med: { name: 'Méditerranéens', icon: '🏛️', pct: [3, 6, 9],
-    passive: p => '+' + p + ' % de production pour toutes tes tours',
+        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites', cond: 'dead', need: 600, pick: { point: true } } } } },
+  med: { name: 'Méditerranéens', icon: '🏛️', pct: [4, 8, 12],
+    passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
     factions: {
       egypte: { name: 'Égyptiens', power: { name: 'Grands bâtisseurs', icon: '🧱', dur: 15, kind: 'speed', desc: '15 s : croissance de tes tours +50 % (hors casernes) ; une tour qui envoie garde la moitié de cette croissance' },
         god: { name: 'Anubis', desc: 'Tue la moitié des unités adverses : celles les plus proches de l’endroit touché (la zone s’ajuste à leur dispersion)', cond: 'full6', need: 5, pick: { point: true } } },
@@ -3814,32 +4069,43 @@ const GOD_COND = {
 };
 const civLevel = st => st >= 45 ? 3 : st >= 30 ? 2 : st >= 15 ? 1 : 0;
 // Civilisation choisie et débloquée (sinon null)
+// Plus d'étoiles : la civilisation choisie a tous ses pouvoirs et son passif au maximum
 function myCiv() {
-  const c = CIVS[custom.civ], st = totalStars();
-  if (!c || st < CIV_STARS.passive[0]) return null;
+  const c = CIVS[custom.civ]; if (!c) return null;
   const f = c.factions[custom.fac] ? custom.fac : Object.keys(c.factions)[0];
-  return { key: custom.civ, c, fac: f, f: c.factions[f], lvl: civLevel(st), power: st >= CIV_STARS.power, god: st >= CIV_STARS.god };
+  return { key: custom.civ, c, fac: f, f: c.factions[f], lvl: 3, power: true, god: true };
 }
 
 /* État de la partie en cours (remis à zéro par buildGame) : une civilisation par joueur (null si aucune).
    civs[0] : le joueur ; dans les défis, chaque ordinateur reçoit une civilisation au maximum de ses étoiles. */
 let civs = [], civ = null;                         // civ : raccourci vers la civilisation du joueur
+// Civilisations des ordinateurs d'une partie de défi : même tirage pour tous sur une carte donnée
+function aiCivsFor(seed, n) {
+  const r = mulberry32(hashStr('civ:' + seed)); r(); r();
+  const all = Object.keys(CIVS).flatMap(k => Object.keys(CIVS[k].factions).map(f => [k, f]));
+  return Array.from({ length: n }, () => all[Math.floor(r() * all.length)]);
+}
 function makeCiv(key, fac, lvl, power, god) {
   const c = CIVS[key];
-  return { key, fac, f: c.factions[fac], pct: lvl ? c.pct[lvl - 1] / 100 : 0, power, god,
+  return { key, fac, f: c.factions[fac], pct: c.pct[2] / 100, power, god,   // passif toujours au maximum
     until: 0, used: false, godUsed: false, dead: 0, fullSince: null };
 }
 function civStart() {
-  const m = myCiv();
-  civs = []; civs[0] = m ? makeCiv(m.key, m.fac, m.lvl, m.power, m.god) : null; civ = civs[0];
+  const m = myCiv(), allowed = current && current.cfg ? current.cfg.allowed : null;
+  civs = []; civs[0] = m && (!allowed || allowed.includes(m.fac)) ? makeCiv(m.key, m.fac, 3, true, true) : null; civ = civs[0];
+  if (current && current.cfg && current.cfg.aiCivs) {   // campagne : civilisations des ordinateurs fixées par le niveau
+    for (const p of players) if (!p.human && current.cfg.aiCivs[p.id - 1]) {
+      const [k, f] = current.cfg.aiCivs[p.id - 1];
+      civs[p.id] = makeCiv(k, f, 3, true, true); civs[p.id].strat = AI_CIV_STRAT[f]; civs[p.id].sloppy = p.lvl < 0.4;
+    }
+  }
   if (current && current.kind === 'defi') {        // défis : civilisations des ordinateurs, tirées selon la carte
-    const r = mulberry32(hashStr('civ:' + ((current.cfg && current.cfg.seed) || 1)));   // même tirage pour tous sur ce défi
-    r(); r();
-    const all = Object.keys(CIVS).flatMap(k => Object.keys(CIVS[k].factions).map(f => [k, f]));
+    const list = aiCivsFor((current.cfg && current.cfg.seed) || 1, players.length - 1);
     for (const p of players) if (!p.human) {
-      const [k, f] = all[Math.floor(r() * all.length)];
+      const [k, f] = list[p.id - 1];
       civs[p.id] = makeCiv(k, f, 3, true, true);
       civs[p.id].strat = AI_CIV_STRAT[f];
+      civs[p.id].sloppy = p.lvl < 0.4;             // Très facile et Facile : erreurs stratégiques volontaires
     }
   }
   renderPowers();
@@ -3852,14 +4118,33 @@ const civFacO = (o, fac) => civActiveO(o) && cOf(o).fac === fac;
 const civActive = () => civActiveO(0);
 const civOn = kind => civActive() && civ.f.power.kind === kind;
 const civFac = fac => civFacO(0, fac);
-const pwOf = u => u.pw || (u.big ? ARMOR : 1);                       // puissance d'origine d'une unité
+const pwOf = u => u.pw || (u.big ? ARMOR : 1);                       // catégorie d'une unité (1, 2 ou blindé)
+// Attaque / vie (armure) : classique 1/1(0), blindé 10/10(0), guerrier jaguar 2/2(0), Berserker 2/2(1),
+// unité romaine pendant Experts de siège 2/1(0). La vie se consomme d'un combat à l'autre, pas l'attaque ni l'armure.
+const atkOf = u => u.big ? ARMOR : u.atk ? u.atk : civFacO(u.owner, 'rome') ? 2 : 1;
+const armOf = u => u.arm || 0;
+// Combat entre deux unités : échanges successifs (attaque moins armure de l'autre, l'armure encaisse avant la vie)
+// jusqu'à la mort de l'une ou des deux ; si aucune ne peut blesser l'autre, elles se croisent sans combattre.
+function fight(x, y) {
+  const dx = Math.max(0, atkOf(x) - armOf(y)), dy = Math.max(0, atkOf(y) - armOf(x));
+  if (!dx && !dy) return false;
+  while (x.hp > 0 && y.hp > 0) {
+    civLossO(y.owner, Math.min(y.hp, dx)); civLossO(x.owner, Math.min(x.hp, dy));
+    y.hp -= dx; x.hp -= dy;
+  }
+  if (x.hp <= 0) x.dead = true;
+  if (y.hp <= 0) y.dead = true;
+  return true;
+}
 // Multiplicateur de production d'une tour (passifs et pouvoirs de son propriétaire)
 function civProd(t) {
   const c = cOf(t.owner); if (!c) return 1;
   let k = 1;
-  if (c.key === 'amer' && t.stock >= 30) k += c.pct;
+  if (c.key === 'med' && t.stock >= 30) k += c.pct;
   if (c.key === 'nord' && level(t) <= 4) k += c.pct;
-  if (c.key === 'med') k += c.pct;
+  if (c.key === 'amer') k += c.pct;
+  // Guerriers Aigles : +25 % de production par ligne d'attaque qui part de la tour
+  if (civFacO(t.owner, 'maya')) k *= 1 + 0.25 * t.paths.filter(id => towers[id].owner !== t.owner).length;
   if (t.kind !== 'barracks') {                     // pouvoirs (hors casernes)
     if (civFacO(t.owner, 'celte')) k *= 1.5;       // Guèdes : production +50 %
     if (civFacO(t.owner, 'azte') || civFacO(t.owner, 'viking')) k *= 0.75;   // Guerriers Jaguars, Berserkers : −25 %
@@ -3887,33 +4172,61 @@ const godProgress = () => godProgressO(0);
    Stratégie par faction (moment du pouvoir de civilisation, cibles du pouvoir divin).
    Valeurs issues des simulations ordinateur contre ordinateur (voir le compte rendu de la version). */
 // Stratégies retenues après simulation (meilleur moment du pouvoir, meilleures cibles du pouvoir divin) :
-//   asap : dès 25 s ; attack : quand au moins 2 tours attaquent ; growth : quand 3 tours ou plus ont de la place.
+//   asap : dès 25 s ; attack : quand au moins 2 tours attaquent ; growth : quand 3 tours ou plus ont de la place ;
+//   late : à partir de 4 tours dont 2 attaquent ; siege : quand des unités vont prendre une tour grâce au pouvoir.
 const AI_CIV_STRAT = {
   maya:   { power: 'attack', god: 'strong' },     // Tezcatlipoca sur les 3 tours adverses les plus fortes
-  azte:   { power: 'growth', god: 'front' },      // Quetzalcoatl sur les 2 tours les plus avancées
-  viking: { power: 'asap',   god: 'strong' },     // Loki sur la tour adverse classique la plus forte
+  azte:   { power: 'attack', god: 'front' },      // Quetzalcoatl sur les 2 tours classiques les plus avancées
+  viking: { power: 'late',   god: 'strong' },     // Berserkers une fois implanté (4 tours, 2 attaques) ; Loki sur la plus forte tour classique
   celte:  { power: 'attack' },                    // Toutatis là où il touche le plus de garnisons et d'unités
   egypte: { power: 'growth' },                    // Anubis au cœur de la plus grande armée adverse
-  rome:   { power: 'attack' }                     // Mars : caserne sur la tour la plus avancée
+  rome:   { power: 'siege' }                      // Experts de siège juste avant l'impact ; Mars : caserne sur la tour la plus avancée
 };
 function aiCivTick(pl) {
   const c = cOf(pl.id); if (!c) return;
   const mine = towers.filter(t => t.owner === pl.id), st = c.strat || {};
   const attacking = mine.filter(t => t.paths.some(id => towers[id].owner !== pl.id));
   const threatened = mine.some(t => enemyIn(t, pl.id) > t.stock * 0.8);
-  // Pouvoir de civilisation
-  if (c.power && !c.used && scoreClock() >= POWER_DELAY) {
+  // Pouvoir de civilisation. Ordinateur « maladroit » (Très facile, Facile) : il le gaspille, en général
+  // à un moment où aucune de ses tours n'attaque (ou au hasard s'il attaque sans arrêt).
+  if (c.power && !c.used && scoreClock() >= POWER_DELAY && c.sloppy) {
+    if (c.randT == null) c.randT = POWER_DELAY + 30 + Math.random() * 60;
+    if (!attacking.length || scoreClock() >= c.randT) { c.used = true; c.until = scoreClock() + c.f.power.dur; if (state === 'play' && current && current.kind !== 'sim') sfx('cry'); }
+  }
+  if (c.power && !c.used && scoreClock() >= POWER_DELAY && !c.sloppy) {
     const mode = st.power || 'asap';
-    const go = mode === 'asap'
+    // Experts de siège : juste avant l'impact. Les unités qui arriveront sur une tour pendant les 15 s du pouvoir
+    // (vitesse réduite de 25 % comprise) la prendraient une fois leur attaque doublée, mais pas sans le pouvoir.
+    const sp = Math.hypot(W, H) * 0.085 * 0.7 * 0.75, win = c.f.power.dur * GAME_SPEED;   // vitesse, fenêtre en temps de jeu
+    const siege = mode === 'siege' && towers.some(t => {
+      if (t.owner === pl.id) return false;
+      const n = units.filter(u => !u.dead && u.owner === pl.id && u.to === t.id && pwOf(u) === 1
+        && (1 - u.p) * dist(towers[u.from], t) / sp <= win).length;
+      return n >= 3 && n <= t.stock && n * 2 > t.stock;
+    });
+    const go = mode === 'asap' || siege
+      || mode === 'late' && mine.length >= 4 && attacking.length >= 2
       || mode === 'attack' && attacking.length >= Math.min(2, mine.length) && attacking.reduce((a, t) => a + t.stock, 0) >= 20
       || mode === 'defense' && threatened
       || mode === 'growth' && !threatened && mine.filter(t => t.stock < t.cap * 0.8).length >= Math.min(3, mine.length);
     if (go || scoreClock() > POWER_DELAY + 90) {   // au plus tard 90 s après
       c.used = true; c.until = scoreClock() + c.f.power.dur;
+      if (state === 'play' && current && current.kind !== 'sim') sfx('cry');
       if (state === 'play' && current && current.kind === 'defi') toast(NAMES[pl.id] + ' déclenche ' + c.f.power.name);
     }
   }
   // Pouvoir divin
+  if (c.god && !c.godUsed && godProgressO(pl.id).ready && c.sloppy) {   // maladroit : les plus mauvaises cibles
+    const fx = towers.filter(t => t.owner >= 0 && t.owner !== pl.id);
+    const fcx = fx.reduce((a, t) => a + t.x, 0) / Math.max(1, fx.length), fcy = fx.reduce((a, t) => a + t.y, 0) / Math.max(1, fx.length);
+    const foes = fx.sort((a, b) => a.stock - b.stock);                       // tours adverses les plus faibles
+    const own = mine.filter(t => t.kind === 'tower').sort((a, b) => Math.hypot(b.x - fcx, b.y - fcy) - Math.hypot(a.x - fcx, a.y - fcy));   // tours de l'arrière
+    const g = c.f.god, spot = foes[0] ? { x: foes[0].x, y: foes[0].y } : null;   // zone sur la tour la plus faible, loin des armées
+    if (g.pick && g.pick.point) { if (spot) applyGod({ point: spot }, pl.id); }
+    else if (g.pick.who === 'own') { if (own.length) applyGod({ sel: own.slice(0, g.pick.n) }, pl.id); }
+    else { const f = foes.filter(t => !g.pick.regular || t.kind === 'tower'); if (f.length) applyGod({ sel: f.slice(0, g.pick.n) }, pl.id); }
+    return;
+  }
   if (c.god && !c.godUsed && godProgressO(pl.id).ready) {
     const foes = towers.filter(t => t.owner >= 0 && t.owner !== pl.id);
     const byStock = (a, b) => b.stock - a.stock;
@@ -3922,7 +4235,7 @@ function aiCivTick(pl) {
     const byNear = (a, b) => Math.hypot(a.x - cx, a.y - cy) - Math.hypot(b.x - cx, b.y - cy);
     switch (c.fac) {
       case 'maya': if (foes.length) applyGod({ sel: foes.sort(st.god === 'near' ? byNear : byStock).slice(0, 3) }, pl.id); break;
-      case 'azte': applyGod({ sel: mine.slice().sort(st.god === 'strong' ? byStock : st.god === 'front' ? (a, b) => -byNear(a, b)
+      case 'azte': applyGod({ sel: mine.filter(t => t.kind === 'tower').sort(st.god === 'strong' ? byStock : st.god === 'front' ? (a, b) => -byNear(a, b)
         : (a, b) => (enemyIn(b, pl.id) - b.stock) - (enemyIn(a, pl.id) - a.stock)).slice(0, 2) }, pl.id); break;
       case 'viking': { const reg = foes.filter(t => t.kind === 'tower'); if (reg.length) applyGod({ sel: [reg.sort(st.god === 'near' ? byNear : byStock)[0]] }, pl.id); break; }
       case 'celte': {                              // Toutatis : endroit qui touche le plus de garnisons et d'unités adverses
@@ -3954,14 +4267,52 @@ function aiCivTick(pl) {
   }
 }
 
+/* ================= Effets sonores synthétisés : éclair (pouvoir divin), cri de guerre (pouvoir de civilisation) =================
+   Produits par le navigateur (aucun fichier son) ; coupés avec la musique (bouton 🔊). */
+let sfxCtx = null;
+function sfx(kind) {
+  if (!musicOn || !soundUnlocked || document.hidden) return;
+  try {
+    sfxCtx = sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const A = sfxCtx, t0 = A.currentTime + 0.02, out = A.createGain(); out.gain.value = 0.55; out.connect(A.destination);
+    const noise = dur => { const b = A.createBuffer(1, Math.round(A.sampleRate * dur), A.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = A.createBufferSource(); s.buffer = b; return s; };
+    if (kind === 'thunder') {                      // claquement aigu puis grondement grave qui s'éteint
+      const crack = noise(0.25), bp = A.createBiquadFilter(), g1 = A.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 2600; g1.gain.setValueAtTime(0.9, t0); g1.gain.exponentialRampToValueAtTime(0.01, t0 + 0.25);
+      crack.connect(bp).connect(g1).connect(out); crack.start(t0);
+      const rumble = noise(2.6), lp = A.createBiquadFilter(), g2 = A.createGain();
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t0); lp.frequency.exponentialRampToValueAtTime(120, t0 + 2.4);
+      g2.gain.setValueAtTime(0.0001, t0); g2.gain.exponentialRampToValueAtTime(1.2, t0 + 0.08); g2.gain.exponentialRampToValueAtTime(0.01, t0 + 2.5);
+      rumble.connect(lp).connect(g2).connect(out); rumble.start(t0);
+    } else {                                       // cri de guerre : cor grave et clameur de voix
+      for (const [f, d] of [[110, 0], [164, 0.04]]) {
+        const o = A.createOscillator(), lp = A.createBiquadFilter(), g = A.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 0.9, t0 + d); o.frequency.linearRampToValueAtTime(f, t0 + d + 0.25);
+        lp.type = 'lowpass'; lp.frequency.value = 1100;
+        g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.35, t0 + d + 0.12); g.gain.setValueAtTime(0.35, t0 + d + 0.8);
+        g.gain.exponentialRampToValueAtTime(0.01, t0 + d + 1.3);
+        o.connect(lp).connect(g).connect(out); o.start(t0 + d); o.stop(t0 + d + 1.35);
+      }
+      for (const f of [650, 1150, 2400]) {         // formants d'une clameur (« Haaa ! »)
+        const n = noise(0.9), bp = A.createBiquadFilter(), g = A.createGain();
+        bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 6;
+        g.gain.setValueAtTime(0.0001, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.5, t0 + 0.2); g.gain.exponentialRampToValueAtTime(0.01, t0 + 0.9);
+        n.connect(bp).connect(g).connect(out); n.start(t0 + 0.05);
+      }
+    }
+  } catch (e) { /* son indisponible : sans effet sur le jeu */ }
+}
+
 /* ================= Fresque de civilisation autour de la carte et filtres des pouvoirs ================= */
 // La carte est légèrement réduite (VIEW) pour laisser la place à la fresque sans rien cacher du jeu.
 const VIEW = { k: 1, ox: 0, oy: 0, F: 0 };
 // Bandeau inférieur réservé aux boutons de pouvoir : la carte est placée au-dessus, ils ne la recouvrent jamais
 const POWER_BAR = 60;
 function updateView() {
-  const F = civ && state !== 'menu' ? Math.max(12, Math.min(22, Math.round(Math.min(W, H) * 0.045))) : 0;
-  const B = civ && state !== 'menu' && (civ.power || civ.god) ? POWER_BAR : 0;
+  const F = civ && state !== 'menu' && !custom.noFresco ? Math.max(12, Math.min(22, Math.round(Math.min(W, H) * 0.045))) : 0;
+  const foeCiv = state !== 'menu' && players.some(p => !p.human && cOf(p.id));
+  const B = (civ && state !== 'menu' && (civ.power || civ.god) ? POWER_BAR : 0) + (foeCiv ? 26 : 0);
   VIEW.F = F; VIEW.B = B;
   VIEW.k = F || B ? Math.min((W - 2 * F) / W, (H - 2 * F - B) / H) : 1;
   VIEW.ox = (W - W * VIEW.k) / 2; VIEW.oy = F + (H - 2 * F - B - H * VIEW.k) / 2;
@@ -4060,9 +4411,16 @@ function drawPowerTint() {
 
 /* Boutons de pouvoir pendant la partie */
 function renderPowers() {
-  const box = $('powers');
-  if (!civ || (!civ.power && !civ.god) || state !== 'play' || pick) { box.classList.add('hidden'); return; }
+  const box = $('powers'), mineOn = civ && (civ.power || civ.god), foes = players.filter(p => !p.human && cOf(p.id));
+  if ((!mineOn && !foes.length) || state !== 'play' || pick) { box.classList.add('hidden'); return; }
   box.classList.remove('hidden');
+  // Pouvoirs des ordinateurs : grisés, barrés une fois utilisés, liseré de leur couleur
+  $('aiPowers').innerHTML = foes.map(p => { const c = cOf(p.id), act = scoreClock() < c.until;
+    return `<span class="aip" style="border-color:${COLORS[p.id]}" title="${NAMES[p.id]} : ${c.f.name}">`
+      + `<i class="${act ? 'on' : c.used ? 'used' : ''}" title="${c.f.power.name}">${c.f.power.icon}</i>`
+      + `<i class="${c.godUsed ? 'used' : ''}" title="${c.f.god.name}">✨</i></span>`; }).join('');
+  $('powers').querySelector('.mine').classList.toggle('hidden', !mineOn);
+  if (!mineOn) return;
   const pw = civ.f.power, now = scoreClock(), act = now < civ.until, wait = Math.ceil(POWER_DELAY - now);
   const b1 = $('btnPower'), b2 = $('btnGod');
   b1.classList.toggle('hidden', !civ.power);
@@ -4081,6 +4439,7 @@ function renderPowers() {
 $('btnPower').onclick = () => {
   if (!civ || civ.used || state !== 'play' || paused || scoreClock() < POWER_DELAY) return;
   civ.used = true; civ.until = scoreClock() + civ.f.power.dur;
+  sfx('cry');                                      // cri de guerre
   toast(civ.f.power.name + ' : ' + civ.f.power.desc.replace(/^\d+ s : /, '') + ' !');
   renderPowers();
 };
@@ -4142,6 +4501,18 @@ function boltFx(t) {                               // éclair : du haut de la ca
 }
 // Zone d'Anubis : centrée sur le toucher, son rayon s'ajuste pour contenir exactement la moitié des unités
 // adverses présentes sur le terrain (petite si elles sont groupées, grande si elles sont dispersées)
+// Zones d'Anubis actives : toute unité adverse qui s'y trouve (qui y entre, ou qui sort d'une tour de la zone) meurt
+let anubisZones = [];
+function anubisTick() {
+  if (!anubisZones.length) return;
+  const now = scoreClock();
+  anubisZones = anubisZones.filter(z => now < z.until);
+  for (const z of anubisZones) for (const u of units) {
+    if (u.dead || u.owner === z.o) continue;
+    const q = unitPos(u);
+    if (Math.hypot(q.x - z.x, q.y - z.y) <= z.r) u.dead = true;
+  }
+}
 function anubisZone(pt, o) {
   const foe = units.filter(u => !u.dead && u.owner !== o)
     .map(u => { const q = unitPos(u); return { u, d: Math.hypot(q.x - pt.x, q.y - pt.y) }; }).sort((a, b) => a.d - b.d);
@@ -4154,11 +4525,12 @@ function applyGod(sel, o = 0) {
   cv.godUsed = true;
   const foe = t => t.owner >= 0 && t.owner !== o;  // tours adverses de ce joueur
   addFx({ type: 'title', text: g.name + ' intervient', dur: 2 });   // inscription au centre de l'écran
+  sfx('thunder');                                  // coup de tonnerre
   switch (cv.fac) {
     case 'maya':                                   // Tezcatlipoca : éclairs sur les tours visées
       for (const t of sel.sel) { t.stock = Math.floor(t.stock / 2); t.hit = 1; boltFx(t); } break;
     case 'azte':                                   // Quetzalcoatl : aura dorée sur les tours renforcées
-      for (const t of sel.sel) { t.cap += 30; t.stock = Math.min(t.cap, t.stock + 30); t.fx = 1; addFx({ type: 'aura', t, dur: 2 }); } break;
+      for (const t of sel.sel) { t.cap += 30; t.stock = Math.min(t.cap, t.stock + 30); t.fx = 1; t.qb = true; addFx({ type: 'aura', t, dur: 2 }); } break;
     case 'viking': {                               // Loki : nuage autour de la tour conquise
       const t = sel.sel[0];
       if (t) { if (t.owner === 0) lostTower = true; t.owner = o; t.paths = []; t.acc = 0; t.facc = 0; t.rr = 0; t.aggr = []; t.fx = 1; addFx({ type: 'cloud', t, dur: 2 }); }
@@ -4182,8 +4554,9 @@ function applyGod(sel, o = 0) {
     }
     case 'egypte': {                               // Anubis : la moitié de l'armée adverse, la plus proche du toucher
       const z = anubisZone(sel.point, o);
-      for (const u of z.victims) u.dead = true;    // exactement la moitié de l'armée adverse : celle de la zone
-      addFx({ type: 'red', dur: 1 }); addFx({ type: 'zone', x: z.x, y: z.y, r: z.r, dur: 0.8 }); break;
+      for (const u of z.victims) u.dead = true;    // la moitié de l'armée adverse : celle de la zone
+      anubisZones.push({ x: z.x, y: z.y, r: z.r, o, until: scoreClock() + 3 });   // la zone reste mortelle 3 s
+      addFx({ type: 'red', dur: 1 }); break;
     }
     case 'rome': {                                 // Mars : aura dorée (bonus)
       const t = sel.sel[0];
@@ -4231,9 +4604,6 @@ function drawGodFx() {
         ctx.fillStyle = `rgba(190,180,215,${0.45 * a})`; ctx.beginPath(); ctx.arc(x - pr * 0.25, y - pr * 0.3, pr * 0.55, 0, TAU); ctx.fill();
       }
       ctx.restore();
-    } else if (f.type === 'zone') {                // zone d'Anubis : cercle rouge qui s'estompe
-      ctx.save(); ctx.fillStyle = `rgba(200,20,20,${0.35 * (1 - p)})`; ctx.strokeStyle = `rgba(140,10,10,${0.8 * (1 - p)})`; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore();
     } else if (f.type === 'shade') {
       ctx.save(); ctx.fillStyle = `rgba(20,30,50,${0.45 * (1 - p * 0.6)})`;
       ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, TAU); ctx.fill(); ctx.restore();
@@ -4323,7 +4693,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_148';
+const APP_VERSION = '20261025_156';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
