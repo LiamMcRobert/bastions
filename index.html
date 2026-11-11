@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261025_182)
+     Fichier  : index.html (paquet GitHub Pages, version 20261111_03)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -2834,6 +2834,22 @@ function computeIncoming() {
 const enemyIn  = (t, o) => inc[t.id].reduce((s, v, k) => k === o ? s : s + v, 0);
 const friendIn = (t, o) => inc[t.id][o];
 
+/* Caserne grise : sa riposte de blindés broie une tour qui l'attaque seule et trop faible (la tour redevient
+   grise). L'IA ne l'attaque qu'avec des tours d'au moins 20 défenseurs dont la puissance cumulée dépasse
+   nettement la riposte : une grosse tour seule, sinon une attaque groupée de 2 ou 3 tours. */
+const BARRACKS_MIN_POP = 20;                       // population minimale de chaque tour qui attaque une caserne grise
+const BARRACKS_MARGIN = 2;                         // puissance cumulée exigée : 2 × la riposte estimée (calibré au banc)
+const isGreyBarracks = c => c.owner < 0 && c.kind === 'barracks';
+// Riposte d'une caserne grise (attaque par seconde) : blindés à sa cadence, deux fois moins vite, +20 %
+const ripostePow = c => ARMOR / armorInterval(c.stock) * RIPOSTE_EFF * SPECIAL_BONUS;
+// Puissance d'attaque envoyée par une tour (attaque par seconde)
+function attackPow(t) {
+  const k = (t.kind !== 'tower' ? SPECIAL_BONUS : 1) * civProd(t);
+  return (t.kind === 'barracks' ? ARMOR / armorInterval(t.stock) : prodRate(level(t))) * k;
+}
+const barracksPow = (pl, c) => towers.reduce((s, t) => s + (t.owner === pl.id && t.paths.includes(c.id) ? attackPow(t) : 0), 0);
+const barracksMinPop = prof => Math.max(BARRACKS_MIN_POP, prof.threshold);
+
 function aiThink(pl) {
   aiCivTick(pl);                                   // pouvoirs de la civilisation de l'ordinateur (défis)
   const prof = PROFILES[pl.profile];
@@ -2857,7 +2873,9 @@ function aiThink(pl) {
       const g = towers[id];
       return g.owner !== pl.id || enemyIn(g, pl.id) > g.stock * 0.6;
     });
-    if (prof.retreat && t.paths.length && threat > t.stock * prof.retreat) { t.paths = []; continue; }
+    // les blindés de riposte d'une caserne grise attaquée se heurtent à notre flux : pas de repli pour eux
+    const fear = threat - (t.paths.some(id => isGreyBarracks(towers[id])) ? inc[t.id][4] : 0);
+    if (prof.retreat && t.paths.length && fear > t.stock * prof.retreat) { t.paths = []; continue; }
     if (t.paths.length >= prof.maxPaths) continue;
     if (threat === 0 && t.stock >= prof.threshold * 0.5) {
       const needy = mine
@@ -2867,6 +2885,22 @@ function aiThink(pl) {
     }
     if (t.stock < prof.threshold) continue;
     aiAttack(pl, t, prof, noise);
+  }
+  // Casernes grises : attaque groupée quand aucune tour seule n'est assez puissante
+  if (Math.random() >= skip) for (const c of towers) {
+    if (!isGreyBarracks(c)) continue;
+    const need = BARRACKS_MARGIN * ripostePow(c);
+    let pow = barracksPow(pl, c), n = mine.filter(t => t.paths.includes(c.id)).length;
+    if (pow >= need) continue;                     // déjà assez de tours engagées
+    const crew = mine.filter(t => !t.paths.includes(c.id) && t.paths.length < prof.maxPaths
+        && t.stock >= barracksMinPop(prof) && canLink(t, c) && enemyIn(t, pl.id) === 0)
+      .sort((a, b) => attackPow(b) - attackPow(a));
+    const pick = [];
+    for (const t of crew) {
+      if (pow >= need || n >= MAX_PATHS) break;  // la caserne ne riposte que contre 3 tours
+      pick.push(t); pow += attackPow(t); n++;
+    }
+    if (pow >= need) for (const t of pick) t.paths.push(c.id);
   }
 }
 function aiAttack(pl, t, prof, noise) {
@@ -2879,6 +2913,9 @@ function aiAttack(pl, t, prof, noise) {
         if (c.owner === pl.id || t.paths.includes(c.id) || !canLink(t, c)) continue;
         if (spareHuman && c.owner === 0) continue;
         if (t.kind !== 'barracks' && pl.bersLane && pl.bersLane.has(c.id + '>' + t.id)) continue;   // Berserkers en face
+        // caserne grise : seule une tour d'au moins 20 défenseurs, assez puissante (avec les tours déjà engagées)
+        if (isGreyBarracks(c) && (t.stock < barracksMinPop(prof)
+            || barracksPow(pl, c) + attackPow(t) < BARRACKS_MARGIN * ripostePow(c))) continue;
         const need = Math.max(1, c.stock + 1 - friendIn(c, pl.id));
         let cost = need * (c.owner === -1 ? prof.neutralW : c.owner === 0 ? prof.humanW : 1)
                  + dist(t, c) / (minDim * 0.05);
@@ -4928,7 +4965,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261025_182';
+const APP_VERSION = '20261111_03';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
