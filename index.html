@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261111_03)
+     Fichier  : index.html (paquet GitHub Pages, version 20261112_01)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
@@ -3579,8 +3579,20 @@ const SPR_FLAG = {
 };
 const SPR = {}, BAN = {};
 for (const k in SPR_DATA) { const [src, w, h] = SPR_DATA[k], img = new Image(); img.src = src; SPR[k] = { img, w, h, civ: !!FAC_CIV[k], v: {} }; }
-for (const k in BAN_DATA) { const [src, w, h] = BAN_DATA[k], img = new Image(); img.src = src; BAN[k] = { img, w, h }; }
-const OWNER_HUE = [null, 4, 142, 44];               // rouge, vert, jaune (le bleu du joueur est la couleur d'origine)
+for (const k in BAN_DATA) { const [src, w, h] = BAN_DATA[k], img = new Image(); img.src = src; BAN[k] = { img, w, h, v: {} }; }
+const OWNER_HUE = [218, 4, 142, 44];                // bleu, rouge, vert, jaune (teinte HSL des couleurs des joueurs)
+const OWNER_L = [1, 1, 1, 0.82];                    // jaune assombri : les emblèmes dorés restent lisibles sur le tissu
+// Tissus des civilisations (tentures, bannières, fonds de drapeaux) : teinte centrale, plage de teintes,
+// saturation minimale, correction de luminosité. Ils prennent la couleur du propriétaire.
+const CIV_FABRIC = {
+  maya:   [176, 138, 212, 0.12, 1],                 // turquoise
+  azte:   [352, 333, 367, 0.45, 1],                 // rouge (plage à cheval sur 0°)
+  rome:   [352, 333, 367, 0.45, 1],
+  egypte: [210, 162, 252, 0.12, 1],                  // bleu
+  viking: [214, 185, 252, 0.12, 1],
+  celte:  [125, 108, 145, 0.3, 1.25]                // vert sombre, éclairci
+};
+const SKIN_FABRIC = [222, 195, 252, 0.08, 1];       // skins communs et bâtiments spéciaux : tout le bleu
 function rgb2hsl(r, g, b) {
   r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
   if (!d) return [0, 0, l];
@@ -3592,23 +3604,38 @@ function hsl2rgb(h, s, l) {
   const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
   return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
 }
-// Image d'une tour pour un propriétaire (préparée une fois puis gardée en mémoire)
-function sprVariant(key, owner) {
-  const S = SPR[key]; if (!S || !S.img.complete || !S.img.naturalWidth) return null;
-  const o = owner < 0 ? 'n' : S.civ ? 0 : owner;
-  if (o === 0) return S.img;
-  if (S.v[o]) return S.v[o];
-  const c = document.createElement('canvas'); c.width = S.img.naturalWidth; c.height = S.img.naturalHeight;
-  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(S.img, 0, 0);
-  const d = g.getImageData(0, 0, c.width, c.height), p = d.data;
+// Recolore une image : tissu de la plage F à la couleur du propriétaire o, ou niveaux de gris ('n')
+function recolorImg(img, F, o) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), p = d.data, [mid, lo, hi, smin, lk] = F;
   for (let i = 0; i < p.length; i += 4) {
     if (!p[i + 3]) continue;
     if (o === 'n') { const l = 0.3 * p[i] + 0.59 * p[i + 1] + 0.11 * p[i + 2]; p[i] = p[i + 1] = p[i + 2] = l * 0.92 + 10; continue; }
-    const [h, s, l] = rgb2hsl(p[i], p[i + 1], p[i + 2]);
-    if (h >= 195 && h <= 252 && s > 0.22) { const [r, gg, b] = hsl2rgb((OWNER_HUE[o] + (h - 222) * 0.3 + 360) % 360, s, l); p[i] = r; p[i + 1] = gg; p[i + 2] = b; }
+    let [h, s, l] = rgb2hsl(p[i], p[i + 1], p[i + 2]);
+    if (h < lo) h += 360;
+    if (h > hi || s <= smin) continue;
+    const [r, gg, b] = hsl2rgb((OWNER_HUE[o] + (h - mid) * 0.3 + 720) % 360, s, Math.min(0.92, l * lk * OWNER_L[o]));
+    p[i] = r; p[i + 1] = gg; p[i + 2] = b;
   }
   g.putImageData(d, 0, 0);
-  return (S.v[o] = c);
+  return c;
+}
+// Le tissu est-il déjà à la couleur du propriétaire ? (image d'origine gardée telle quelle)
+const fabricIsOwner = (F, o) => Math.abs(((F[0] - OWNER_HUE[o]) % 360 + 540) % 360 - 180) < 15 && OWNER_L[o] === 1 && F[4] === 1;
+// Image d'une tour pour un propriétaire (préparée une fois puis gardée en mémoire) :
+// tentures, bannières, drapeaux et éléments bleus à la couleur du propriétaire ; tours grises en niveaux de gris
+function sprVariant(key, owner) {
+  const S = SPR[key]; if (!S || !S.img.complete || !S.img.naturalWidth) return null;
+  const o = owner < 0 ? 'n' : owner, F = S.civ ? CIV_FABRIC[key] : SKIN_FABRIC;
+  if (o !== 'n' && (!F || fabricIsOwner(F, o))) return S.img;
+  return S.v[o] || (S.v[o] = recolorImg(S.img, F, o));
+}
+// Drapeau d'une civilisation, fond à la couleur du propriétaire
+function banVariant(fac, owner) {
+  const B = BAN[fac]; if (!B || !B.img.complete || !B.img.naturalWidth) return null;
+  const F = CIV_FABRIC[fac]; if (owner < 0 || fabricIsOwner(F, owner)) return B.img;
+  return B.v[owner] || (B.v[owner] = recolorImg(B.img, F, owner));
 }
 // Skin d'une tour : un ordinateur avec une civilisation a la tour de sa civilisation ; sinon le skin choisi
 const SPECIAL_SPR = { super: 'super', artillery: 'artillery', barracks: 'barracks' };
@@ -3649,9 +3676,10 @@ function drawSpriteTower(t, key, c, dk) {
   // drapeau de la civilisation du propriétaire, posé en haut de la tour à la place du drapeau de l'illustration ;
   // taille minimale fixe pour rester lisible sur les petites tours
   const oc = cOf(t.owner), FL = SPR_FLAG[key], B = oc && BAN[oc.fac];
-  if (oc && FL && B && B.img.complete && key !== oc.fac && !t.preview) {
+  const BI = oc && FL && B && key !== oc.fac && !t.preview && banVariant(oc.fac, t.owner);
+  if (BI) {
     const bh = Math.max(Math.max(15, Math.min(22, baseR * 0.75)), FL[2] * Ht * 1.25), bw = bh * B.w / B.h;
-    ctx.drawImage(B.img, x - Wt / 2 + FL[0] * Wt - bh * 0.07, yb - Ht + r * 0.18 + FL[1] * Ht - bh * 0.06, bw, bh);
+    ctx.drawImage(BI, x - Wt / 2 + FL[0] * Wt - bh * 0.07, yb - Ht + r * 0.18 + FL[1] * Ht - bh * 0.06, bw, bh);
   }
   if (t.deny > 0) { ctx.save(); ctx.globalAlpha = t.deny; ctx.strokeStyle = '#ff3b30'; ctx.lineWidth = 4;
     ctx.beginPath(); ctx.ellipse(x, yb, r + 7, r * 0.45 + 5, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
@@ -3684,7 +3712,7 @@ function towerHalo(t) {
 // Sa taille ne dépend pas de celle de la tour : il reste lisible sur les petites comme sur les grandes tours.
 function drawCivFlag(t) {
   const c = cOf(t.owner); if (!c) return;
-  const B = BAN[c.fac]; if (!B || !B.img.complete) return;
+  const B = BAN[c.fac], BI = banVariant(c.fac, t.owner); if (!BI) return;
   const r = rad(t), fh = Math.max(15, Math.min(24, baseR * 0.8)), fw = fh * B.w / B.h;
   const wide = t.kind === 'barracks' ? 1.35 : SPECIAL_SPR[t.kind] ? 1.15 : 0.95;
   const px = t.x - r * wide - fw * 0.55, foot = t.y + r * 0.62, top = foot - fh * 2.1;   // drapeau à gauche de la tour, contre elle
@@ -3692,7 +3720,7 @@ function drawCivFlag(t) {
   ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(px + 2, foot, fh * 0.25, fh * 0.09, 0, 0, TAU); ctx.fill();
   ctx.strokeStyle = 'rgba(60,40,25,.95)'; ctx.lineWidth = Math.max(1.6, fh * 0.09);
   ctx.beginPath(); ctx.moveTo(px + fh * 0.08, top + fh * 0.3); ctx.lineTo(px + fh * 0.08, foot); ctx.stroke();
-  ctx.drawImage(B.img, px, top, fw, fh);
+  ctx.drawImage(BI, px, top, fw, fh);
   ctx.restore();
 }
 function drawTower(t) {
@@ -4965,7 +4993,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261111_03';
+const APP_VERSION = '20261112_01';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
