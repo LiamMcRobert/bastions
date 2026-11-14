@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261114_03)
+     Fichier  : index.html (paquet GitHub Pages, version 20261114_08)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
-                Campagne de 75 niveaux (5 difficultés × 15), défis du jour, défis par identifiant,
+                Campagne de 25 niveaux (5 chapitres × 5), défis du mois, défis par identifiant,
                 classement en ligne (Google Sheets via Apps Script)
      Usage    : Ouvrir dans Chrome/Safari sur mobile ou tablette.
                 Aucune bibliothèque externe, fonctionne hors ligne.
@@ -266,6 +266,12 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   pointer-events:none;transition:opacity .25s}
 #toast{opacity:0;bottom:70px}
 #toast.show{opacity:1}
+#powerNotices{position:absolute;top:clamp(110px,18vh,190px);left:50%;transform:translateX(-50%);z-index:15;
+  display:flex;flex-direction:column;align-items:center;gap:3px;width:min(94%,700px);pointer-events:none;text-align:center}
+.powerNotice{font-size:clamp(22px,4.8vw,34px);font-weight:800;line-height:1.12;letter-spacing:.02em;
+  -webkit-text-stroke:1px rgba(15,20,28,.8);paint-order:stroke fill;text-shadow:0 2px 5px rgba(0,0,0,.55)}
+#powerNotices.multiple .powerNotice{font-size:clamp(16px,3.4vw,23px)}
+.powerNotice.available{color:#ffd447;-webkit-text-stroke:1px #684400;text-shadow:0 2px 6px rgba(0,0,0,.7)}
 #hint{bottom:auto;transform:none;font-size:14px;padding:7px 12px;max-width:calc(100% - 16px);width:max-content}
 #hint::before{content:"";position:absolute;left:var(--ax,50%);width:12px;height:12px;
   background:var(--panel);transform:translateX(-50%) rotate(45deg)}
@@ -371,6 +377,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   </div>
   <div id="hint" class="msg hidden">Glisse ta tour vers une autre pour attaquer</div>
   <div id="toast" class="msg"></div>
+  <div id="powerNotices" aria-live="polite"></div>
 
   <!-- ===== Menu principal ===== -->
   <div id="menu" class="overlay">
@@ -1080,6 +1087,8 @@ const EN_RX = [
   [/^Ton meilleur temps : (\S+)\.$/, m => 'Your best time: ' + m[1] + '.'],
   [/^Ton meilleur temps reste (\S+)\.$/, m => 'Your best time remains ' + m[1] + '.'],
   [/^Difficulté « (.+) » débloquée !$/, m => 'Difficulty \u201c' + WX(m[1]) + '\u201d unlocked!'],
+  [/^Pouvoir : (.+)$/, m => 'Power: ' + WX(m[1])],
+  [/^(.+) t’écoute$/, m => WX(m[1]) + ' is listening'],
   [/^Chapitre (\d) \((.+)\) débloqué !$/, m => 'Chapter ' + m[1] + ' (' + WX(m[2]) + ') unlocked!'],
   [/^Partie (\d+)\/(\d+) gagnée en (\S+)\.$/, m => 'Game ' + m[1] + '/' + m[2] + ' won in ' + m[3] + '.'],
   [/^Total : (\S+)\.$/, m => 'Total: ' + m[1] + '.'],
@@ -1138,11 +1147,14 @@ Object.assign(EN, {
   'Drakar': 'Longship', 'Château de cartes': 'House of cards', 'prêt': 'ready', 'utilisé': 'used', 'Annuler': 'Cancel', 'Valider': 'Confirm',
   'Tour de tir': 'Fire tower', 'Caserne': 'Barracks'
 });
-const CIV_COND_EN = s => s.replace(/^(\d+) de tes tours à 10 défenseurs ou plus en même temps$/, '$1 of your towers at 10 defenders or more at the same time')
+const CIV_COND_EN = s => s.replace(/^(\d+) dégâts infligés par tes tours et unités \(aux tours et unités adverses\)$/, '$1 damage dealt by your towers and units (to enemy towers and units)').replace(/^(\d+) de tes tours à 10 défenseurs ou plus en même temps$/, '$1 of your towers at 10 defenders or more at the same time')
   .replace(/^(\d+) de tes tours à garnison maximale pendant au moins 5 s$/, '$1 of your towers at full garrison for at least 5 s')
   .replace(/^(\d+) de tes unités perdues \(au combat ou dans tes tours\)$/, '$1 of your units lost (in battle or in your towers)')
   .replace(/^(\d+) de tes tours à 40 défenseurs ou plus en même temps$/, '$1 of your towers at 40 defenders or more at the same time');
-const CIV_PASSIVE_EN = s => s.replace(/^\+([\d /]+) % de production pour une tour qui attaque une tour neutre ou adverse$/, '+$1% production for a tower attacking a neutral or enemy tower')
+const CIV_PASSIVE_EN = s => s.replace(/^\+([\d /]+) % de production pour une tour qui attaque une tour neutre ou une tour de moins de 10 défenseurs$/, '+$1% production for a tower attacking a neutral tower or a tower under 10 defenders')
+  .replace(/^\+([\d /]+) % de production pour une tour qui attaque une tour d’un autre joueur$/, '+$1% production for a tower attacking another player\u2019s tower')
+  .replace(/^\+([\d /]+) % de production pour une tour qui renforce une de tes tours de moins de 40 défenseurs$/, '+$1% production for a tower reinforcing one of your towers under 40 defenders')
+  .replace(/^\+([\d /]+) % de production pour une tour qui attaque une tour neutre ou adverse$/, '+$1% production for a tower attacking a neutral or enemy tower')
   .replace(/^\+([\d /]+) % de production pour une tour qui renforce une de tes tours$/, '+$1% production for a tower reinforcing one of your towers')
   .replace(/^\+([\d /]+) % de production pour une tour qui attaque \(dégressif : un quart de moins dès 20, 30 et 40 défenseurs dans la tour visée, rien sur une tour pleine\) ou qui renforce une de tes tours de moins de 20 défenseurs$/,
     '+$1% production for a tower that attacks (decreasing: a quarter less from 20, 30 and 40 defenders in the target, nothing on a full tower) or reinforces one of your towers under 20 defenders').replace(/^\+([\d /]+) % de production pour tes tours à 30 défenseurs ou plus$/, '+$1% production for your towers at 30 defenders or more')
@@ -1172,6 +1184,9 @@ Object.assign(EN, {
   'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
   'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.': 'Raiding peoples: their small and medium towers produce more, ideal for expanding fast.',
   'Bâtisseurs prospères : toutes leurs tours produisent davantage.': 'Prosperous builders: all their towers produce more.',
+  'Chasseurs opportunistes : leurs tours produisent davantage en s’attaquant aux tours neutres ou affaiblies.': 'Opportunist hunters: their towers produce more when attacking neutral or weakened towers.',
+  'Peuples de raids : leurs tours qui attaquent les autres peuples produisent davantage.': 'Raiding peoples: their towers attacking other peoples produce more.',
+  'Bâtisseurs organisés : leurs tours qui ravitaillent leurs tours les moins remplies produisent davantage.': 'Organized builders: their towers supplying their least-filled towers produce more.',
   'Chasseurs opportunistes : leurs tours produisent davantage en frappant les tours faibles et en soutenant les plus fragiles.': 'Opportunist hunters: their towers produce more when striking weak towers and supporting the most fragile ones.',
   'Peuples de raids : leurs tours qui attaquent produisent davantage.': 'Raiding peoples: their attacking towers produce more.',
   'Bâtisseurs organisés : leurs tours qui en ravitaillent d’autres produisent davantage.': 'Organized builders: their towers that supply others produce more.', 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.': 'Builders of great cities: their well-filled towers produce more.',
@@ -1201,7 +1216,9 @@ Object.assign(EN, {
   'Experts de siège': 'Siege Experts', 'Grands bâtisseurs': 'Master Builders',
   '14 s : tes unités de puissance 1 (hors casernes) vont 50 % plus vite': '14 s: your strength-1 units (not from barracks) move 50% faster',
   '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2': '15 s: your towers (not barracks) produce strength-2 units 25% more slowly',
+  '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1': '15 s: your towers (not barracks) produce strength-2 units 25% more slowly, invincible against strength-1 units',
   '12 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1': '12 s: your towers (not barracks) produce strength-2 units 25% more slowly, invincible against strength-1 units',
+  '15 s : production de tes tours +50 % (hors casernes)': '15 s: your towers\u2019 production +50% (not barracks)',
   '12 s : production de tes tours +50 % (hors casernes)': '12 s: your towers\u2019 production +50% (not barracks)',
   '15 s : croissance de tes tours +50 % (hors casernes) ; une tour qui envoie garde la moitié de cette croissance': '15 s: your towers grow 50% faster (not barracks); a tower that sends troops keeps half of that growth',
   '15 s : tes unités de puissance 1 (hors casernes) frappent et renforcent double, mais vont 25 % moins vite': '15 s: your strength-1 units (not from barracks) hit and reinforce double, but move 25% slower',
@@ -1213,6 +1230,7 @@ EN_RX.push(
 );
 Object.assign(EN, {
   '+30 défenseurs (et +30 de capacité) pour 2 de tes tours': '+30 defenders (and +30 capacity) for 2 of your towers',
+  'Prend possession d’une tour standard adverse de 50 défenseurs maximum avec sa population': 'Takes over a standard enemy tower of at most 50 defenders, with its population',
   'Prend possession d’une tour adverse classique (pas un bâtiment spécial) avec sa population': 'Takes over a regular enemy tower (not a special building) with its population',
   'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites': 'The sky falls where you tap (a circle half the screen across): enemy towers\u2019 population is halved, enemy units are destroyed',
   'Tue la moitié des unités adverses : celles les plus proches de l’endroit touché (la zone s’ajuste à leur dispersion)': 'Kills half of the enemy units: those closest to where you tap (the area adjusts to how spread out they are)',
@@ -1820,8 +1838,9 @@ function groundDetail(g, L, r, s, free) {
 
 /* ================= Construction d'une partie ================= */
 function buildGame(cfg) {
+  pickNeutralSkin();                               // nouvelle apparence des tours neutres
   const rng = mulberry32(cfg.seed >>> 0);
-  units = []; shots = []; bursts = []; paused = false; drag = null; lostTower = false; clock = 0;
+  units = []; shots = []; bursts = []; paused = false; drag = null; lostTower = false; clock = 0; clearPowerNotices();
   const keys = Object.keys(PROFILES), pool = cfg.pool || keys;
   players = [{ id: 0, human: true, alive: true }];
   for (let i = 1; i <= cfg.opponents; i++) {
@@ -2736,7 +2755,7 @@ function arrive(u) {
       t.acc = Math.max(t.acc, 1);                   // riposte immédiate dès la première attaque
     }
   }
-  if (t.owner !== u.owner) { civLossO(u.owner, Math.min(v, t.stock)); civLossO(t.owner, Math.min(v, t.stock)); }   // attaquants et défenseurs tombés
+  if (t.owner !== u.owner) { const dealt = Math.min(v, t.stock); civDamageO(u.owner, dealt); civDamageO(t.owner, dealt); civLossO(u.owner, dealt); civLossO(t.owner, dealt); }   // attaquants et défenseurs tombés
   if (t.owner === u.owner) t.stock = Math.min(t.cap, t.stock + v);
   else if (v <= t.stock) { t.stock -= v; t.hit = 1; }
   else {
@@ -2770,7 +2789,7 @@ function fire(t, aggr) {
   }
   if (best) {                                      // un tir inflige 1 dégât, encaissé d'abord par l'armure
     const d = Math.max(0, 1 - armOf(best));
-    best.hp -= d; civLossO(best.owner, Math.min(d, best.hp + d));
+    best.hp -= d; civDamageO(t.owner, d); civLossO(best.owner, Math.min(d, best.hp + d));
     if (best.hp <= 0) best.dead = true;
   } else {
     bd = R;
@@ -2781,7 +2800,7 @@ function fire(t, aggr) {
       if (d <= bd) { bd = d; best = o; }
     }
     if (!best) return false;
-    best.stock--; best.hit = 1; pos = { x: best.x, y: best.y }; civLossO(best.owner, 1);
+    best.stock--; best.hit = 1; pos = { x: best.x, y: best.y }; civDamageO(t.owner, 1); civLossO(best.owner, 1);
     if (t.owner < 0 && best.stock <= 0) {          // riposte neutre : la tour agresseuse redevient grise, à 10
       if (best.owner === 0) lostTower = true;
       best.owner = -1; best.stock = Math.min(best.cap, 10); best.paths = []; best.acc = 0; best.fx = 1; best.aggr = [];
@@ -2876,6 +2895,19 @@ function attackPow(t) {
 const barracksPow = (pl, c) => towers.reduce((s, t) => s + (t.owner === pl.id && t.paths.includes(c.id) ? attackPow(t) : 0), 0);
 const barracksMinPop = prof => Math.max(BARRACKS_MIN_POP, prof.threshold);
 
+/* Ravitaillement (passif méditerranéen) : vers une de ses tours de moins de 40 défenseurs, plus proche du front */
+function feedOK(pl, g) { const c = cOf(pl.id); return !!c && c.key === 'med' && g.stock < Math.min(40, g.cap - 1); }
+function aiFeed(pl, t) {
+  const c = cOf(pl.id); if (!c || c.key !== 'med') return;
+  const foes = towers.filter(g => g.owner >= 0 && g.owner !== pl.id); if (!foes.length) return;
+  const front = u => Math.min(...foes.map(g => dist(u, g))), ft = front(t);
+  let best = null, bf = ft;
+  for (const u of towers) {
+    if (u.owner !== pl.id || u === t || !canLink(t, u) || !feedOK(pl, u) || dist(t, u) > minDim * 0.6) continue;
+    const f = front(u); if (f < bf) { bf = f; best = u; }
+  }
+  if (best) t.paths.push(best.id);
+}
 function aiThink(pl) {
   aiCivTick(pl);                                   // pouvoirs de la civilisation de l'ordinateur (défis)
   const prof = PROFILES[pl.profile];
@@ -2897,7 +2929,7 @@ function aiThink(pl) {
     const threat = enemyIn(t, pl.id);
     t.paths = t.paths.filter(id => {
       const g = towers[id];
-      return g.owner !== pl.id || enemyIn(g, pl.id) > g.stock * 0.6;
+      return g.owner !== pl.id || enemyIn(g, pl.id) > g.stock * 0.6 || feedOK(pl, g);
     });
     // les blindés de riposte d'une caserne grise attaquée se heurtent à notre flux : pas de repli pour eux
     const fear = threat - (t.paths.some(id => isGreyBarracks(towers[id])) ? inc[t.id][4] : 0);
@@ -2909,8 +2941,9 @@ function aiThink(pl) {
         .sort((a, b) => dist(t, a) - dist(t, b))[0];
       if (needy && dist(t, needy) < minDim * 0.6) { t.paths.push(needy.id); continue; }
     }
-    if (t.stock < prof.threshold) continue;
-    aiAttack(pl, t, prof, noise);
+    if (t.stock >= prof.threshold) aiAttack(pl, t, prof, noise);
+    // Méditerranéens : une tour sans cible ravitaille une tour plus proche du front (passif)
+    if (!t.paths.length && threat === 0 && t.stock >= prof.threshold * 0.5) aiFeed(pl, t);
   }
   // Casernes grises : attaque groupée quand aucune tour seule n'est assez puissante
   if (Math.random() >= skip) for (const c of towers) {
@@ -3685,8 +3718,15 @@ function banVariant(fac, owner) {
 const SPECIAL_SPR = { super: 'super', artillery: 'artillery', barracks: 'barracks' };
 // taille relative (hauteur) de chaque image : super-tour plus haute, caserne plus basse et large
 const SPR_SCALE = { super: 1.22, artillery: 1.05, barracks: 0.8 };
+// Skin des tours neutres : tiré au hasard à chaque début de partie (skins communs et tours de civilisation)
+let neutralSkin = 'bastion';
+function pickNeutralSkin() {
+  const pool = SKINS.concat(FAC_SKINS).map(k => k.sprite).filter(k => SPR[k]);
+  neutralSkin = pool[Math.floor(Math.random() * pool.length)] || 'bastion';
+}
 function spriteKeyFor(t) {
   if (SPECIAL_SPR[t.kind]) return SPECIAL_SPR[t.kind];
+  if (t.owner < 0 && !t.preview) return neutralSkin;
   const c = t.owner > 0 ? cOf(t.owner) : null;
   if (c) return c.fac;
   // joueur : tour de sa civilisation si « Skin de tour automatique » est coché (aperçus exclus)
@@ -3949,6 +3989,29 @@ function updateChips() {
   }
 }
 let toastT = null;
+/* Annonces des pouvoirs : 3 s en temps réel, en haut de l'écran, dans la couleur du joueur (doré : ton pouvoir
+   divin est prêt). L'affichage n'est refait que lorsqu'une annonce arrive ou expire. */
+let powerNotices = [], lastGodReady = false;
+function announcePower(text, owner, available = false) {
+  powerNotices.push({ text, color: available ? null : COLORS[owner] || COLORS[0], available, until: performance.now() + 3000 });
+  renderPowerNotices();
+  setTimeout(renderPowerNotices, 3020);
+}
+function renderPowerNotices() {
+  const now = performance.now();
+  powerNotices = powerNotices.filter(n => now < n.until);
+  const box = $('powerNotices');
+  box.classList.toggle('multiple', powerNotices.length > 1);
+  box.innerHTML = powerNotices.map(n => `<div class="powerNotice${n.available ? ' available' : ''}"${n.available ? '' : ` style="color:${n.color}"`}>${escapeHtml(n.text)}</div>`).join('');
+}
+function clearPowerNotices() { powerNotices = []; lastGodReady = false; renderPowerNotices(); }
+// Annonce dorée et carillon quand ton pouvoir divin devient utilisable
+function checkGodAvailability() {
+  if (state !== 'play' || !civ || civ.godUsed) { lastGodReady = false; return; }
+  const ready = godProgress().ready;
+  if (ready && !lastGodReady) { announcePower(civ.f.god.name + ' t’écoute', 0, true); sfx('ready'); }
+  lastGodReady = ready;
+}
 function toast(msg) {
   const el = $('toast'); el.textContent = msg; el.classList.add('show');
   clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1700);
@@ -4253,7 +4316,7 @@ function frame(now) {
   if (state === 'play' && !paused) {
     update(dt * GAME_SPEED * SPEEDS[speedIdx]);
     chipTimer -= dt;
-    if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); updateChrono(); positionHint(); renderPowers(); }
+    if (chipTimer <= 0 && state === 'play') { chipTimer = 0.25; updateChips(); updateChrono(); positionHint(); renderPowers(); checkGodAvailability(); }
     tutoTick();
   }
   render();
@@ -4331,9 +4394,9 @@ $('skinGrid').addEventListener('click', e => { const b = e.target.closest('[data
 
 /* Onglet Civilisations : présentation, bonus débloqués selon les étoiles de campagne, choix */
 const CIV_INTRO = {
-  amer: 'Bâtisseurs prospères : toutes leurs tours produisent davantage.',
-  nord: 'Peuples de raids : leurs petites et moyennes tours produisent davantage, idéal pour s’étendre vite.',
-  med: 'Bâtisseurs de grandes cités : leurs tours bien remplies produisent davantage.'
+  amer: 'Chasseurs opportunistes : leurs tours produisent davantage en s’attaquant aux tours neutres ou affaiblies.',
+  nord: 'Peuples de raids : leurs tours qui attaquent les autres peuples produisent davantage.',
+  med: 'Bâtisseurs organisés : leurs tours qui ravitaillent leurs tours les moins remplies produisent davantage.'
 };
 const FAC_INTRO = {
   maya: 'Vitesse et frappes ciblées.', azte: 'Puissance au combat et croissance.',
@@ -4388,22 +4451,22 @@ $('segSpeed').addEventListener('click', e => {
    chacun utilisable une fois par partie. Valeurs équilibrées : chaque passif ≈ +7 % au niveau 3,
    chaque pouvoir de civilisation ≈ 15 à 18 s d'avantage. */
 const CIVS = {
-  amer: { name: 'Amérindiens', icon: '🪶', pct: [3, 6, 9],
-    passive: p => '+' + p + ' % de production pour toutes tes tours',
+  amer: { name: 'Amérindiens', icon: '🪶', pct: [14, 14, 14],
+    passive: p => '+' + p + ' % de production pour une tour qui attaque une tour neutre ou une tour de moins de 10 défenseurs',
     factions: {
       maya: { name: 'Mayas', power: { name: 'Guerriers Aigles', icon: '🦅', dur: 15, kind: 'speed', desc: '15 s : +25 % de production par ligne d’attaque de chaque tour, et tes unités de puissance 1 (hors casernes) vont 50 % plus vite' },
         god: { name: 'Tezcatlipoca', desc: 'Divise par 2 la population de 3 tours adverses', cond: 'own10', need: 7, pick: { n: 3, who: 'enemy' } } },
       azte: { name: 'Aztèques', power: { name: 'Guerriers Jaguars', icon: '🐆', dur: 15, kind: 'force', desc: '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2' },
         god: { name: 'Quetzalcoatl', desc: '+30 défenseurs (et +30 de capacité) pour 2 de tes tours', cond: 'own10', need: 7, pick: { n: 2, who: 'own', regular: true } } } } },
-  nord: { name: 'Nordiques', icon: '🛡️', pct: [5, 10, 15],
-    passive: p => '+' + p + ' % de production pour tes tours des niveaux 1 à 4',
+  nord: { name: 'Nordiques', icon: '🛡️', pct: [10, 10, 10],
+    passive: p => '+' + p + ' % de production pour une tour qui attaque une tour d’un autre joueur',
     factions: {
-      viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 12, kind: 'force', desc: '12 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1' },
-        god: { name: 'Loki', desc: 'Prend possession d’une tour adverse classique (pas un bâtiment spécial) avec sa population', cond: 'dead', need: 600, pick: { n: 1, who: 'enemy', regular: true } } },
-      celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 12, kind: 'speed', desc: '12 s : production de tes tours +50 % (hors casernes)' },
-        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites', cond: 'dead', need: 600, pick: { point: true } } } } },
-  med: { name: 'Méditerranéens', icon: '🏛️', pct: [4, 8, 12],
-    passive: p => '+' + p + ' % de production pour tes tours à 30 défenseurs ou plus',
+      viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, kind: 'force', desc: '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1' },
+        god: { name: 'Loki', desc: 'Prend possession d’une tour standard adverse de 50 défenseurs maximum avec sa population', cond: 'damage', need: 600, pick: { n: 1, who: 'enemy', regular: true, maxStock: 50 } } },
+      celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 15, kind: 'speed', desc: '15 s : production de tes tours +50 % (hors casernes)' },
+        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites', cond: 'damage', need: 600, pick: { point: true } } } } },
+  med: { name: 'Méditerranéens', icon: '🏛️', pct: [12, 12, 12],
+    passive: p => '+' + p + ' % de production pour une tour qui renforce une de tes tours de moins de 40 défenseurs',
     factions: {
       egypte: { name: 'Égyptiens', power: { name: 'Grands bâtisseurs', icon: '🧱', dur: 15, kind: 'speed', desc: '15 s : croissance de tes tours +50 % (hors casernes) ; une tour qui envoie garde la moitié de cette croissance' },
         god: { name: 'Anubis', desc: 'Tue toutes les unités adverses hors des tours, sur toute la carte, pendant 3 s', cond: 'full6', need: 5, pick: null } },
@@ -4413,6 +4476,7 @@ const CIVS = {
 const GOD_COND = {
   own10: n => n + ' de tes tours à 10 défenseurs ou plus en même temps',
   dead: n => n + ' de tes unités perdues (au combat ou dans tes tours)',
+  damage: n => n + ' dégâts infligés par tes tours et unités (aux tours et unités adverses)',
   full6: n => n + ' de tes tours à garnison maximale pendant au moins 5 s'
 };
 const civLevel = st => st >= 45 ? 3 : st >= 30 ? 2 : st >= 15 ? 1 : 0;
@@ -4436,9 +4500,10 @@ function aiCivsFor(seed, n) {
 function makeCiv(key, fac, lvl, power, god) {
   const c = CIVS[key];
   return { key, fac, f: c.factions[fac], pct: c.pct[2] / 100, power, god,   // passif toujours au maximum
-    until: 0, used: false, godUsed: false, dead: 0, fullSince: null };
+    until: 0, used: false, godUsed: false, dead: 0, damage: 0, fullSince: null };
 }
 function civStart() {
+  clearPowerNotices();
   const m = myCiv(), allowed = current && current.cfg ? current.cfg.allowed : null;
   civs = []; civs[0] = m && (!allowed || allowed.includes(m.fac)) ? makeCiv(m.key, m.fac, 3, true, true) : null; civ = civs[0];
   if (current && current.cfg && current.cfg.aiCivs) {   // campagne : civilisations des ordinateurs fixées par le niveau
@@ -4478,7 +4543,9 @@ function fight(x, y) {
   const dx = Math.max(0, atkOf(x) - armOf(y)), dy = Math.max(0, atkOf(y) - armOf(x));
   if (!dx && !dy) return false;
   while (x.hp > 0 && y.hp > 0) {
-    civLossO(y.owner, Math.min(y.hp, dx)); civLossO(x.owner, Math.min(x.hp, dy));
+    const dealtX = Math.min(y.hp, dx), dealtY = Math.min(x.hp, dy);
+    civDamageO(x.owner, dealtX); civDamageO(y.owner, dealtY);
+    civLossO(y.owner, dealtX); civLossO(x.owner, dealtY);
     y.hp -= dx; x.hp -= dy;
   }
   if (x.hp <= 0) x.dead = true;
@@ -4486,14 +4553,24 @@ function fight(x, y) {
   return true;
 }
 // Multiplicateur de production d'une tour (passifs et pouvoirs de son propriétaire)
+/* Passifs : une ligne de la tour t vers la tour g y donne-t-elle droit ?
+   Amérindiens : attaque d'une tour neutre ou d'une tour adverse de moins de 10 défenseurs ;
+   Nordiques : attaque d'une tour d'un autre joueur (jamais une neutre) ;
+   Méditerranéens : renfort d'une de ses tours de moins de 40 défenseurs */
+function passiveLine(key, t, g) {
+  const ally = g.owner === t.owner;
+  if (key === 'amer') return !ally && (g.owner < 0 || g.stock < 10);
+  if (key === 'nord') return !ally && g.owner >= 0;
+  if (key === 'med') return ally && g.stock < 40;
+  return false;
+}
 function civProd(t) {
   const c = cOf(t.owner); if (!c) return 1;
   let k = 1;
-  if (c.key === 'med' && t.stock >= 30) k += c.pct;
-  if (c.key === 'nord' && level(t) <= 4) k += c.pct;
-  if (c.key === 'amer') k += c.pct;
-  // Guerriers Aigles : +25 % de production par ligne d'attaque qui part de la tour
-  if (civFacO(t.owner, 'maya')) k *= 1 + 0.25 * t.paths.filter(id => towers[id].owner !== t.owner).length;
+  // passif : au prorata des lignes de la tour qui y donnent droit (la production se répartit entre les lignes)
+  if (t.paths.length) k += c.pct * t.paths.filter(id => passiveLine(c.key, t, towers[id])).length / t.paths.length;
+  // Guerriers Aigles : +25 % de production par ligne d'attaque qui part de la tour (s'ajoute au passif)
+  if (civFacO(t.owner, 'maya')) k += 0.25 * t.paths.filter(id => towers[id].owner !== t.owner).length;
   if (t.kind !== 'barracks') {                     // pouvoirs (hors casernes)
     if (civFacO(t.owner, 'celte')) k *= 1.5;       // Guèdes : production +50 %
     if (civFacO(t.owner, 'azte') || civFacO(t.owner, 'viking')) k *= 0.75;   // Guerriers Jaguars, Berserkers : −25 %
@@ -4504,10 +4581,12 @@ function civProd(t) {
 const civSpeed = u => civFacO(u.owner, 'maya') && pwOf(u) === 1 ? 1.5 : civFacO(u.owner, 'rome') ? 0.75 : 1;
 // Guerriers Jaguars et Berserkers : nouvelles unités de puissance 2 (hors casernes)
 const civBoostO = o => civFacO(o, 'azte') || civFacO(o, 'viking');
-const civLossO = (o, n) => { const c = cOf(o); if (c && n > 0) c.dead += n; };   // pertes (pouvoir divin nordique)
+const civLossO = (o, n) => { const c = cOf(o); if (c && n > 0) c.dead += n; };   // pertes
+const civDamageO = (o, n) => { const c = cOf(o); if (c && n > 0) c.damage += n; };   // dégâts infligés (pouvoir divin nordique)
 // Conditions des pouvoirs divins. Amérindiens et Méditerranéens : vérifiées en continu ; Nordiques : pertes cumulées.
 function godProgressO(o) {
   const c = cOf(o), g = c.f.god;
+  if (g.cond === 'damage') { const have = Math.floor(c.damage); return { have: Math.min(have, g.need), need: g.need, ready: have >= g.need }; }
   if (g.cond === 'dead') { const have = Math.floor(c.dead); return { have: Math.min(have, g.need), need: g.need, ready: have >= g.need }; }
   if (g.cond === 'own10') { const have = towers.filter(t => t.owner === o && t.stock >= 10).length; return { have: Math.min(have, g.need), need: g.need, ready: have >= g.need }; }
   const have = towers.filter(t => t.owner === o && t.stock >= t.cap).length, now = scoreClock();   // garnison maximale
@@ -4540,7 +4619,7 @@ function aiCivTick(pl) {
   // à un moment où aucune de ses tours n'attaque (ou au hasard s'il attaque sans arrêt).
   if (c.power && !c.used && scoreClock() >= POWER_DELAY && c.sloppy) {
     if (c.randT == null) c.randT = POWER_DELAY + 30 + Math.random() * 60;
-    if (!attacking.length || scoreClock() >= c.randT) { c.used = true; c.until = scoreClock() + c.f.power.dur; if (state === 'play' && current && current.kind !== 'sim') sfx('cry'); }
+    if (!attacking.length || scoreClock() >= c.randT) { c.used = true; c.until = scoreClock() + c.f.power.dur; if (state === 'play' && current && current.kind !== 'sim') sfx('cry'); if (state === 'play') announcePower('Pouvoir : ' + c.f.power.name, pl.id); }
   }
   if (c.power && !c.used && scoreClock() >= POWER_DELAY && !c.sloppy) {
     const mode = st.power || 'asap';
@@ -4561,7 +4640,7 @@ function aiCivTick(pl) {
     if (go || scoreClock() > POWER_DELAY + 90) {   // au plus tard 90 s après
       c.used = true; c.until = scoreClock() + c.f.power.dur;
       if (state === 'play' && current && current.kind !== 'sim') sfx('cry');
-      if (state === 'play' && current && current.kind === 'defi') toast(NAMES[pl.id] + ' déclenche ' + c.f.power.name);
+      if (state === 'play') announcePower('Pouvoir : ' + c.f.power.name, pl.id);
     }
   }
   // Pouvoir divin
@@ -4574,7 +4653,7 @@ function aiCivTick(pl) {
     if (!g.pick) applyGod({}, pl.id);              // sans cible (Anubis) : déclenché au mauvais moment
     else if (g.pick.point) { if (spot) applyGod({ point: spot }, pl.id); }
     else if (g.pick.who === 'own') { if (own.length) applyGod({ sel: own.slice(0, g.pick.n) }, pl.id); }
-    else { const f = foes.filter(t => !g.pick.regular || t.kind === 'tower'); if (f.length) applyGod({ sel: f.slice(0, g.pick.n) }, pl.id); }
+    else { const f = foes.filter(t => (!g.pick.regular || t.kind === 'tower') && (g.pick.maxStock == null || t.stock <= g.pick.maxStock)); if (f.length) applyGod({ sel: f.slice(0, g.pick.n) }, pl.id); }
     return;
   }
   if (c.god && !c.godUsed && godProgressO(pl.id).ready) {
@@ -4587,7 +4666,7 @@ function aiCivTick(pl) {
       case 'maya': if (foes.length) applyGod({ sel: foes.sort(st.god === 'near' ? byNear : byStock).slice(0, 3) }, pl.id); break;
       case 'azte': applyGod({ sel: mine.filter(t => t.kind === 'tower').sort(st.god === 'strong' ? byStock : st.god === 'front' ? (a, b) => -byNear(a, b)
         : (a, b) => (enemyIn(b, pl.id) - b.stock) - (enemyIn(a, pl.id) - a.stock)).slice(0, 2) }, pl.id); break;
-      case 'viking': { const reg = foes.filter(t => t.kind === 'tower'); if (reg.length) applyGod({ sel: [reg.sort(st.god === 'near' ? byNear : byStock)[0]] }, pl.id); break; }
+      case 'viking': { const reg = foes.filter(t => t.kind === 'tower' && t.stock <= 50); if (reg.length) applyGod({ sel: [reg.sort(st.god === 'near' ? byNear : byStock)[0]] }, pl.id); break; }
       case 'celte': {                              // Toutatis : endroit qui touche le plus de garnisons et d'unités adverses
         const R = TOUTATIS_R(), foeU = units.filter(u => !u.dead && u.owner !== pl.id).map(unitPos);
         const spots = foes.map(t => ({ x: t.x, y: t.y })).concat(foeU);
@@ -4624,7 +4703,17 @@ function sfx(kind) {
     const A = sfxCtx, t0 = A.currentTime + 0.02, out = A.createGain(); out.gain.value = 0.55; out.connect(A.destination);
     const noise = dur => { const b = A.createBuffer(1, Math.round(A.sampleRate * dur), A.sampleRate), d = b.getChannelData(0);
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = A.createBufferSource(); s.buffer = b; return s; };
-    if (kind === 'thunder') {                      // claquement aigu puis grondement grave qui s'éteint
+    if (kind === 'ready') {                        // carillon bref : le pouvoir divin est prêt
+      out.gain.value = 0.32;
+      for (const [f, d] of [[660, 0], [880, 0.13], [990, 0.26]]) {
+        const o = A.createOscillator(), g = A.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, t0 + d);
+        g.gain.setValueAtTime(0.0001, t0 + d);
+        g.gain.exponentialRampToValueAtTime(0.42, t0 + d + 0.025);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.48);
+        o.connect(g).connect(out); o.start(t0 + d); o.stop(t0 + d + 0.5);
+      }
+    } else if (kind === 'thunder') {               // claquement aigu puis grondement grave qui s'éteint
       const crack = noise(0.25), bp = A.createBiquadFilter(), g1 = A.createGain();
       bp.type = 'bandpass'; bp.frequency.value = 2600; g1.gain.setValueAtTime(0.9, t0); g1.gain.exponentialRampToValueAtTime(0.01, t0 + 0.25);
       crack.connect(bp).connect(g1).connect(out); crack.start(t0);
@@ -4789,7 +4878,7 @@ $('btnPower').onclick = () => {
   if (!civ || civ.used || state !== 'play' || paused || scoreClock() < POWER_DELAY) return;
   civ.used = true; civ.until = scoreClock() + civ.f.power.dur;
   sfx('cry');                                      // cri de guerre
-  toast(civ.f.power.name + ' : ' + civ.f.power.desc.replace(/^\d+ s : /, '') + ' !');
+  announcePower('Pouvoir : ' + civ.f.power.name, 0);
   renderPowers();
 };
 $('btnGod').onclick = () => {
@@ -4813,7 +4902,7 @@ let pick = null;
 const TOUTATIS_R = () => minDim / 4;               // cercle d'un demi-écran de diamètre
 const pickable = t => {
   const p = pick.god.pick;
-  return (p.who === 'enemy' ? t.owner > 0 : t.owner === 0) && (!p.regular || t.kind === 'tower');
+  return (p.who === 'enemy' ? t.owner > 0 : t.owner === 0) && (!p.regular || t.kind === 'tower') && (p.maxStock == null || t.stock <= p.maxStock);
 };
 function updatePick() {
   const g = pick.god, p = g.pick;
@@ -5043,7 +5132,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261114_03';
+const APP_VERSION = '20261114_08';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
