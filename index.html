@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261115_12)
+     Fichier  : index.html (paquet GitHub Pages, version 20261115_15)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 25 niveaux (5 chapitres × 5), défis du mois, défis par identifiant,
@@ -4675,8 +4675,12 @@ function endDrag(e) {
   if (drag.mode === 'link' && e.type === 'pointerup' && state === 'play') {
     const p = ptOf(e), t = towerAt(p.x, p.y);
     const moved = Math.hypot(p.x - drag.sx, p.y - drag.sy) > 12;
-    if (!moved) {
-      if (drag.start.paths.length) drag.start.paths = [];
+    if (!moved) {                                  // toucher sa tour : toutes ses attaques sont annulées
+      if (drag.start.paths.length) {
+        logEv('c', drag.start.paths.length);
+        if (net.role === 'guest') netSend({ t: 'cut', a: drag.start.id, ids: drag.start.paths.slice() });   // multijoueur : l'hôte applique
+        drag.start.paths = [];
+      }
     } else if (t && t !== drag.start) addPath(drag.start, t);
   } else if (drag.mode === 'cut' && e.type === 'pointerup' && state === 'play') {
     // Simple toucher (sans glisser) sur un chemin : on le supprime
@@ -5642,7 +5646,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261115_12';
+const APP_VERSION = '20261115_15';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
