@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261114_08)
+     Fichier  : index.html (paquet GitHub Pages, version 20261115_01)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 25 niveaux (5 chapitres × 5), défis du mois, défis par identifiant,
@@ -250,7 +250,7 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
 #pre .specs span{display:flex;width:30px;height:30px}
 #pre .specs svg{width:100%;height:100%;fill:var(--muted);opacity:.35}
 #pre .specs span.on svg{fill:var(--accent);opacity:1}
-.prebox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:0 0 8px}
+.prebox{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px;margin:0 0 8px}
 .prebox div{background:var(--field);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
 .prebox span{font-size:12px;font-weight:700;color:var(--muted)}
 .prebox strong{font-size:22px;font-weight:800;display:flex;flex-direction:column;line-height:1.15}
@@ -2021,7 +2021,7 @@ function monthlyChallenges(month = parisMonth()) {
 // Civilisations à affronter dans un défi (première partie), affichées sur sa carte
 function foesLine(ch) {
   const g = ch.games[0], list = aiCivsFor(g.seed, g.opponents);
-  return '<p class="sub foes"><span>Adversaires :</span> ' + list.map(([k, f], i) => `<span style="color:${COLORS[i + 1]}">●</span> ${CIVS[k].icon} <span>${CIVS[k].factions[f].name}</span>`).join(', ') + '</p>';
+  return '<p class="sub foes"><span>Adversaires :</span> ' + list.map(([k, f], i) => `<span style="color:${COLORS[i + 1]}">●</span> ${CIVS[k].factions[f].power.icon} <span>${CIVS[k].factions[f].name}</span>`).join(', ') + '</p>';
 }
 /* Comparaison de deux résultats : une victoire bat toujours une défaite ; entre victoires, le temps le plus
    court l'emporte ; entre défaites, le plus de manches gagnées, puis le temps le plus court */
@@ -2125,7 +2125,7 @@ const specIcons = ch => SPECIAL_ORDER.map(k => { const on = ch.specials.includes
 // Cases « Top 3 en ligne » et « Ton meilleur », identiques à l'encart de lancement d'une partie
 const none = txt => '<em class="none">' + txt + '</em>';   // état sans valeur, en petit
 const podiumHtml = id => remote[id] ? (remote[id].length
-  ? remote[id].map((r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + escapeHtml(r.pseudo) + civTag(r) + '</small>').join('')
+  ? remote[id].map(podiumLine).join('')
   : none('Aucun record')) : none('—');
 const mineHtml = (best, n) => !best ? none('Pas encore joué')
   : best.status === 'réussi' ? fmtTime(best.total) + '<small>défi réussi' + (best.retries ? ', ' + best.retries + ' manche' + (best.retries > 1 ? 's' : '') + ' rejouée' + (best.retries > 1 ? 's' : '') : '') + '</small>'
@@ -2231,6 +2231,9 @@ const LETTER_FAC = Object.fromEntries(Object.entries(CIV_LETTER).map(([f, l]) =>
 const myCivLetter = () => (civs[0] && CIV_LETTER[civs[0].fac]) || '';
 // Nom de la civilisation d'un temps du top 3, en petit après le temps (rien sans civilisation)
 const civTag = r => { const f = LETTER_FAC[r.civ]; return f ? ' <span class="civtag">' + CIVS[FAC_CIV[f]].factions[f].name + '</span>' : ''; };
+// Ligne du top 3 : médaille, temps, logo du pouvoir de civilisation, pseudo, nom de la civilisation
+const powIcon = r => { const f = LETTER_FAC[r.civ]; return f ? CIVS[FAC_CIV[f]].factions[f].power.icon + ' ' : ''; };
+const podiumLine = (r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + powIcon(r) + escapeHtml(r.pseudo) + civTag(r) + '</small>';
 const civTxt = r => { const f = LETTER_FAC[r.civ]; return f ? ' (' + CIVS[FAC_CIV[f]].factions[f].name + ')' : ''; };
 const cleanTop = top => (Array.isArray(top) ? top : []).filter(r => r && r.pseudo && isFinite(+r.time))
   .map(r => ({ pseudo: String(r.pseudo).slice(0, 20), time: +r.time, civ: LETTER_FAC[r.civ] ? r.civ : '' })).sort((a, b) => a.time - b.time).slice(0, 3);
@@ -2472,10 +2475,7 @@ function renderBoard(kind) {
   const head = '<tr><th>#</th><th>Login</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th>' + (camp ? '<th class="ind">★</th>' : '') + '</tr>';
   const body = rows.map((r, i) => `<tr${r.login.toLowerCase() === me ? ' class="me"' : ''}><td>${i + 1}</td><td>${escapeHtml(r.login)}</td>`
     + `<td>${r.m[0]}</td><td>${r.m[1]}</td><td>${r.m[2]}</td><td>${r.m[0] + r.m[1] + r.m[2]}</td>` + (camp ? `<td class="ind">${r.stars == null ? '–' : r.stars}</td>` : '') + '</tr>').join('');
-  const sub = [0, 1, 2].map(i => rows.reduce((a, r) => a + r.m[i], 0));
-  const foot = rows.length ? `<tr class="tot"><td></td><td>Sous-totaux</td><td>${sub[0]}</td><td>${sub[1]}</td><td>${sub[2]}</td><td>${sub[0] + sub[1] + sub[2]}</td>`
-    + (camp ? '<td class="ind"></td>' : '') + '</tr>' : '';
-  $('boardTable').innerHTML = rows.length ? `<table class="board"><thead>${head}</thead><tbody>${body}${foot}</tbody></table>`
+  $('boardTable').innerHTML = rows.length ? `<table class="board"><thead>${head}</thead><tbody>${body}</tbody></table>`
     : '<p class="sub">Aucun résultat en ligne pour le moment.</p>';
 }
 let boardKind = 'defi';
@@ -2621,7 +2621,7 @@ function showPre({ title, chips, specials, id, mine, note, start, foes, allowed,
   $('preMine').innerHTML = mine;
   $('preNote').textContent = note || '';
   const rec = () => remote[id] && remote[id].length
-    ? remote[id].map((r, i) => '<small class="podium">' + MEDALS[i] + ' ' + fmtTime(r.time) + ' ' + escapeHtml(r.pseudo) + civTag(r) + '</small>').join('') : null;
+    ? remote[id].map(podiumLine).join('') : null;
   $('preRecord').innerHTML = rec() || none('Chargement…');
   preStart = start;
   $('pre').classList.remove('hidden');
@@ -4117,7 +4117,7 @@ function renderCampaign() {
       const t = best[L.id], done = t != null, star = done && t < STAR_TIME, lost = !done && lostSet[L.id], can = levelOpen(L.n);
       const cls = done ? 'won' : lost ? 'lost' : '';
       const wm = L.specials.length ? `<span class="wm${L.specials.length > 1 ? ' all' : ''}">${L.specials.map(k => ICONS[k]).join('')}</span>` : '';
-      const foes = L.civs.length ? `<span class="foes">${L.civs.map(f => CIVS[FAC_CIV[f]].icon).join('')}</span>` : '';
+      const foes = L.civs.length ? `<span class="foes">${L.civs.map(f => CIVS[FAC_CIV[f]].factions[f].power.icon).join('')}</span>` : '';
       html += `<button data-n="${L.n}" class="${cls}"${can ? '' : ' disabled'}`
         + ` aria-label="${TIERS[campTi(ti)].name} niveau ${L.k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${star ? ', étoile' : ''}">`
         + wm + foes + (star ? `<span class="pf">${starSvg('')}</span>` : '')
@@ -4229,8 +4229,16 @@ document.querySelectorAll('#optList input').forEach(inp => {
 });
 let menuTab = 'campaign';
 document.querySelector('#menu .menuhead').addEventListener('click', e => {
-  const b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab);
+  const b = e.target.closest('[data-tab]'); if (b) openTab(b.dataset.tab);
 });
+// Onglet choisi par le joueur : retour à l'accueil de l'onglet (sortie des défis du mois, de l'historique,
+// du tableau des scores) et en haut de la page
+function openTab(name) {
+  if (name === 'free') { $('defiMonth').classList.add('hidden'); $('defiHist').classList.add('hidden'); $('defiNew').classList.remove('hidden'); }
+  $('board').classList.add('hidden');
+  showTab(name);
+  document.querySelector('#menu .panel').scrollTop = 0;
+}
 // Glisser vers la gauche sur Campagne : Défis ; vers la droite sur Défis : Campagne
 (() => {
   const panel = document.querySelector('#menu .panel');
@@ -4243,8 +4251,8 @@ document.querySelector('#menu .menuhead').addEventListener('click', e => {
     if (!on) return; on = false;
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // geste surtout horizontal
-    if (dx < 0 && menuTab === 'campaign') showTab('free');
-    else if (dx > 0 && menuTab === 'free') showTab('campaign');
+    if (dx < 0 && menuTab === 'campaign') openTab('free');
+    else if (dx > 0 && menuTab === 'free') openTab('campaign');
   }, { passive: true });
 })();
 ['segOpp', 'segDiff', 'segGames'].forEach(id => $(id).addEventListener('click', e => {
@@ -5132,7 +5140,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261114_08';
+const APP_VERSION = '20261115_01';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
