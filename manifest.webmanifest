@@ -1,16 +1,32 @@
 {
-  "name": "Bastions",
+  "name": "Bastions – Des Peuples et des Dieux",
   "short_name": "Bastions",
-  "description": "Jeu de stratégie : conquête de tours",
+  "description": "Jeu de stratégie : conquiers toutes les tours de la carte.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#3f8cf2",
-  "theme_color": "#3f8cf2",
+  "background_color": "#4f9636",
+  "theme_color": "#2f78e0",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
