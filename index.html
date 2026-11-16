@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261115_24)
+     Fichier  : index.html (paquet GitHub Pages, version 20261116_02)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
@@ -1000,7 +1000,7 @@ const EN = {
 "Tours possédées": "Towers owned",
 "Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.": "Number of towers per player, shown at the top of the screen during games.",
 "Chronomètre": "Timer",
-"Pour la suite de l’histoire, continue la campagne.": "To find out what happens next, keep playing the campaign.",
+"Termine le tutoriel pour choisir où implanter ta faction.": "Finish the tutorial to choose where to settle your faction.",
   "Le premier bastion": "The first bastion",
   "Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.": "You have just taken the lead of a young faction. The local clans will not go easy on you: assert yourself.",
   "Ton premier bastion tient bon : ta faction est née.": "Your first bastion holds: your faction is born.",
@@ -5016,10 +5016,11 @@ function campBlock(title, lv, best, lostSet, note, cols) {
 function renderCampaign() {
   const best = campBest(), plan = campaignPlan(), lostSet = camp2().lost, zs = camp2().zones;
   let html = campBlock('Tutoriel', plan.filter(L => L.group === 'tuto'), best, lostSet, STORY.tuto1[1], 5);
-  if (campTutoDone()) {
+  {                                                // carte du monde toujours visible ; zones cliquables seulement quand elles sont proposées
     const ch = zoneChoices();
     html += `<div class="tierhead"><strong>Carte du monde</strong><span>${zs.length}/3 zones</span></div>`
-      + `<p class="sub story">${ch.length ? (zs.length ? 'Zone terminée : choisis ta prochaine destination.' : 'Choisis où implanter ta faction.')
+      + `<p class="sub story">${!campTutoDone() ? 'Termine le tutoriel pour choisir où implanter ta faction.'
+        : ch.length ? (zs.length ? 'Zone terminée : choisis ta prochaine destination.' : 'Choisis où implanter ta faction.')
         : zs.length === 3 && zs.every(zoneDone) ? 'Le monde entier reconnaît ton autorité.' : 'Termine la zone en cours pour voyager plus loin.'}</p>`
       + worldMap();
   }
@@ -5031,9 +5032,6 @@ function renderCampaign() {
     const fin = plan.filter(L => L.group === z + 'F');
     html += campBlock('Finale — ' + zoneName(z), fin, best, lostSet, zoneFacsDone(z) ? '' : '🔒 Termine les campagnes des ' + ZONES[z].facs.map(facName).join(' et des ') + ' pour ouvrir la finale.', 4);
   });
-  // niveaux encore verrouillés (zones non atteintes comprises) : invitation à poursuivre
-  if (plan.some(L => !levelOpen(L.n)))
-    html += '<p class="camplock"><span aria-hidden="true">🔒</span>Pour la suite de l’histoire, continue la campagne.</p>';
   $('campGrid').innerHTML = html;
 }
 // Récit affiché lors du choix d'une zone ou d'un voyage
@@ -6113,7 +6111,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261115_24';
+const APP_VERSION = '20261116_02';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
