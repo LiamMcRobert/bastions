@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261115_15)
+     Fichier  : index.html (paquet GitHub Pages, version 20261115_20)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
-                Campagne de 25 niveaux (5 chapitres × 5), défis du mois, défis par identifiant,
+                Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
                 classement en ligne (Google Sheets via Apps Script)
      Usage    : Ouvrir dans Chrome/Safari sur mobile ou tablette.
                 Aucune bibliothèque externe, fonctionne hors ligne.
@@ -120,6 +120,18 @@ h3{margin:8px 0 4px;font-size:20px}
 .tierhead span{font-size:12px;color:var(--muted);text-align:right}
 .tierhead.locked strong{color:var(--muted)}
 #campGrid .story{margin:2px 0 6px}
+#campGrid .zonehead{margin:22px 0 2px;font-size:19px}
+#campGrid .tiergrid{gap:5px}
+.world{display:block;width:100%;height:auto;margin:4px 0 6px;border-radius:10px}
+.world .sea{fill:#9cc7e4}
+.world .land{fill:#d9c99a;stroke:#b3a06a;stroke-width:.4}
+.world .wz circle{fill:#9aa3ab;stroke:#fff;stroke-width:.5}
+.world .wz.been circle{fill:#3b7d3a}
+.world .wz.can circle{fill:#e2a400;cursor:pointer;animation:wzpulse 1.4s ease-in-out infinite}
+.world .wz.can{cursor:pointer}
+.world .wi{font-size:3.6px;fill:#fff;font-weight:800;pointer-events:none}
+.world .wl{font-size:3.2px;fill:#203040;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:.6px;pointer-events:none}
+@keyframes wzpulse{50%{r:5}}
 .tiergrid button .foes{position:absolute;right:4px;top:4px;font-size:10px;line-height:1}
 .tiergrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .tiergrid button{position:relative;min-height:54px;border-radius:10px;border:2px solid var(--line);background:transparent;
@@ -452,7 +464,7 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
         <div class="seg" id="segSpeed"><button data-v="0">×1</button><button data-v="1">×1,5</button><button data-v="2">×2</button></div>
         <p class="lbl">Tours</p>
         <label class="tgl"><input type="checkbox" id="optAutoSkin"><span><strong>Skin de tour automatique</strong>Avec une civilisation, tes tours prennent l’apparence de ses tours. Choisir un skin ci-dessous décoche cette option.</span></label>
-        <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne ; les tours de victoire, en terminant le chapitre de leur civilisation.</p>
+        <p class="sub" style="margin:2px 0 0">Les skins se débloquent avec les étoiles de campagne ; les tours de victoire, en terminant la campagne de leur peuple.</p>
         <div class="cards" id="skinGrid"></div>
         <p class="lbl" style="margin-top:20px">Classement en ligne</p>
         <p class="sub" style="margin:2px 0 0">Les meilleurs temps sont enregistrés automatiquement dans le tableau des records du jeu.</p>
@@ -511,10 +523,10 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
           <li>Le bouton ×1 en haut à droite accélère le jeu (×1,5 puis ×2). Le bouton 🔊 coupe ou remet la musique (menus et parties).</li>
           <li>Les bâtiments spéciaux produisent 20 % de plus que les tours classiques.</li>
           <li>Les tours grises ne produisent rien mais se défendent. Élimine tous les adversaires pour gagner : les tours grises restantes ne comptent pas.</li>
-          <li>Campagne : 5 chapitres de 5 parties, un par difficulté. Chef d’une jeune faction, tu t’imposes face aux clans locaux, puis tu rencontres les Méditerranéens, les Nordiques et les Amérindiens avant de conquérir le monde. Chaque partie se débloque en gagnant la précédente ; les bulles d’explication sont intégrées aux premières parties. Une victoire en moins de 3:20 donne une étoile.</li>
+          <li>Campagne : après 5 niveaux de tutoriel, choisis sur la carte du monde où implanter ta faction (Europe du Nord, bassin méditerranéen ou Amérique centrale et du Sud). Chaque zone compte deux peuples de 8 niveaux chacun (2 faciles sans civilisation, puis 6 où tu incarnes ce peuple) et une finale de 4 niveaux difficiles. Une zone terminée ouvre les zones voisines. Une étoile par niveau gagné à temps</li>
           <li>Cadres des parties : vert pour une victoire, rouge pour une défaite, gris si la partie n’a pas encore été jouée ; dans les défis, or, argent ou bronze pour ta place dans le top 3 en ligne. Sur la grille de campagne, le filigrane indique les bâtiments spéciaux, les emblèmes les civilisations adverses et la bande de couleur le paysage.</li>
           <li>Un bâtiment spécial gris attaqué riposte contre les tours qui l’ont attaqué (3 au maximum), deux fois moins vite qu’une tour occupée et sans gagner de population. La riposte contre une tour cesse quand elle tombe (elle redevient grise, avec 10 défenseurs) ou après 15 s sans nouvelle attaque de sa part.</li>
-          <li>Personnalisation : 21 skins de tours se débloquent avec les étoiles de campagne (tous à 20 étoiles) ; les 6 tours de civilisation sont disponibles dès le départ (attribuées automatiquement à ta civilisation, sauf si tu décoches « Skin de tour automatique ») et les 6 tours de victoire se débloquent en terminant le chapitre de leur civilisation. On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).</li>
+          <li>Personnalisation : 21 skins de tours se débloquent avec les étoiles de campagne (tous à 46 étoiles) ; les 6 tours de civilisation sont disponibles dès le départ (attribuées automatiquement à ta civilisation, sauf si tu décoches « Skin de tour automatique ») et les 6 tours de victoire se débloquent en terminant la campagne de leur peuple. On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).</li>
           <li>Défis : deux défis du jour (Normal et Difficile), renouvelés chaque jour à minuit (heure de Paris), quinze défis du mois (5 Normal, 10 Difficile) et des défis à créer. Les défis du jour et du mois sont les mêmes pour tout le monde ; chaque carte indique les civilisations à affronter. Toute partie se partage par un lien qui l’ouvre directement.</li>
           <li>Défis créés : les bâtiments spéciaux sont placés au centre en Normal, plus près de toi en Facile et Très facile, plus près de l’ordinateur au-delà ; deux exemplaires si une seule option est activée, un de chaque sinon.</li>
           <li>Temps : comptés à la vitesse ×1 (jouer en ×1,5 ou ×2 ne les change pas). Le top 3 de chaque partie est enregistré en ligne.</li>
@@ -544,6 +556,13 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
   </div>
 
   <!-- ===== Avant de lancer une partie ===== -->
+  <div id="story" class="overlay hidden">
+    <div class="panel">
+      <h2 id="storyTitle"></h2>
+      <p class="sub" id="storyText"></p>
+      <button class="primary" id="btnStoryOk">Continuer</button>
+    </div>
+  </div>
   <div id="pre" class="overlay hidden">
     <div class="panel">
       <h2 id="preTitle"></h2>
@@ -623,7 +642,6 @@ const DARK   = ['#1b438a', '#8a231d', '#17643a', '#8a6a00'];
 const NEUTRAL = '#8e949c', NEUTRAL_DARK = '#4e535a';
 const NAMES = ['Bleu', 'Rouge', 'Vert', 'Jaune'];
 const MAX_STOCK = 50, MAX_PATHS = 3, TAU = Math.PI * 2;
-const TIER_LEVELS = 5, CAMPAIGN_SIZE = 5 * TIER_LEVELS;   // 5 chapitres (difficultés) × 5 parties
 const STAR_TIME = 200;                          // étoile : victoire en moins de 3:20 (temps compté à la vitesse ×1)
 const ASPECT = 1.7;   // proportion de référence (portrait) pour espacer les tours générées
 
@@ -728,83 +746,190 @@ const campTi = ti => Math.min(ti, 3);
 // identifiant unique d'un niveau : C1-051 à C1-455 (numéros 51 à 55, distincts de l'ancienne campagne)
 const levelId = (ti, k) => 'C1-' + ti + String(50 + k);
 function shuffle(a, rng) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-/* ================= Campagne : 5 chapitres de 5 parties (une difficulté par chapitre) =================
-   Histoire : le joueur devient le chef d'une jeune faction qui doit survivre parmi les clans locaux, puis
-   rencontre les grandes civilisations. Les civilisations que le joueur peut adopter s'ouvrent chapitre après chapitre. */
+/* ================= Campagne : tutoriel, puis 3 zones à explorer =================
+   Tutoriel : 5 niveaux en Très facile. Le joueur choisit ensuite la zone où il implante sa faction.
+   Zone : 2 factions de 8 niveaux chacune (jouables en parallèle), puis 4 niveaux de finale.
+   Faction : 2 niveaux Facile 1v1 (le joueur sans civilisation, ou une civilisation déjà maîtrisée à partir de la
+   2e zone), 3 niveaux Normal (1v1, 1v1, 1v2) puis 3 niveaux Difficile (1v1, 1v2, 1v3) où le joueur incarne la faction.
+   Les ordinateurs ont toujours la civilisation de la faction. Finale (Difficile) : le joueur choisit l'une des deux
+   factions ; ordinateurs prédéfinis. Une zone terminée ouvre les zones voisines (Méditerranée – Nord – Amériques). */
 const FAC_CIV = { maya: 'amer', azte: 'amer', viking: 'nord', celte: 'nord', egypte: 'med', rome: 'med' };
 const ALL3 = ['super', 'artillery', 'barracks'];
-const CHAPTERS = [
-  { theme: 'Affirmer sa faction', allowed: [],
-    story: 'Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.',
-    levels: [
-      { title: 'Le premier bastion', opp: 1, specials: [], civs: [], land: 0, tuto: 'basics' },
-      { title: 'La super-tour', opp: 1, specials: ['super'], civs: [], land: 1, tuto: 'super' },
-      { title: 'La tour de tir', opp: 1, specials: ['artillery'], civs: [], land: 0, tuto: 'artillery' },
-      { title: 'La caserne', opp: 1, specials: ['barracks'], civs: [], land: 4, tuto: 'barracks' },
-      { title: 'Deux clans rivaux', opp: 2, specials: ALL3, civs: [], land: 1, tuto: 'two' }] },
-  { theme: 'Rencontre avec les Méditerranéens', allowed: [],
-    story: 'Au sud, deux peuples puissants convoitent tes terres : les Romains et les Égyptiens.',
-    levels: [
-      { title: 'Les légions de Rome', opp: 1, specials: ['super'], civs: ['rome'], land: 1, tuto: 'rome' },
-      { title: 'Le siège', opp: 1, specials: ['barracks'], civs: ['rome'], land: 0 },
-      { title: 'Les bâtisseurs du Nil', opp: 1, specials: ['artillery'], civs: ['egypte'], land: 2, tuto: 'egypte' },
-      { title: 'Le regard d’Anubis', opp: 1, specials: ['super'], civs: ['egypte'], land: 2 },
-      { title: 'L’alliance du Sud', opp: 2, specials: ALL3, civs: ['rome', 'egypte'], land: 1 }] },
-  { theme: 'Rencontre avec les Nordiques', allowed: ['rome', 'egypte'],
-    story: 'Tu peux adopter la civilisation des Romains ou des Égyptiens. Au nord, Celtes et Vikings descendent sur tes frontières.',
-    levels: [
-      { title: 'Les druides', opp: 1, specials: ['artillery'], civs: ['celte'], land: 4, tuto: 'celte' },
-      { title: 'Le ciel nous tombe sur la tête', opp: 1, specials: ['super'], civs: ['celte'], land: 0 },
-      { title: 'Les drakkars', opp: 1, specials: ['barracks'], civs: ['viking'], land: 3, tuto: 'viking' },
-      { title: 'La fureur des Berserkers', opp: 1, specials: ['super', 'barracks'], civs: ['viking'], land: 3 },
-      { title: 'Le Grand Nord', opp: 2, specials: ALL3, civs: ['celte', 'viking'], land: 3 }] },
-  { theme: 'Rencontre avec les Amérindiens', allowed: ['rome', 'egypte', 'celte', 'viking'],
-    story: 'Les civilisations nordiques s’ouvrent à toi. Par-delà l’océan, Mayas et Aztèques défendent leurs empires.',
-    levels: [
-      { title: 'Les cités de jade', opp: 1, specials: ['artillery'], civs: ['maya'], land: 1, tuto: 'maya' },
-      { title: 'Les Guerriers Aigles', opp: 1, specials: ['super', 'artillery'], civs: ['maya'], land: 4 },
-      { title: 'Tenochtitlan', opp: 1, specials: ['barracks'], civs: ['azte'], land: 4, tuto: 'azte' },
-      { title: 'Le Serpent à plumes', opp: 1, specials: ['super', 'barracks'], civs: ['azte'], land: 1 },
-      { title: 'Les empires du soleil', opp: 2, specials: ALL3, civs: ['maya', 'azte'], land: 2 }] },
-  { theme: 'Conquête du monde', allowed: null,
-    story: 'Toutes les civilisations te sont ouvertes. Il est temps de conquérir le monde.',
-    levels: [
-      { title: 'Le pacte des mers', opp: 2, specials: ['super', 'artillery'], civs: ['rome', 'celte'], land: 0, tuto: 'world' },
-      { title: 'Le duel du désert', opp: 1, specials: ['barracks', 'artillery'], civs: ['egypte'], land: 2 },
-      { title: 'Les trois fronts', opp: 3, specials: ['super', 'barracks'], civs: ['maya', 'viking', 'rome'], land: 1 },
-      { title: 'Les empires coalisés', opp: 2, specials: ALL3, civs: ['azte', 'egypte'], land: 4 },
-      { title: 'La conquête du monde', opp: 3, specials: ALL3, civs: ['viking', 'maya', 'egypte'], land: 3 }] }
-];
+const ZONES = {
+  med:  { facs: ['rome', 'egypte'], next: ['nord'] },
+  nord: { facs: ['celte', 'viking'], next: ['med', 'amer'] },
+  amer: { facs: ['maya', 'azte'], next: ['nord'] }
+};
+const ZONE_ORDER = ['med', 'nord', 'amer'], FAC_ORDER = ['rome', 'egypte', 'celte', 'viking', 'maya', 'azte'];
+const FAC_LANDS = { rome: [0, 1], egypte: [2, 1], celte: [0, 4], viking: [3, 0], maya: [4, 1], azte: [1, 2] };
+const FAC_OPP = [1, 1, 1, 1, 2, 1, 2, 3], FAC_TI = [1, 1, 2, 2, 2, 3, 3, 3];
+const FAC_SPEC = [[], ['super'], ['artillery'], ['barracks'], ['super', 'artillery'], ['barracks', 'super'], ['artillery', 'barracks'], ALL3];
+const FIN_OPP = [1, 1, 2, 3], FIN_SPEC = [['super', 'barracks'], ['artillery', 'super'], ALL3, ALL3];
+const TUTO_LV = [
+  { opp: 1, specials: [], land: 0, tuto: 'basics' }, { opp: 1, specials: ['super'], land: 1, tuto: 'super' },
+  { opp: 1, specials: ['artillery'], land: 0, tuto: 'artillery' }, { opp: 1, specials: ['barracks'], land: 4, tuto: 'barracks' },
+  { opp: 2, specials: ALL3, land: 1, tuto: 'two' }];
+const STORY = {
+  tuto1: ["Le premier bastion", "Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.", "Ton premier bastion tient bon : ta faction est née.", "Ton bastion est tombé. Relève-toi et recommence."],
+  tuto2: ["La super-tour", "", "La super-tour est à toi : elle produira davantage.", "La super-tour reste aux mains du clan rival."],
+  tuto3: ["La tour de tir", "", "Tes tours de tir déciment les assaillants.", "Les tirs ennemis ont eu raison de toi."],
+  tuto4: ["La caserne", "", "Tes blindés sortent de la caserne.", "Les blindés ennemis ont enfoncé tes lignes."],
+  tuto5: ["Deux clans rivaux", "", "Les deux clans se soumettent : ta faction est prête à affronter le monde.", "Les deux clans t’ont submergé."],
+  rome1: ["La rencontre", "Vos éclaireurs débarquent sur les rives du Latium. Ils y trouvent des routes pavées tirées au cordeau, jalonnées de bornes milliaires qui comptent les pas jusqu’à Rome. Un centurion vous somme de décliner votre nom : la République ne tolère pas d’étrangers armés sur ses terres.", "Le centurion baisse son glaive : Rome reconnaît votre droit de passage.", "Repoussés vers la mer, vos éclaireurs devront tenter un autre rivage."],
+  rome2: ["Le camp de Merula", "Le consul Aulus Cornelius Merula fait dresser chaque soir un camp fortifié, fossé et palissade compris, même pour une seule nuit. Pour gagner sa confiance, prouvez que vos tours tiennent face à ses légions.", "Merula vous offre le pain et le sel : vous êtes désormais les hôtes de la République.", "Les légions de Merula tiennent le camp : il faudra revenir plus nombreux."],
+  rome3: ["Les portes de Janus", "Admis dans la cité, vous prenez le parti des plébéiens contre le patricien Gaius Fabius Ambustus, maître du Sénat. Quand Rome part en guerre, on ouvre les portes du temple de Janus, dieu des commencements : elles ne se refermeront qu’à la paix.", "Fabius s’incline : le peuple de Rome acclame son nouveau défenseur.", "Fabius garde le Sénat ; les portes de Janus restent ouvertes."],
+  rome4: ["Les greniers de Cérès", "Quintus Licinius Varro lève une armée sur ses domaines de Campanie. Cérès, déesse des moissons et protectrice de la plèbe depuis son temple de l’Aventin, favorise ceux qui tiennent les greniers : des tours pleines nourriront vos légions.", "Les greniers de Campanie sont à vous : Rome mangera à votre table.", "Varro tient les moissons ; vos légions ont faim."],
+  rome5: ["Sous le regard des augures", "Deux préteurs, Servius Sulpicius Rufo et Titus Manlius Cursor, s’allient contre vous. Les augures scrutent le vol des oiseaux avant chaque décision : sous l’œil de Jupiter Capitolin, prouvez que les dieux vous ont choisi.", "Les augures sont formels : les oiseaux volent à votre droite.", "Les poulets sacrés refusent de manger : funeste présage."],
+  rome6: ["La danse des Saliens", "Élu consul, vous affrontez Appius Claudius Rufinus, chef de la faction sénatoriale. Mars, père de Romulus, ne protège que les généraux audacieux : ses prêtres, les Saliens, dansent avec les boucliers sacrés à l’ouverture de chaque campagne.", "Rufinus prend le chemin de l’exil : vous voilà consul de plein droit.", "Rufinus triomphe sur la Voie sacrée ; vous devez quitter Rome."],
+  rome7: ["Le pomerium violé", "Deux proconsuls, Marcus Junius Silanus et Gnaeus Domitius Calvus, rentrent d’Hispanie et marchent sur Rome en armes, au mépris du pomerium, l’enceinte sacrée qu’aucune armée ne doit franchir. Vesta, gardienne du foyer de la cité, attend que vous rétablissiez l’ordre.", "Les proconsuls déposent les armes hors de l’enceinte sacrée.", "Les légions d’Hispanie campent sur le Champ de Mars."],
+  rome8: ["Dictateur pour six mois", "Trois prétendants se partagent les provinces. Selon la coutume, le Sénat vous confie la dictature pour six mois seulement. Vainquez-les, et Jupiter Très Bon Très Grand fera de vous le premier citoyen de Rome.", "Six mois plus tard, vous rendez la dictature, comme Cincinnatus retourna à sa charrue : Rome vous en aime davantage.", "Les trois prétendants se partagent Rome ; votre nom sera effacé des fastes."],
+  egypte1: ["Les portes du Delta", "Vos navires remontent une branche du Nil jusqu’au Delta. Sur les rives, des scribes notent tout ce qui passe : bétail, grain, étrangers. Le gouverneur du nome vous ordonne de vous présenter avec un tribut.", "Le gouverneur fait graver votre nom sur une stèle : vous pouvez commercer sur le fleuve.", "Les archers du nome vous repoussent vers la mer."],
+  egypte2: ["Le gardien de Memphis", "À Memphis, le général Nebamon garde la route des pyramides de Gizeh, déjà vieilles de mille ans. Les Égyptiens comptent le temps en crues du Nil : remportez cette bataille avant la prochaine inondation.", "Nebamon vous laisse contempler les pyramides : l’Égypte vous accueille.", "Nebamon vous chasse dans le désert de l’Ouest."],
+  egypte3: ["Le nomarque d’Hermopolis", "Devenu égyptien, vous briguez le pouvoir. Le nomarque Djehutinakht tient la Moyenne-Égypte depuis Hermopolis, la cité de Thot, dieu à tête d’ibis qui inventa l’écriture. Ses scribes comptent chacun de vos soldats.", "Thot inscrit votre victoire dans ses registres.", "Djehutinakht garde sa province ; Thot ne retient pas votre nom."],
+  egypte4: ["La lionne de Memphis", "Le général Iuput s’empare des greniers royaux. Sekhmet, la déesse lionne, souffle la peste et la guerre sur ceux qui la négligent : apaisez-la par une victoire éclatante.", "Sekhmet s’apaise ; les greniers royaux sont à vous.", "La colère de Sekhmet s’abat sur votre armée."],
+  egypte5: ["La Belle Fête de la Vallée", "À Thèbes, deux prêtres d’Amon, Pakharu et Nesamon, lèvent les milices du temple contre vous. Pendant la Belle Fête de la Vallée, la barque d’Amon traverse le Nil : il faut gagner avant la fin des processions.", "La barque d’Amon s’arrête devant vous : l’oracle vous désigne.", "Les prêtres d’Amon vous déclarent impur."],
+  egypte6: ["Le vizir de Haute-Égypte", "Le vizir Ankhmahor tient la justice et l’armée de Haute-Égypte. Maât, déesse de l’ordre du monde, pèse chaque acte : seule une victoire juste vous la rendra favorable.", "Maât vous reconnaît : l’ordre est rétabli en Haute-Égypte.", "Le vizir vous condamne au nom de Maât."],
+  egypte7: ["Les deux couronnes", "Deux prétendants, Sekhemrê du Delta et Montouemhat de Thèbes, s’unissent contre vous. Pour ceindre la double couronne, rouge et blanche, il faut l’appui d’Horus, le faucon dont chaque pharaon est l’incarnation.", "Le faucon d’Horus se pose sur votre bras : les Deux Terres sont unies.", "Les deux couronnes vous échappent."],
+  egypte8: ["Pharaon", "Trois grands du royaume refusent encore votre règne. Rê, le soleil, traverse chaque nuit le monde souterrain dans sa barque : triomphez avant l’aube, et vous serez fils de Rê.", "Le peuple vous acclame : vous êtes Pharaon, fils de Rê. Les tailleurs de pierre commencent votre tombeau.", "Rê se lève sans vous : un autre ceindra la double couronne."],
+  celte1: ["L’oppidum", "Vous remontez une vallée boisée de Gaule jusqu’à un oppidum, une ville perchée sur une colline et ceinte d’un rempart de bois, de terre et de pierres. Des guerriers au torque d’or vous barrent la route.", "Le chef du village vous offre l’hydromel : vous êtes les bienvenus.", "Les guerriers vous repoussent dans la forêt."],
+  celte2: ["Le gui et la serpe", "Au sixième jour de la lune, raconte Pline, les druides cueillent le gui sur un chêne avec une serpe d’or. Le chef Segomaros vous défie : chez les Celtes, on se mesure avant de s’asseoir au même banquet.", "Segomaros vous cède la part du héros au banquet.", "Segomaros garde la part du héros."],
+  celte3: ["Le conseil des druides", "Adopté par une tribu, vous visez le commandement. Le vergobret Litavicos, magistrat suprême, s’y oppose. Chaque année, les druides se réunissent dans la forêt des Carnutes pour trancher les querelles.", "Les druides des Carnutes tranchent en votre faveur.", "Les druides donnent raison à Litavicos."],
+  celte4: ["Le tonnerre de Taranis", "Le chef Ambicatos rallie les clans du sud. Taranis, le dieu à la roue, gronde dans l’orage : offrez-lui une victoire avant que la foudre ne tombe sur vos remparts.", "La foudre de Taranis frappe le camp d’Ambicatos.", "L’orage de Taranis s’abat sur vos remparts."],
+  celte5: ["La nuit de Samain", "À Samain, la nuit où s’ouvre le monde des morts, les frères rivaux Cotos et Valetiacos s’unissent contre vous. Il faut vaincre avant que les esprits ne regagnent l’Autre Monde.", "Les esprits repartent apaisés : les deux frères vous prêtent serment.", "Les morts de Samain hantent votre camp."],
+  celte6: ["Le dieu cornu", "Le chef Catumandos garde les forêts du nord. Cernunnos, le dieu cornu maître des bêtes sauvages, ne laisse traverser ses bois qu’aux chefs dignes de lui.", "Les cerfs de Cernunnos s’écartent devant vous.", "La forêt se referme sur votre armée."],
+  celte7: ["Le serment des clans", "Deux chefs, Orgétorix et Indutiomaros, refusent de vous suivre. Lugus, le dieu aux mille talents, aime les chefs habiles : prouvez votre adresse.", "Lugus vous accorde la victoire : les clans vous prêtent serment.", "Les clans se dispersent : nul ne vous suit."],
+  celte8: ["Roi des Gaules", "Trois rois s’opposent encore à vous. Toutatis, dieu protecteur de la tribu, réclame un chef capable d’unir tous les peuples gaulois. Pourvu que le ciel ne vous tombe pas sur la tête !", "Toutes les tribus vous acclament roi : la Gaule est unie.", "Les Gaules restent divisées."],
+  viking1: ["Les drakkars du fjord", "Vos navires entrent dans un fjord bordé de falaises. Sur la grève, des drakkars à proue de dragon sont tirés au sec ; les guerriers d’un jarl vous attendent derrière leurs boucliers ronds peints de couleurs vives.", "Le jarl vous invite dans sa longue maison.", "Les drakkars vous poursuivent jusqu’en haute mer."],
+  viking2: ["Le Thing", "Chaque été, les hommes libres se réunissent au Thing pour juger et faire les lois. Le jarl Ulf Bjarnarson conteste votre présence : ici, on règle les différends par la parole… ou par les armes.", "Le Thing vous accorde le droit de vous établir.", "Le Thing vous déclare hors-la-loi."],
+  viking3: ["Les corbeaux d’Odin", "Devenu nordique, vous prétendez au titre de jarl face à Thorvald Grimsson. Odin le borgne, qui donna un œil pour la sagesse, observe la bataille par ses corbeaux Hugin et Munin.", "Les corbeaux d’Odin rapportent votre victoire.", "Odin détourne son œil unique."],
+  viking4: ["Le marteau de Thor", "Le chef Halfdan Haraldsson tient les côtes. Thor, protecteur des hommes, frappe les géants de son marteau Mjöllnir : montrez-lui votre force.", "Le tonnerre de Thor salue votre victoire.", "Mjöllnir reste muet : Halfdan l’emporte."],
+  viking5: ["Les frères de Birka", "À Birka, la cité marchande, les frères Sigurd et Ragnvald Eiriksson s’unissent contre vous. Njörd, dieu des vents et de la mer, décide des traversées : gagnez avant que le vent ne tourne.", "Njörd gonfle vos voiles : Birka vous paie tribut.", "Le vent tourne : vos navires restent au port."],
+  viking6: ["Le serment de Tyr", "Le jarl Hakon Sveinsson refuse votre autorité. Tyr, qui sacrifia sa main dans la gueule du loup Fenrir, est le dieu des serments : un chef doit tenir parole jusqu’au bout.", "Hakon prête serment sur l’anneau sacré.", "Hakon rompt ses serments et vous chasse."],
+  viking7: ["Les guerriers-ours", "Eirik Hache-Rouge et Bjorn Côtes-de-Fer lancent contre vous leurs berserkers, vêtus de peaux d’ours. Freyja, déesse de la guerre et de l’amour, choisit la moitié des guerriers morts au combat : méritez sa faveur.", "Les valkyries vous désignent vainqueur.", "Freyja emporte vos guerriers dans sa grande salle."],
+  viking8: ["Roi des Nordiques", "Trois rois de la mer refusent encore de plier. Pour être proclamé roi, il faut l’approbation de tous les Things… et un nom digne des sagas.", "Les scaldes chanteront votre saga ; une pierre runique porte désormais votre nom.", "Nul scalde ne chantera votre nom."],
+  maya1: ["Les cités de pierre", "Au cœur de la forêt du Yucatán surgissent des pyramides blanchies à la chaux, plus hautes que les arbres. Les gardes d’une cité maya, armés de lances à pointe d’obsidienne, vous barrent le passage.", "Le seigneur de la cité vous offre une coupe de cacao.", "Les lances d’obsidienne vous repoussent dans la forêt."],
+  maya2: ["Le jeu de balle", "Sur le terrain de jeu de balle, les joueurs frappent une lourde balle de caoutchouc avec les hanches. Le capitaine B’alam Ajaw vous défie : chez les Mayas, une partie peut décider d’une guerre.", "La balle traverse l’anneau de pierre : la cité vous accueille.", "B’alam Ajaw remporte la partie, et la guerre."],
+  maya3: ["Le seigneur de Tikal", "Devenu maya, vous convoitez le trône. Le seigneur Chak Tok Ich’aak règne depuis son palais. Itzamná, dieu créateur et inventeur de l’écriture, protège les scribes : vos exploits doivent être gravés sur une stèle.", "Les sculpteurs gravent votre victoire sur une stèle.", "Votre nom ne sera gravé sur aucune stèle."],
+  maya4: ["La pluie de Chaac", "La sécheresse frappe les champs de maïs et la reine Ix Yok’in accuse votre impiété. Chaac, dieu de la pluie à la hache de foudre, attend une offrande : seule la victoire fera tomber l’orage.", "Chaac fend les nuages : la pluie revient sur le maïs.", "La sécheresse continue ; le peuple se détourne de vous."],
+  maya5: ["Le Compte long", "Deux seigneurs alliés, Yax Pasaj et Uk’it Took’, s’unissent contre vous. Les prêtres annoncent la fin d’un cycle du calendrier du Compte long : un chef doit marquer l’événement par une victoire.", "Une nouvelle stèle célèbre la fin du cycle et votre règne.", "Le cycle s’achève sans vous."],
+  maya6: ["La reine de la Lune", "La reine Ix K’ab’al Xook protège la cité rivale. Ixchel, déesse de la Lune, des tisserandes et des naissances, veille sur elle : la nuit, sa lumière trahit vos troupes.", "Ixchel voile la Lune : votre attaque surprend la reine.", "La Lune éclaire vos troupes : la reine vous voit venir."],
+  maya7: ["L’ombre du serpent", "Les seigneurs de Chichén Itzá, menés par K’ak’upakal, lèvent leurs armées. À l’équinoxe, l’ombre du serpent Kukulcán descend l’escalier de leur pyramide : il faut vaincre avant que l’ombre ne disparaisse.", "L’ombre de Kukulcán glisse vers vos troupes : le dieu vous a choisi.", "Le serpent disparaît ; vos alliés vous abandonnent."],
+  maya8: ["K’uhul Ajaw", "Trois cités refusent encore votre autorité. Le titre de K’uhul Ajaw, seigneur divin, ne s’obtient que par la conquête et par les offrandes au Soleil, K’inich Ajaw.", "Vous êtes K’uhul Ajaw : toutes les cités vous paient tribut en jade et en cacao.", "Les cités restent libres ; votre dynastie s’éteint."],
+  azte1: ["La ville sur le lac", "Du haut des montagnes, vous découvrez Tenochtitlan, bâtie au milieu du lac Texcoco et reliée à la rive par de longues chaussées. Des guerriers en armure de coton matelassé en gardent l’entrée.", "On vous ouvre la chaussée : vous entrez dans la ville.", "La chaussée est coupée : vous ne passerez pas."],
+  azte2: ["Le marché de Tlatelolco", "Au grand marché de Tlatelolco, on paie en fèves de cacao et en couvertures de coton. Le marchand Ocelotl, un pochteca, vous soupçonne d’espionnage : chez les Aztèques, les marchands sont aussi des éclaireurs.", "Ocelotl vous ouvre ses comptoirs.", "Ocelotl vous fait chasser du marché."],
+  azte3: ["L’aigle et le serpent", "Devenu aztèque, vous visez le conseil des seigneurs. Selon la légende, les Mexicas fondèrent leur ville là où un aigle dévorait un serpent, perché sur un cactus. Le seigneur Cuauhtlatoa refuse de vous céder sa place.", "Le conseil vous accueille parmi les seigneurs.", "Cuauhtlatoa garde son siège au conseil."],
+  azte4: ["Les jardins flottants", "Le seigneur Tezozómoc contrôle les chinampas, les jardins flottants qui nourrissent la ville. Tláloc, dieu de la pluie, exige des offrandes sur sa montagne : sans lui, le maïs ne pousse pas.", "Tláloc envoie la pluie : les chinampas sont à vous.", "Les chinampas restent à Tezozómoc ; la ville a faim."],
+  azte5: ["La guerre fleurie", "Deux seigneurs, Axolohua et Mixcoatl, vous provoquent en guerre fleurie, un combat rituel où l’on cherche à capturer plutôt qu’à tuer.", "Vos guerriers ramènent de nombreux captifs : votre prestige grandit.", "Vos guerriers sont capturés : la honte retombe sur vous."],
+  azte6: ["Les guerriers jaguars", "Le chef Xiuhcoatl commande les ordres d’élite, guerriers aigles et guerriers jaguars. Xipe Totec, dieu du printemps et du renouveau, ne favorise que les chefs capables de renaître après la défaite.", "Xipe Totec vous accorde le renouveau : les guerriers jaguars vous suivent.", "Les guerriers jaguars restent fidèles à Xiuhcoatl."],
+  azte7: ["La Triple Alliance", "Texcoco et Tlacopan, alliées de Tenochtitlan dans la Triple Alliance, envoient leurs seigneurs Nezahualpilli et Totoquihuaztli contre vous. Quetzalcóatl, le Serpent à plumes, dieu du vent et du savoir, observe : la ruse vaut ici autant que la force.", "La Triple Alliance se range derrière vous.", "L’Alliance vous rejette ; Tenochtitlan vous ferme ses portes."],
+  azte8: ["Huey Tlatoani", "Trois prétendants se disputent le titre de Huey Tlatoani, « celui qui parle ». Huitzilopochtli, dieu du soleil et de la guerre, réclame un chef victorieux pour que le soleil poursuive sa course.", "Vous êtes Huey Tlatoani : de la côte à la montagne, les peuples vous paient tribut.", "Un autre parlera au nom des Mexicas."],
+  medF1: ["La mer intérieure", "Romains et Égyptiens se disputent la Méditerranée, que les Romains appellent déjà Mare Nostrum, « notre mer ». Tenez d’abord tête aux légions.", "Les légions reculent : la mer s’ouvre devant vous.", "Rome garde la maîtrise de la mer."],
+  medF2: ["Le grenier du monde", "L’Égypte nourrit la Méditerranée de son blé : qui tient le Nil tient les cités. Défaites les armées du Pharaon.", "Les convois de blé partent désormais sous vos ordres.", "Le blé d’Égypte nourrit vos ennemis."],
+  medF3: ["Le phare d’Alexandrie", "À Alexandrie, au pied du phare de Pharos, l’une des sept merveilles du monde, Romains et Égyptiens s’allient contre vous.", "Le phare d’Alexandrie brille désormais pour vous.", "Le phare guide les flottes ennemies."],
+  medF4: ["Maître de la Méditerranée", "Toutes les flottes du bassin méditerranéen se rassemblent pour une dernière bataille.", "De Gadès à Alexandrie, la Méditerranée vous obéit.", "La Méditerranée vous échappe."],
+  nordF1: ["Les tribus de l’Ouest", "Celtes et Nordiques se disputent les rivages de la mer du Nord. Les tribus gauloises attaquent les premières.", "Les tribus de l’Ouest rendent les armes.", "Les tribus gardent leurs forêts."],
+  nordF2: ["Le danegeld", "Les Vikings exigent le danegeld, un tribut d’argent pour épargner vos villages. Refusez de payer.", "Pas une pièce d’argent ne partira vers le Nord.", "Vous payez le danegeld."],
+  nordF3: ["Les îles brumeuses", "Sur les îles de la mer du Nord, druides et jarls concluent une alliance contre vous.", "L’alliance se brise sur vos remparts.", "Les îles restent aux mains de l’alliance."],
+  nordF4: ["Maître du Nord", "Celtes et Vikings rassemblent toutes leurs forces, des forêts aux fjords.", "Des forêts aux fjords, le Nord vous obéit.", "Le Nord reste indompté."],
+  amerF1: ["Les routes blanches", "Mayas et Aztèques se disputent la Mésoamérique. Les Mayas tiennent les sacbé, les routes blanches surélevées qui relient leurs cités.", "Les routes blanches sont à vous.", "Les sacbé restent aux mains des Mayas."],
+  amerF2: ["Le tribut", "Les collecteurs de tribut aztèques réclament plumes, jade et cacao à vos villages.", "Les collecteurs repartent les mains vides.", "Vos villages paient tribut à Tenochtitlan."],
+  amerF3: ["Le cinquième soleil", "Les prêtres des deux peuples annoncent la fin du cinquième soleil et s’unissent contre vous.", "Le soleil se lève encore, et c’est pour vous.", "Le soleil se lève sans vous."],
+  amerF4: ["Maître des deux empires", "Des forêts du Yucatán au lac Texcoco, toutes les armées marchent contre vous.", "Mayas et Aztèques reconnaissent votre empire.", "Les deux empires restent libres."]
+};
+const ZONE_TXT = {
+  med: ["Bassin méditerranéen", "Vous implantez votre faction sur les rivages ensoleillés de la Méditerranée, où se croisent galères romaines et barques égyptiennes."],
+  nord: ["Europe du Nord", "Vous implantez votre faction dans les terres froides du Nord, entre forêts gauloises et fjords vikings."],
+  amer: ["Amérique centrale et du Sud", "Vous implantez votre faction dans les forêts et les hauts plateaux d’Amérique centrale, où s’élèvent des pyramides de pierre."]
+};
+const TRAVEL_TXT = {
+  "med>nord": "Depuis Massalia, des marchands parlent d’une route de l’ambre qui mène vers des côtes froides et brumeuses, celles que le navigateur Pythéas aurait longées. Vous embarquez à la rencontre de nouveaux peuples.",
+  "nord>med": "Descendant les fleuves vers le sud, vous suivez les marchands d’étain jusqu’aux rivages chauds de la Méditerranée, à la rencontre de nouveaux peuples.",
+  "nord>amer": "En suivant les incursions vikings vers le Vinland, au-delà du Groenland, vous découvrez de nouvelles terres et de nouveaux peuples.",
+  "amer>nord": "Sur la route du retour, des récits de navigateurs venus de l’Est vous guident vers les côtes sauvages et froides du Nord, à la rencontre de nouveaux peuples."
+};
+const facName = f => CIVS[FAC_CIV[f]].factions[f].name;
+const zoneName = z => ZONE_TXT[z][0];
 let CAMP_PLAN = null;
 function campaignPlan() {
   if (CAMP_PLAN) return CAMP_PLAN;
-  const plan = [];
-  CHAPTERS.forEach((ch, ti) => ch.levels.forEach((l, i) => {
-    const k = i + 1, n = ti * TIER_LEVELS + k;
-    plan.push(Object.assign({ ti, k, n, id: levelId(ti, k), seed: n * 7919 + 2027 }, l));
-  }));
+  const plan = [], add = o => { o.n = plan.length + 1; o.seed = o.n * 7919 + 2027;
+    [o.title, o.intro, o.win, o.lose] = STORY[o.key]; plan.push(o); };
+  TUTO_LV.forEach((l, i) => add(Object.assign({ key: 'tuto' + (i + 1), group: 'tuto', k: i + 1, ti: 0, civs: [], id: 'C2-00' + (i + 1) }, l)));
+  ZONE_ORDER.forEach((z, zi) => {
+    for (const f of ZONES[z].facs) for (let k = 1; k <= 8; k++)
+      add({ key: f + k, group: f, zone: z, fac: f, k, ti: FAC_TI[k - 1], opp: FAC_OPP[k - 1], specials: FAC_SPEC[k - 1].slice(),
+        civs: Array(FAC_OPP[k - 1]).fill(f), land: FAC_LANDS[f][k % 2], tuto: k === 1 ? f : null, id: 'C2-1' + FAC_ORDER.indexOf(f) + k });
+    const [a, b] = ZONES[z].facs;
+    [[a], [b], [a, b], [a, b, a]].forEach((cv, i) =>
+      add({ key: z + 'F' + (i + 1), group: z + 'F', zone: z, k: i + 1, ti: 3, opp: FIN_OPP[i], specials: FIN_SPEC[i].slice(), civs: cv,
+        land: FAC_LANDS[cv[i % cv.length]][i % 2], id: 'C2-2' + zi + (i + 1) }));
+  });
   return (CAMP_PLAN = plan);
 }
+const CAMPAIGN_SIZE = 65;
 function campaignLevel(n) {
-  const L = campaignPlan()[n - 1], ct = campTi(L.ti), tier = TIERS[ct], d = (n - 1) / (CAMPAIGN_SIZE - 1);
+  const L = campaignPlan()[n - 1], ct = campTi(L.ti), tier = TIERS[ct], d = ct / 3;
   return {
     name: L.title, id: L.id, seed: L.seed, opponents: L.opp,
     neutrals: Math.round(5 + L.opp * 2 + d * 4),
     neutralStock: [Math.round(2 + d * 12), Math.round(10 + d * 30)],
     playerStart: tier.playerStart, aiStart: tier.aiStart, aiLevel: tier.aiLevel, tier: tier.name,
-    pool: L.ti === 0 ? ['defensif', 'equilibre'] : null, profiles: null,
+    pool: ct <= 1 ? ['defensif', 'equilibre'] : null, profiles: null,
     specials: L.specials.slice(), specialG: SPECIAL_G[ct], specialPop: SPECIAL_POP[ct], stockBias: STOCK_BIAS[ct],
     aiPassiveK: ct === 1 ? 0.5 : 1,                // Facile : passif des ordinateurs divisé par 2
     land: L.land,
-    aiCivs: L.civs.map(f => [FAC_CIV[f], f]),     // civilisations des ordinateurs
-    allowed: CHAPTERS[L.ti].allowed               // factions que le joueur peut adopter (null : toutes)
+    aiCivs: L.civs.map(f => [FAC_CIV[f], f]),     // civilisations des ordinateurs : celles de la faction
+    allowed: campAllowed(L),                       // factions que le joueur peut adopter
+    civRequired: !!L.zone && !L.fac                // finale : l'une des deux factions de la zone, obligatoirement
   };
 }
 // Progression : meilleur temps de score (secondes à la vitesse ×1) de chaque niveau gagné, par identifiant
-const campBest = () => (progress.camp = progress.camp || { best: {} }).best;
-// Campagne linéaire : un niveau s'ouvre quand le précédent est gagné
-const levelOpen = n => n === 1 || campBest()[campaignPlan()[n - 2].id] != null;
-const tierUnlocked = ti => levelOpen(ti * TIER_LEVELS + 1);
+// (nouvelle campagne : progression repartie de zéro dans progress.camp2)
+const camp2 = () => { const c = progress.camp2 = progress.camp2 || {}; c.best = c.best || {}; c.lost = c.lost || {}; c.zones = c.zones || []; return c; };
+const campBest = () => camp2().best;
+const keyWon = key => { const L = campaignPlan().find(x => x.key === key); return !!L && campBest()[L.id] != null; };
+const campTutoDone = () => keyWon('tuto5');
+const facDone = f => keyWon(f + '8');
+const zoneFacsDone = z => ZONES[z].facs.every(facDone);
+const zoneDone = z => keyWon(z + 'F4');
+const zoneExplored = z => camp2().zones.includes(z);
+// Civilisations du joueur : niveaux faciles (sans civilisation, ou une civilisation déjà maîtrisée), puis la faction, puis au choix en finale
+function campAllowed(L) {
+  if (L.group === 'tuto') return [];
+  if (L.fac) return L.k <= 2 ? FAC_ORDER.filter(f => f !== L.fac && facDone(f)) : [L.fac];
+  return ZONES[L.zone].facs.slice();
+}
+// Un niveau s'ouvre quand le précédent de son groupe est gagné ; une faction quand sa zone est atteinte ;
+// la finale quand les deux factions de la zone sont terminées
+function levelOpen(n) {
+  const plan = campaignPlan(), L = plan[n - 1]; if (!L) return false;
+  if (L.group !== 'tuto' && !(campTutoDone() && zoneExplored(L.zone))) return false;
+  if (L.zone && !L.fac && !zoneFacsDone(L.zone)) return false;
+  return L.k === 1 || campBest()[plan[n - 2].id] != null;
+}
+// Zones proposées : toutes après le tutoriel ; ensuite les voisines d'une zone terminée, quand toutes les zones explorées le sont
+function zoneChoices() {
+  const zs = camp2().zones;
+  if (!campTutoDone()) return [];
+  if (!zs.length) return ZONE_ORDER.slice();
+  if (!zs.every(zoneDone)) return [];
+  return ZONE_ORDER.filter(z => !zs.includes(z) && zs.some(e => ZONES[e].next.includes(z)));
+}
+function chooseZone(z) {
+  if (!zoneChoices().includes(z)) return;
+  const zs = camp2().zones, from = zs.length ? zs.filter(e => ZONES[e].next.includes(z)).pop() : null;
+  zs.push(z); saveProgress();
+  showStory(zoneName(z), from ? TRAVEL_TXT[from + '>' + z] : ZONE_TXT[z][1]);
+  renderCampaign();
+}
+// Zones dont un niveau est gagné (progression récupérée depuis un autre appareil)
+function syncZones() {
+  const zs = camp2().zones, best = campBest(); let ch = false;
+  for (const L of campaignPlan()) if (L.zone && best[L.id] != null && !zs.includes(L.zone)) { zs.push(L.zone); ch = true; }
+  if (ch) { saveProgress(); if (menuTab === 'campaign') renderCampaign(); }
+}
+// Niveau suivant du même groupe, s'il est ouvert
+const nextCampN = n => { const p = campaignPlan(), L = p[n - 1], N = p[n]; return N && N.group === L.group && levelOpen(N.n) ? N.n : null; };
 
 /* ================= État du jeu ================= */
 const $ = id => document.getElementById(id);
@@ -872,6 +997,281 @@ const EN = {
 "Tours possédées": "Towers owned",
 "Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.": "Number of towers per player, shown at the top of the screen during games.",
 "Chronomètre": "Timer",
+  "Le premier bastion": "The first bastion",
+  "Tu viens de prendre la tête d’une jeune faction. Les clans locaux ne te feront aucun cadeau : impose-toi.": "You have just taken the lead of a young faction. The local clans will not go easy on you: assert yourself.",
+  "Ton premier bastion tient bon : ta faction est née.": "Your first bastion holds: your faction is born.",
+  "Ton bastion est tombé. Relève-toi et recommence.": "Your bastion has fallen. Get back up and try again.",
+  "La super-tour": "The super tower",
+  "La super-tour est à toi : elle produira davantage.": "The super tower is yours: it will produce more.",
+  "La super-tour reste aux mains du clan rival.": "The super tower stays in the rival clan’s hands.",
+  "La tour de tir": "The shooting tower",
+  "Tes tours de tir déciment les assaillants.": "Your shooting towers decimate the attackers.",
+  "Les tirs ennemis ont eu raison de toi.": "The enemy shots got the better of you.",
+  "La caserne": "The barracks",
+  "Tes blindés sortent de la caserne.": "Your armored units roll out of the barracks.",
+  "Les blindés ennemis ont enfoncé tes lignes.": "The enemy armored units broke through your lines.",
+  "Deux clans rivaux": "Two rival clans",
+  "Les deux clans se soumettent : ta faction est prête à affronter le monde.": "Both clans submit: your faction is ready to face the world.",
+  "Les deux clans t’ont submergé.": "The two clans overwhelmed you.",
+  "La rencontre": "The encounter",
+  "Vos éclaireurs débarquent sur les rives du Latium. Ils y trouvent des routes pavées tirées au cordeau, jalonnées de bornes milliaires qui comptent les pas jusqu’à Rome. Un centurion vous somme de décliner votre nom : la République ne tolère pas d’étrangers armés sur ses terres.": "Your scouts land on the shores of Latium. They find paved roads as straight as an arrow, lined with milestones counting the paces to Rome. A centurion demands your name: the Republic tolerates no armed strangers on its lands.",
+  "Le centurion baisse son glaive : Rome reconnaît votre droit de passage.": "The centurion lowers his sword: Rome grants you passage.",
+  "Repoussés vers la mer, vos éclaireurs devront tenter un autre rivage.": "Driven back to the sea, your scouts will have to try another shore.",
+  "Le camp de Merula": "Merula’s camp",
+  "Le consul Aulus Cornelius Merula fait dresser chaque soir un camp fortifié, fossé et palissade compris, même pour une seule nuit. Pour gagner sa confiance, prouvez que vos tours tiennent face à ses légions.": "Every evening, consul Aulus Cornelius Merula has a fortified camp built, ditch and palisade included, even for a single night. To win his trust, prove that your towers can stand against his legions.",
+  "Merula vous offre le pain et le sel : vous êtes désormais les hôtes de la République.": "Merula offers you bread and salt: you are now guests of the Republic.",
+  "Les légions de Merula tiennent le camp : il faudra revenir plus nombreux.": "Merula’s legions hold the camp: you will need to come back in greater numbers.",
+  "Les portes de Janus": "The gates of Janus",
+  "Admis dans la cité, vous prenez le parti des plébéiens contre le patricien Gaius Fabius Ambustus, maître du Sénat. Quand Rome part en guerre, on ouvre les portes du temple de Janus, dieu des commencements : elles ne se refermeront qu’à la paix.": "Admitted into the city, you side with the plebeians against the patrician Gaius Fabius Ambustus, master of the Senate. When Rome goes to war, the gates of the temple of Janus, god of beginnings, are opened: they will only close again in peace.",
+  "Fabius s’incline : le peuple de Rome acclame son nouveau défenseur.": "Fabius bows: the people of Rome cheer their new champion.",
+  "Fabius garde le Sénat ; les portes de Janus restent ouvertes.": "Fabius keeps the Senate; the gates of Janus stay open.",
+  "Les greniers de Cérès": "The granaries of Ceres",
+  "Quintus Licinius Varro lève une armée sur ses domaines de Campanie. Cérès, déesse des moissons et protectrice de la plèbe depuis son temple de l’Aventin, favorise ceux qui tiennent les greniers : des tours pleines nourriront vos légions.": "Quintus Licinius Varro raises an army on his Campanian estates. Ceres, goddess of harvests and protector of the plebs from her temple on the Aventine, favors those who hold the granaries: full towers will feed your legions.",
+  "Les greniers de Campanie sont à vous : Rome mangera à votre table.": "The granaries of Campania are yours: Rome will eat at your table.",
+  "Varro tient les moissons ; vos légions ont faim.": "Varro holds the harvests; your legions go hungry.",
+  "Sous le regard des augures": "Under the eyes of the augurs",
+  "Deux préteurs, Servius Sulpicius Rufo et Titus Manlius Cursor, s’allient contre vous. Les augures scrutent le vol des oiseaux avant chaque décision : sous l’œil de Jupiter Capitolin, prouvez que les dieux vous ont choisi.": "Two praetors, Servius Sulpicius Rufo and Titus Manlius Cursor, join forces against you. The augurs study the flight of birds before every decision: under the eye of Capitoline Jupiter, prove that the gods have chosen you.",
+  "Les augures sont formels : les oiseaux volent à votre droite.": "The augurs are certain: the birds fly on your right.",
+  "Les poulets sacrés refusent de manger : funeste présage.": "The sacred chickens refuse to eat: an ill omen.",
+  "La danse des Saliens": "The dance of the Salii",
+  "Élu consul, vous affrontez Appius Claudius Rufinus, chef de la faction sénatoriale. Mars, père de Romulus, ne protège que les généraux audacieux : ses prêtres, les Saliens, dansent avec les boucliers sacrés à l’ouverture de chaque campagne.": "Elected consul, you face Appius Claudius Rufinus, leader of the senatorial faction. Mars, father of Romulus, only protects bold generals: his priests, the Salii, dance with the sacred shields at the start of every campaign.",
+  "Rufinus prend le chemin de l’exil : vous voilà consul de plein droit.": "Rufinus goes into exile: you are consul in your own right.",
+  "Rufinus triomphe sur la Voie sacrée ; vous devez quitter Rome.": "Rufinus celebrates a triumph on the Sacred Way; you must leave Rome.",
+  "Le pomerium violé": "The pomerium breached",
+  "Deux proconsuls, Marcus Junius Silanus et Gnaeus Domitius Calvus, rentrent d’Hispanie et marchent sur Rome en armes, au mépris du pomerium, l’enceinte sacrée qu’aucune armée ne doit franchir. Vesta, gardienne du foyer de la cité, attend que vous rétablissiez l’ordre.": "Two proconsuls, Marcus Junius Silanus and Gnaeus Domitius Calvus, return from Hispania and march on Rome under arms, defying the pomerium, the sacred boundary no army may cross. Vesta, keeper of the city’s hearth, expects you to restore order.",
+  "Les proconsuls déposent les armes hors de l’enceinte sacrée.": "The proconsuls lay down their arms outside the sacred boundary.",
+  "Les légions d’Hispanie campent sur le Champ de Mars.": "The legions of Hispania camp on the Field of Mars.",
+  "Dictateur pour six mois": "Dictator for six months",
+  "Trois prétendants se partagent les provinces. Selon la coutume, le Sénat vous confie la dictature pour six mois seulement. Vainquez-les, et Jupiter Très Bon Très Grand fera de vous le premier citoyen de Rome.": "Three claimants share out the provinces. As custom demands, the Senate grants you the dictatorship for six months only. Defeat them, and Jupiter Best and Greatest will make you Rome’s first citizen.",
+  "Six mois plus tard, vous rendez la dictature, comme Cincinnatus retourna à sa charrue : Rome vous en aime davantage.": "Six months later you lay down the dictatorship, as Cincinnatus returned to his plough: Rome loves you all the more.",
+  "Les trois prétendants se partagent Rome ; votre nom sera effacé des fastes.": "The three claimants share Rome; your name will be erased from the records.",
+  "Les portes du Delta": "The gates of the Delta",
+  "Vos navires remontent une branche du Nil jusqu’au Delta. Sur les rives, des scribes notent tout ce qui passe : bétail, grain, étrangers. Le gouverneur du nome vous ordonne de vous présenter avec un tribut.": "Your ships sail up a branch of the Nile into the Delta. On the banks, scribes record everything that passes: cattle, grain, strangers. The governor of the nome orders you to appear with a tribute.",
+  "Le gouverneur fait graver votre nom sur une stèle : vous pouvez commercer sur le fleuve.": "The governor has your name carved on a stela: you may trade on the river.",
+  "Les archers du nome vous repoussent vers la mer.": "The nome’s archers drive you back to the sea.",
+  "Le gardien de Memphis": "The guardian of Memphis",
+  "À Memphis, le général Nebamon garde la route des pyramides de Gizeh, déjà vieilles de mille ans. Les Égyptiens comptent le temps en crues du Nil : remportez cette bataille avant la prochaine inondation.": "In Memphis, general Nebamun guards the road to the pyramids of Giza, already a thousand years old. Egyptians count time in Nile floods: win this battle before the next inundation.",
+  "Nebamon vous laisse contempler les pyramides : l’Égypte vous accueille.": "Nebamun lets you gaze upon the pyramids: Egypt welcomes you.",
+  "Nebamon vous chasse dans le désert de l’Ouest.": "Nebamun drives you into the Western Desert.",
+  "Le nomarque d’Hermopolis": "The nomarch of Hermopolis",
+  "Devenu égyptien, vous briguez le pouvoir. Le nomarque Djehutinakht tient la Moyenne-Égypte depuis Hermopolis, la cité de Thot, dieu à tête d’ibis qui inventa l’écriture. Ses scribes comptent chacun de vos soldats.": "Now an Egyptian, you seek power. The nomarch Djehutinakht rules Middle Egypt from Hermopolis, city of Thoth, the ibis-headed god who invented writing. His scribes count every one of your soldiers.",
+  "Thot inscrit votre victoire dans ses registres.": "Thoth records your victory in his registers.",
+  "Djehutinakht garde sa province ; Thot ne retient pas votre nom.": "Djehutinakht keeps his province; Thoth does not remember your name.",
+  "La lionne de Memphis": "The lioness of Memphis",
+  "Le général Iuput s’empare des greniers royaux. Sekhmet, la déesse lionne, souffle la peste et la guerre sur ceux qui la négligent : apaisez-la par une victoire éclatante.": "General Iuput seizes the royal granaries. Sekhmet, the lioness goddess, breathes plague and war upon those who neglect her: appease her with a brilliant victory.",
+  "Sekhmet s’apaise ; les greniers royaux sont à vous.": "Sekhmet is appeased; the royal granaries are yours.",
+  "La colère de Sekhmet s’abat sur votre armée.": "Sekhmet’s wrath falls upon your army.",
+  "La Belle Fête de la Vallée": "The Beautiful Festival of the Valley",
+  "À Thèbes, deux prêtres d’Amon, Pakharu et Nesamon, lèvent les milices du temple contre vous. Pendant la Belle Fête de la Vallée, la barque d’Amon traverse le Nil : il faut gagner avant la fin des processions.": "In Thebes, two priests of Amun, Pakharu and Nesamun, raise the temple militias against you. During the Beautiful Festival of the Valley, Amun’s barque crosses the Nile: you must win before the processions end.",
+  "La barque d’Amon s’arrête devant vous : l’oracle vous désigne.": "Amun’s barque stops before you: the oracle chooses you.",
+  "Les prêtres d’Amon vous déclarent impur.": "The priests of Amun declare you impure.",
+  "Le vizir de Haute-Égypte": "The vizier of Upper Egypt",
+  "Le vizir Ankhmahor tient la justice et l’armée de Haute-Égypte. Maât, déesse de l’ordre du monde, pèse chaque acte : seule une victoire juste vous la rendra favorable.": "The vizier Ankhmahor controls the justice and army of Upper Egypt. Maat, goddess of the world’s order, weighs every deed: only a just victory will win her favor.",
+  "Maât vous reconnaît : l’ordre est rétabli en Haute-Égypte.": "Maat recognizes you: order is restored in Upper Egypt.",
+  "Le vizir vous condamne au nom de Maât.": "The vizier condemns you in the name of Maat.",
+  "Les deux couronnes": "The two crowns",
+  "Deux prétendants, Sekhemrê du Delta et Montouemhat de Thèbes, s’unissent contre vous. Pour ceindre la double couronne, rouge et blanche, il faut l’appui d’Horus, le faucon dont chaque pharaon est l’incarnation.": "Two claimants, Sekhemre of the Delta and Montuemhat of Thebes, unite against you. To wear the double crown, red and white, you need the support of Horus, the falcon embodied by every pharaoh.",
+  "Le faucon d’Horus se pose sur votre bras : les Deux Terres sont unies.": "Horus’s falcon lands on your arm: the Two Lands are united.",
+  "Les deux couronnes vous échappent.": "The two crowns slip away from you.",
+  "Pharaon": "Pharaoh",
+  "Trois grands du royaume refusent encore votre règne. Rê, le soleil, traverse chaque nuit le monde souterrain dans sa barque : triomphez avant l’aube, et vous serez fils de Rê.": "Three great lords of the kingdom still reject your rule. Ra, the sun, crosses the underworld in his barque every night: triumph before dawn and you will be son of Ra.",
+  "Le peuple vous acclame : vous êtes Pharaon, fils de Rê. Les tailleurs de pierre commencent votre tombeau.": "The people cheer you: you are Pharaoh, son of Ra. The stonecutters begin your tomb.",
+  "Rê se lève sans vous : un autre ceindra la double couronne.": "Ra rises without you: another will wear the double crown.",
+  "L’oppidum": "The oppidum",
+  "Vous remontez une vallée boisée de Gaule jusqu’à un oppidum, une ville perchée sur une colline et ceinte d’un rempart de bois, de terre et de pierres. Des guerriers au torque d’or vous barrent la route.": "You travel up a wooded valley of Gaul to an oppidum, a hilltop town ringed by a rampart of timber, earth and stone. Warriors wearing golden torcs block your way.",
+  "Le chef du village vous offre l’hydromel : vous êtes les bienvenus.": "The village chief offers you mead: you are welcome.",
+  "Les guerriers vous repoussent dans la forêt.": "The warriors drive you back into the forest.",
+  "Le gui et la serpe": "The mistletoe and the sickle",
+  "Au sixième jour de la lune, raconte Pline, les druides cueillent le gui sur un chêne avec une serpe d’or. Le chef Segomaros vous défie : chez les Celtes, on se mesure avant de s’asseoir au même banquet.": "On the sixth day of the moon, Pliny tells us, druids cut mistletoe from an oak with a golden sickle. Chief Segomaros challenges you: among the Celts, you prove yourself before sharing the same feast.",
+  "Segomaros vous cède la part du héros au banquet.": "Segomaros gives you the hero’s portion at the feast.",
+  "Segomaros garde la part du héros.": "Segomaros keeps the hero’s portion.",
+  "Le conseil des druides": "The council of druids",
+  "Adopté par une tribu, vous visez le commandement. Le vergobret Litavicos, magistrat suprême, s’y oppose. Chaque année, les druides se réunissent dans la forêt des Carnutes pour trancher les querelles.": "Adopted by a tribe, you aim for command. The vergobret Litavicos, supreme magistrate, stands in your way. Each year, the druids gather in the forest of the Carnutes to settle disputes.",
+  "Les druides des Carnutes tranchent en votre faveur.": "The druids of the Carnutes rule in your favor.",
+  "Les druides donnent raison à Litavicos.": "The druids side with Litavicos.",
+  "Le tonnerre de Taranis": "The thunder of Taranis",
+  "Le chef Ambicatos rallie les clans du sud. Taranis, le dieu à la roue, gronde dans l’orage : offrez-lui une victoire avant que la foudre ne tombe sur vos remparts.": "Chief Ambicatos rallies the southern clans. Taranis, the wheel god, rumbles in the storm: offer him a victory before lightning strikes your ramparts.",
+  "La foudre de Taranis frappe le camp d’Ambicatos.": "Taranis’s lightning strikes Ambicatos’s camp.",
+  "L’orage de Taranis s’abat sur vos remparts.": "Taranis’s storm falls upon your ramparts.",
+  "La nuit de Samain": "The night of Samhain",
+  "À Samain, la nuit où s’ouvre le monde des morts, les frères rivaux Cotos et Valetiacos s’unissent contre vous. Il faut vaincre avant que les esprits ne regagnent l’Autre Monde.": "At Samhain, the night when the world of the dead opens, the rival brothers Cotos and Valetiacos unite against you. You must win before the spirits return to the Otherworld.",
+  "Les esprits repartent apaisés : les deux frères vous prêtent serment.": "The spirits leave in peace: the two brothers swear allegiance to you.",
+  "Les morts de Samain hantent votre camp.": "The dead of Samhain haunt your camp.",
+  "Le dieu cornu": "The horned god",
+  "Le chef Catumandos garde les forêts du nord. Cernunnos, le dieu cornu maître des bêtes sauvages, ne laisse traverser ses bois qu’aux chefs dignes de lui.": "Chief Catumandos guards the northern forests. Cernunnos, the horned lord of wild beasts, only lets worthy chiefs cross his woods.",
+  "Les cerfs de Cernunnos s’écartent devant vous.": "Cernunnos’s stags step aside before you.",
+  "La forêt se referme sur votre armée.": "The forest closes in on your army.",
+  "Le serment des clans": "The oath of the clans",
+  "Deux chefs, Orgétorix et Indutiomaros, refusent de vous suivre. Lugus, le dieu aux mille talents, aime les chefs habiles : prouvez votre adresse.": "Two chiefs, Orgetorix and Indutiomarus, refuse to follow you. Lugus, the god of many skills, loves cunning leaders: prove your skill.",
+  "Lugus vous accorde la victoire : les clans vous prêtent serment.": "Lugus grants you victory: the clans swear allegiance.",
+  "Les clans se dispersent : nul ne vous suit.": "The clans scatter: no one follows you.",
+  "Roi des Gaules": "King of the Gauls",
+  "Trois rois s’opposent encore à vous. Toutatis, dieu protecteur de la tribu, réclame un chef capable d’unir tous les peuples gaulois. Pourvu que le ciel ne vous tombe pas sur la tête !": "Three kings still oppose you. Toutatis, protector god of the tribe, demands a leader able to unite all the Gaulish peoples. Let’s hope the sky doesn’t fall on your head!",
+  "Toutes les tribus vous acclament roi : la Gaule est unie.": "Every tribe hails you as king: Gaul is united.",
+  "Les Gaules restent divisées.": "The Gauls remain divided.",
+  "Les drakkars du fjord": "The longships of the fjord",
+  "Vos navires entrent dans un fjord bordé de falaises. Sur la grève, des drakkars à proue de dragon sont tirés au sec ; les guerriers d’un jarl vous attendent derrière leurs boucliers ronds peints de couleurs vives.": "Your ships enter a cliff-lined fjord. On the shore, dragon-prowed longships are hauled up on the beach; a jarl’s warriors wait behind brightly painted round shields.",
+  "Le jarl vous invite dans sa longue maison.": "The jarl invites you into his longhouse.",
+  "Les drakkars vous poursuivent jusqu’en haute mer.": "The longships chase you out to the open sea.",
+  "Le Thing": "The Thing",
+  "Chaque été, les hommes libres se réunissent au Thing pour juger et faire les lois. Le jarl Ulf Bjarnarson conteste votre présence : ici, on règle les différends par la parole… ou par les armes.": "Every summer, free men gather at the Thing to judge and make laws. Jarl Ulf Bjarnarson disputes your presence: here, quarrels are settled by words… or by weapons.",
+  "Le Thing vous accorde le droit de vous établir.": "The Thing grants you the right to settle.",
+  "Le Thing vous déclare hors-la-loi.": "The Thing declares you an outlaw.",
+  "Les corbeaux d’Odin": "Odin’s ravens",
+  "Devenu nordique, vous prétendez au titre de jarl face à Thorvald Grimsson. Odin le borgne, qui donna un œil pour la sagesse, observe la bataille par ses corbeaux Hugin et Munin.": "Now a Norseman, you claim the title of jarl against Thorvald Grimsson. One-eyed Odin, who gave an eye for wisdom, watches the battle through his ravens Huginn and Muninn.",
+  "Les corbeaux d’Odin rapportent votre victoire.": "Odin’s ravens report your victory.",
+  "Odin détourne son œil unique.": "Odin turns his single eye away.",
+  "Le marteau de Thor": "Thor’s hammer",
+  "Le chef Halfdan Haraldsson tient les côtes. Thor, protecteur des hommes, frappe les géants de son marteau Mjöllnir : montrez-lui votre force.": "Chief Halfdan Haraldsson holds the coasts. Thor, protector of mankind, strikes giants with his hammer Mjölnir: show him your strength.",
+  "Le tonnerre de Thor salue votre victoire.": "Thor’s thunder hails your victory.",
+  "Mjöllnir reste muet : Halfdan l’emporte.": "Mjölnir stays silent: Halfdan wins.",
+  "Les frères de Birka": "The brothers of Birka",
+  "À Birka, la cité marchande, les frères Sigurd et Ragnvald Eiriksson s’unissent contre vous. Njörd, dieu des vents et de la mer, décide des traversées : gagnez avant que le vent ne tourne.": "In Birka, the trading town, the brothers Sigurd and Ragnvald Eiriksson unite against you. Njord, god of wind and sea, decides every crossing: win before the wind turns.",
+  "Njörd gonfle vos voiles : Birka vous paie tribut.": "Njord fills your sails: Birka pays you tribute.",
+  "Le vent tourne : vos navires restent au port.": "The wind turns: your ships stay in port.",
+  "Le serment de Tyr": "Tyr’s oath",
+  "Le jarl Hakon Sveinsson refuse votre autorité. Tyr, qui sacrifia sa main dans la gueule du loup Fenrir, est le dieu des serments : un chef doit tenir parole jusqu’au bout.": "Jarl Hakon Sveinsson rejects your authority. Tyr, who sacrificed his hand in the jaws of the wolf Fenrir, is the god of oaths: a chief must keep his word to the end.",
+  "Hakon prête serment sur l’anneau sacré.": "Hakon swears an oath on the sacred ring.",
+  "Hakon rompt ses serments et vous chasse.": "Hakon breaks his oaths and drives you away.",
+  "Les guerriers-ours": "The bear warriors",
+  "Eirik Hache-Rouge et Bjorn Côtes-de-Fer lancent contre vous leurs berserkers, vêtus de peaux d’ours. Freyja, déesse de la guerre et de l’amour, choisit la moitié des guerriers morts au combat : méritez sa faveur.": "Eirik Red-Axe and Bjorn Ironside unleash their berserkers, clad in bearskins, against you. Freyja, goddess of war and love, chooses half of the warriors slain in battle: earn her favor.",
+  "Les valkyries vous désignent vainqueur.": "The valkyries name you the victor.",
+  "Freyja emporte vos guerriers dans sa grande salle.": "Freyja takes your warriors to her great hall.",
+  "Roi des Nordiques": "King of the Norsemen",
+  "Trois rois de la mer refusent encore de plier. Pour être proclamé roi, il faut l’approbation de tous les Things… et un nom digne des sagas.": "Three sea kings still refuse to bow. To be proclaimed king, you need the approval of every Thing… and a name worthy of the sagas.",
+  "Les scaldes chanteront votre saga ; une pierre runique porte désormais votre nom.": "The skalds will sing your saga; a runestone now bears your name.",
+  "Nul scalde ne chantera votre nom.": "No skald will sing your name.",
+  "Les cités de pierre": "The stone cities",
+  "Au cœur de la forêt du Yucatán surgissent des pyramides blanchies à la chaux, plus hautes que les arbres. Les gardes d’une cité maya, armés de lances à pointe d’obsidienne, vous barrent le passage.": "In the heart of the Yucatán forest rise lime-whitened pyramids, taller than the trees. The guards of a Maya city, armed with obsidian-tipped spears, block your way.",
+  "Le seigneur de la cité vous offre une coupe de cacao.": "The lord of the city offers you a cup of cacao.",
+  "Les lances d’obsidienne vous repoussent dans la forêt.": "The obsidian spears drive you back into the forest.",
+  "Le jeu de balle": "The ballgame",
+  "Sur le terrain de jeu de balle, les joueurs frappent une lourde balle de caoutchouc avec les hanches. Le capitaine B’alam Ajaw vous défie : chez les Mayas, une partie peut décider d’une guerre.": "On the ballcourt, players strike a heavy rubber ball with their hips. Captain B’alam Ajaw challenges you: among the Maya, a game can decide a war.",
+  "La balle traverse l’anneau de pierre : la cité vous accueille.": "The ball passes through the stone ring: the city welcomes you.",
+  "B’alam Ajaw remporte la partie, et la guerre.": "B’alam Ajaw wins the game, and the war.",
+  "Le seigneur de Tikal": "The lord of Tikal",
+  "Devenu maya, vous convoitez le trône. Le seigneur Chak Tok Ich’aak règne depuis son palais. Itzamná, dieu créateur et inventeur de l’écriture, protège les scribes : vos exploits doivent être gravés sur une stèle.": "Now a Maya, you covet the throne. Lord Chak Tok Ich’aak rules from his palace. Itzamna, creator god and inventor of writing, protects the scribes: your deeds must be carved on a stela.",
+  "Les sculpteurs gravent votre victoire sur une stèle.": "The sculptors carve your victory on a stela.",
+  "Votre nom ne sera gravé sur aucune stèle.": "Your name will be carved on no stela.",
+  "La pluie de Chaac": "Chaac’s rain",
+  "La sécheresse frappe les champs de maïs et la reine Ix Yok’in accuse votre impiété. Chaac, dieu de la pluie à la hache de foudre, attend une offrande : seule la victoire fera tomber l’orage.": "Drought strikes the maize fields and Queen Ix Yok’in blames your impiety. Chaac, the rain god with the lightning axe, awaits an offering: only victory will bring the storm.",
+  "Chaac fend les nuages : la pluie revient sur le maïs.": "Chaac splits the clouds: rain returns to the maize.",
+  "La sécheresse continue ; le peuple se détourne de vous.": "The drought goes on; the people turn away from you.",
+  "Le Compte long": "The Long Count",
+  "Deux seigneurs alliés, Yax Pasaj et Uk’it Took’, s’unissent contre vous. Les prêtres annoncent la fin d’un cycle du calendrier du Compte long : un chef doit marquer l’événement par une victoire.": "Two allied lords, Yax Pasaj and Uk’it Took’, unite against you. The priests announce the end of a cycle of the Long Count calendar: a leader must mark the event with a victory.",
+  "Une nouvelle stèle célèbre la fin du cycle et votre règne.": "A new stela celebrates the end of the cycle and your reign.",
+  "Le cycle s’achève sans vous.": "The cycle ends without you.",
+  "La reine de la Lune": "The Moon queen",
+  "La reine Ix K’ab’al Xook protège la cité rivale. Ixchel, déesse de la Lune, des tisserandes et des naissances, veille sur elle : la nuit, sa lumière trahit vos troupes.": "Queen Ix K’ab’al Xook protects the rival city. Ixchel, goddess of the Moon, weavers and births, watches over her: at night, her light betrays your troops.",
+  "Ixchel voile la Lune : votre attaque surprend la reine.": "Ixchel veils the Moon: your attack takes the queen by surprise.",
+  "La Lune éclaire vos troupes : la reine vous voit venir.": "The Moon lights up your troops: the queen sees you coming.",
+  "L’ombre du serpent": "The serpent’s shadow",
+  "Les seigneurs de Chichén Itzá, menés par K’ak’upakal, lèvent leurs armées. À l’équinoxe, l’ombre du serpent Kukulcán descend l’escalier de leur pyramide : il faut vaincre avant que l’ombre ne disparaisse.": "The lords of Chichen Itza, led by K’ak’upakal, raise their armies. At the equinox, the shadow of the serpent Kukulcan descends the stairs of their pyramid: you must win before the shadow fades.",
+  "L’ombre de Kukulcán glisse vers vos troupes : le dieu vous a choisi.": "Kukulcan’s shadow glides toward your troops: the god has chosen you.",
+  "Le serpent disparaît ; vos alliés vous abandonnent.": "The serpent vanishes; your allies abandon you.",
+  "K’uhul Ajaw": "K’uhul Ajaw",
+  "Trois cités refusent encore votre autorité. Le titre de K’uhul Ajaw, seigneur divin, ne s’obtient que par la conquête et par les offrandes au Soleil, K’inich Ajaw.": "Three cities still reject your authority. The title of K’uhul Ajaw, divine lord, is only earned through conquest and offerings to the Sun, K’inich Ajaw.",
+  "Vous êtes K’uhul Ajaw : toutes les cités vous paient tribut en jade et en cacao.": "You are K’uhul Ajaw: every city pays you tribute in jade and cacao.",
+  "Les cités restent libres ; votre dynastie s’éteint.": "The cities stay free; your dynasty dies out.",
+  "La ville sur le lac": "The city on the lake",
+  "Du haut des montagnes, vous découvrez Tenochtitlan, bâtie au milieu du lac Texcoco et reliée à la rive par de longues chaussées. Des guerriers en armure de coton matelassé en gardent l’entrée.": "From the mountains, you discover Tenochtitlan, built in the middle of Lake Texcoco and linked to the shore by long causeways. Warriors in quilted cotton armor guard the entrance.",
+  "On vous ouvre la chaussée : vous entrez dans la ville.": "The causeway opens for you: you enter the city.",
+  "La chaussée est coupée : vous ne passerez pas.": "The causeway is cut: you shall not pass.",
+  "Le marché de Tlatelolco": "The market of Tlatelolco",
+  "Au grand marché de Tlatelolco, on paie en fèves de cacao et en couvertures de coton. Le marchand Ocelotl, un pochteca, vous soupçonne d’espionnage : chez les Aztèques, les marchands sont aussi des éclaireurs.": "At the great market of Tlatelolco, people pay with cacao beans and cotton cloaks. The merchant Ocelotl, a pochteca, suspects you of spying: among the Aztecs, merchants are also scouts.",
+  "Ocelotl vous ouvre ses comptoirs.": "Ocelotl opens his trading posts to you.",
+  "Ocelotl vous fait chasser du marché.": "Ocelotl has you thrown out of the market.",
+  "L’aigle et le serpent": "The eagle and the serpent",
+  "Devenu aztèque, vous visez le conseil des seigneurs. Selon la légende, les Mexicas fondèrent leur ville là où un aigle dévorait un serpent, perché sur un cactus. Le seigneur Cuauhtlatoa refuse de vous céder sa place.": "Now an Aztec, you aim for the council of lords. Legend says the Mexica founded their city where an eagle perched on a cactus was devouring a serpent. Lord Cuauhtlatoa refuses to give up his seat.",
+  "Le conseil vous accueille parmi les seigneurs.": "The council welcomes you among the lords.",
+  "Cuauhtlatoa garde son siège au conseil.": "Cuauhtlatoa keeps his seat on the council.",
+  "Les jardins flottants": "The floating gardens",
+  "Le seigneur Tezozómoc contrôle les chinampas, les jardins flottants qui nourrissent la ville. Tláloc, dieu de la pluie, exige des offrandes sur sa montagne : sans lui, le maïs ne pousse pas.": "Lord Tezozomoc controls the chinampas, the floating gardens that feed the city. Tlaloc, the rain god, demands offerings on his mountain: without him, maize will not grow.",
+  "Tláloc envoie la pluie : les chinampas sont à vous.": "Tlaloc sends the rain: the chinampas are yours.",
+  "Les chinampas restent à Tezozómoc ; la ville a faim.": "The chinampas stay with Tezozomoc; the city goes hungry.",
+  "La guerre fleurie": "The flower war",
+  "Deux seigneurs, Axolohua et Mixcoatl, vous provoquent en guerre fleurie, un combat rituel où l’on cherche à capturer plutôt qu’à tuer.": "Two lords, Axolohua and Mixcoatl, challenge you to a flower war, a ritual battle where warriors seek to capture rather than kill.",
+  "Vos guerriers ramènent de nombreux captifs : votre prestige grandit.": "Your warriors bring back many captives: your prestige grows.",
+  "Vos guerriers sont capturés : la honte retombe sur vous.": "Your warriors are captured: shame falls upon you.",
+  "Les guerriers jaguars": "The jaguar warriors",
+  "Le chef Xiuhcoatl commande les ordres d’élite, guerriers aigles et guerriers jaguars. Xipe Totec, dieu du printemps et du renouveau, ne favorise que les chefs capables de renaître après la défaite.": "Chief Xiuhcoatl commands the elite orders, eagle warriors and jaguar warriors. Xipe Totec, god of spring and renewal, only favors leaders who can rise again after defeat.",
+  "Xipe Totec vous accorde le renouveau : les guerriers jaguars vous suivent.": "Xipe Totec grants you renewal: the jaguar warriors follow you.",
+  "Les guerriers jaguars restent fidèles à Xiuhcoatl.": "The jaguar warriors stay loyal to Xiuhcoatl.",
+  "La Triple Alliance": "The Triple Alliance",
+  "Texcoco et Tlacopan, alliées de Tenochtitlan dans la Triple Alliance, envoient leurs seigneurs Nezahualpilli et Totoquihuaztli contre vous. Quetzalcóatl, le Serpent à plumes, dieu du vent et du savoir, observe : la ruse vaut ici autant que la force.": "Texcoco and Tlacopan, allies of Tenochtitlan in the Triple Alliance, send their lords Nezahualpilli and Totoquihuaztli against you. Quetzalcoatl, the Feathered Serpent, god of wind and knowledge, is watching: cunning matters as much as strength.",
+  "La Triple Alliance se range derrière vous.": "The Triple Alliance rallies behind you.",
+  "L’Alliance vous rejette ; Tenochtitlan vous ferme ses portes.": "The Alliance rejects you; Tenochtitlan closes its gates to you.",
+  "Huey Tlatoani": "Huey Tlatoani",
+  "Trois prétendants se disputent le titre de Huey Tlatoani, « celui qui parle ». Huitzilopochtli, dieu du soleil et de la guerre, réclame un chef victorieux pour que le soleil poursuive sa course.": "Three claimants vie for the title of Huey Tlatoani, “the great speaker”. Huitzilopochtli, god of sun and war, demands a victorious leader so that the sun may keep its course.",
+  "Vous êtes Huey Tlatoani : de la côte à la montagne, les peuples vous paient tribut.": "You are Huey Tlatoani: from coast to mountain, the peoples pay you tribute.",
+  "Un autre parlera au nom des Mexicas.": "Someone else will speak for the Mexica.",
+  "La mer intérieure": "The inland sea",
+  "Romains et Égyptiens se disputent la Méditerranée, que les Romains appellent déjà Mare Nostrum, « notre mer ». Tenez d’abord tête aux légions.": "Romans and Egyptians fight over the Mediterranean, which the Romans already call Mare Nostrum, “our sea”. First, stand up to the legions.",
+  "Les légions reculent : la mer s’ouvre devant vous.": "The legions fall back: the sea opens before you.",
+  "Rome garde la maîtrise de la mer.": "Rome keeps control of the sea.",
+  "Le grenier du monde": "The granary of the world",
+  "L’Égypte nourrit la Méditerranée de son blé : qui tient le Nil tient les cités. Défaites les armées du Pharaon.": "Egypt feeds the Mediterranean with its wheat: whoever holds the Nile holds the cities. Defeat Pharaoh’s armies.",
+  "Les convois de blé partent désormais sous vos ordres.": "The grain convoys now sail under your orders.",
+  "Le blé d’Égypte nourrit vos ennemis.": "Egypt’s wheat feeds your enemies.",
+  "Le phare d’Alexandrie": "The lighthouse of Alexandria",
+  "À Alexandrie, au pied du phare de Pharos, l’une des sept merveilles du monde, Romains et Égyptiens s’allient contre vous.": "In Alexandria, at the foot of the lighthouse of Pharos, one of the seven wonders of the world, Romans and Egyptians join forces against you.",
+  "Le phare d’Alexandrie brille désormais pour vous.": "The lighthouse of Alexandria now shines for you.",
+  "Le phare guide les flottes ennemies.": "The lighthouse guides the enemy fleets.",
+  "Maître de la Méditerranée": "Master of the Mediterranean",
+  "Toutes les flottes du bassin méditerranéen se rassemblent pour une dernière bataille.": "Every fleet of the Mediterranean gathers for one last battle.",
+  "De Gadès à Alexandrie, la Méditerranée vous obéit.": "From Gades to Alexandria, the Mediterranean obeys you.",
+  "La Méditerranée vous échappe.": "The Mediterranean slips away from you.",
+  "Les tribus de l’Ouest": "The western tribes",
+  "Celtes et Nordiques se disputent les rivages de la mer du Nord. Les tribus gauloises attaquent les premières.": "Celts and Norsemen fight over the shores of the North Sea. The Gaulish tribes strike first.",
+  "Les tribus de l’Ouest rendent les armes.": "The western tribes lay down their arms.",
+  "Les tribus gardent leurs forêts.": "The tribes keep their forests.",
+  "Le danegeld": "The Danegeld",
+  "Les Vikings exigent le danegeld, un tribut d’argent pour épargner vos villages. Refusez de payer.": "The Vikings demand the Danegeld, a tribute of silver to spare your villages. Refuse to pay.",
+  "Pas une pièce d’argent ne partira vers le Nord.": "Not a single silver coin will go north.",
+  "Vous payez le danegeld.": "You pay the Danegeld.",
+  "Les îles brumeuses": "The misty isles",
+  "Sur les îles de la mer du Nord, druides et jarls concluent une alliance contre vous.": "On the islands of the North Sea, druids and jarls seal an alliance against you.",
+  "L’alliance se brise sur vos remparts.": "The alliance shatters against your ramparts.",
+  "Les îles restent aux mains de l’alliance.": "The isles stay in the alliance’s hands.",
+  "Maître du Nord": "Master of the North",
+  "Celtes et Vikings rassemblent toutes leurs forces, des forêts aux fjords.": "Celts and Vikings gather all their forces, from the forests to the fjords.",
+  "Des forêts aux fjords, le Nord vous obéit.": "From forests to fjords, the North obeys you.",
+  "Le Nord reste indompté.": "The North remains untamed.",
+  "Les routes blanches": "The white roads",
+  "Mayas et Aztèques se disputent la Mésoamérique. Les Mayas tiennent les sacbé, les routes blanches surélevées qui relient leurs cités.": "Maya and Aztecs fight over Mesoamerica. The Maya hold the sacbe, the raised white roads linking their cities.",
+  "Les routes blanches sont à vous.": "The white roads are yours.",
+  "Les sacbé restent aux mains des Mayas.": "The sacbe stay in Maya hands.",
+  "Le tribut": "The tribute",
+  "Les collecteurs de tribut aztèques réclament plumes, jade et cacao à vos villages.": "Aztec tribute collectors demand feathers, jade and cacao from your villages.",
+  "Les collecteurs repartent les mains vides.": "The collectors leave empty-handed.",
+  "Vos villages paient tribut à Tenochtitlan.": "Your villages pay tribute to Tenochtitlan.",
+  "Le cinquième soleil": "The fifth sun",
+  "Les prêtres des deux peuples annoncent la fin du cinquième soleil et s’unissent contre vous.": "The priests of both peoples announce the end of the fifth sun and unite against you.",
+  "Le soleil se lève encore, et c’est pour vous.": "The sun rises again, and it rises for you.",
+  "Le soleil se lève sans vous.": "The sun rises without you.",
+  "Maître des deux empires": "Master of the two empires",
+  "Des forêts du Yucatán au lac Texcoco, toutes les armées marchent contre vous.": "From the Yucatán forests to Lake Texcoco, every army marches against you.",
+  "Mayas et Aztèques reconnaissent votre empire.": "Maya and Aztecs acknowledge your empire.",
+  "Les deux empires restent libres.": "The two empires remain free.",
+  "Bassin méditerranéen": "Mediterranean basin",
+  "Vous implantez votre faction sur les rivages ensoleillés de la Méditerranée, où se croisent galères romaines et barques égyptiennes.": "You settle your faction on the sunny shores of the Mediterranean, where Roman galleys and Egyptian boats cross paths.",
+  "Europe du Nord": "Northern Europe",
+  "Vous implantez votre faction dans les terres froides du Nord, entre forêts gauloises et fjords vikings.": "You settle your faction in the cold lands of the North, between Gaulish forests and Viking fjords.",
+  "Amérique centrale et du Sud": "Central and South America",
+  "Vous implantez votre faction dans les forêts et les hauts plateaux d’Amérique centrale, où s’élèvent des pyramides de pierre.": "You settle your faction in the forests and highlands of Central America, where stone pyramids rise.",
+  "Depuis Massalia, des marchands parlent d’une route de l’ambre qui mène vers des côtes froides et brumeuses, celles que le navigateur Pythéas aurait longées. Vous embarquez à la rencontre de nouveaux peuples.": "From Massalia, merchants speak of an amber road leading to cold and misty coasts, those the navigator Pytheas is said to have sailed along. You set off to meet new peoples.",
+  "Descendant les fleuves vers le sud, vous suivez les marchands d’étain jusqu’aux rivages chauds de la Méditerranée, à la rencontre de nouveaux peuples.": "Sailing down the rivers to the south, you follow the tin merchants to the warm shores of the Mediterranean, to meet new peoples.",
+  "En suivant les incursions vikings vers le Vinland, au-delà du Groenland, vous découvrez de nouvelles terres et de nouveaux peuples.": "Following the Viking voyages to Vinland, beyond Greenland, you discover new lands and new peoples.",
+  "Sur la route du retour, des récits de navigateurs venus de l’Est vous guident vers les côtes sauvages et froides du Nord, à la rencontre de nouveaux peuples.": "On the way back, tales of sailors from the East guide you toward the wild, cold coasts of the North, to meet new peoples.",
+  "Tutoriel": "Tutorial",
+  "Carte du monde": "World map",
+  "Continuer": "Continue",
+  "Zone terminée : choisis ta prochaine destination.": "Zone complete: choose your next destination.",
+  "Choisis où implanter ta faction.": "Choose where to settle your faction.",
+  "Le monde entier reconnaît ton autorité.": "The whole world acknowledges your authority.",
+  "Termine la zone en cours pour voyager plus loin.": "Finish the current zone to travel further.",
+  "Choisis sur la carte du monde où implanter ta faction.": "Choose on the world map where to settle your faction.",
+  "Choisis ta prochaine destination sur la carte du monde.": "Choose your next destination on the world map.",
 "Multi": "Multi", "Duel": "Duel", "Coopération": "Co-op", "Publique": "Public", "Privée": "Private", "Valider": "Confirm",
 "Code incorrect.": "Wrong code.", "Le code comporte 4 chiffres.": "The code has 4 digits.", "Code à 4 chiffres pour ton invité": "4-digit code for your guest",
 "Choisis un code à 4 chiffres pour ta partie privée.": "Choose a 4-digit code for your private game.",
@@ -889,7 +1289,7 @@ const EN = {
 "Tu as quitté la partie : défaite.": "You left the game: defeat.", "Connexion perdue : défaite.": "Connection lost: defeat.",
 "Skin de tour automatique": "Automatic tower skin",
 "Avec une civilisation, tes tours prennent l’apparence de ses tours. Choisir un skin ci-dessous décoche cette option.": "With a civilization, your towers take the look of its towers. Picking a skin below unchecks this option.",
-"Les skins se débloquent avec les étoiles de campagne ; les tours de victoire, en terminant le chapitre de leur civilisation.": "Skins unlock with campaign stars; victory towers, by finishing their civilization's chapter.",
+"Les skins se débloquent avec les étoiles de campagne ; les tours de victoire, en terminant la campagne de leur peuple.": "Skins unlock with campaign stars; victory towers, by finishing their people’s campaign.",
 "Catapulte": "Catapult", "Pyramide dorée": "Golden pyramid", "Trébuchet": "Trebuchet", "Drakkar": "Longship",
 "Aigle d’or": "Golden eagle", "Jaguar d’or": "Golden jaguar",
 "Affiché en haut de l’écran pendant les parties.": "Shown at the top of the screen during games.",
@@ -1135,6 +1535,12 @@ const EN_RX = [
   [/^Ton meilleur temps reste (\S+)\.$/, m => 'Your best time remains ' + m[1] + '.'],
   [/^Difficulté « (.+) » débloquée !$/, m => 'Difficulty \u201c' + WX(m[1]) + '\u201d unlocked!'],
   [/^Pouvoir : (.+)$/, m => 'Power: ' + WX(m[1])],
+  [/^Finale — (.+)$/, m => 'Final — ' + WX(m[1])], [/^Campagne (.+)$/, m => WX(m[1]) + ' campaign'],
+  [/^Campagne des (.+) terminée : tour de victoire débloquée !$/, m => WX(m[1]) + ' campaign complete: victory tower unlocked!'],
+  [/^La finale (.+) est ouverte !$/, m => 'The ' + WX(m[1]) + ' final is open!'],
+  [/^Termine la campagne des (.+) pour débloquer « (.+) »$/, m => 'Finish the ' + WX(m[1]) + ' campaign to unlock “' + WX(m[2]) + '”'],
+  [/^🔒 Termine les campagnes des (.+) et des (.+) pour ouvrir la finale\.$/, m => '🔒 Finish the ' + WX(m[1]) + ' and ' + WX(m[2]) + ' campaigns to open the final.'],
+  [/^(\d+)\/(\d+) victoires, (\d+) ★$/, m => m[1] + '/' + m[2] + ' wins, ' + m[3] + ' ★'], [/^(\d)\/3 zones$/, m => m[1] + '/3 zones'],
   [/^Tu as battu (.+)\.$/, m => 'You beat ' + m[1] + '.'],
   [/^Victoire en coopération avec (.+) !$/, m => 'Co-op victory with ' + m[1] + '!'], [/^(.+) a quitté la partie$/, m => m[1] + ' left the game'], [/^(.+) a gagné\.$/, m => m[1] + ' won.'],
   [/^(.+) a quitté la partie : victoire\.$/, m => m[1] + ' left the game: victory.'], [/^(.+) ne répond plus : victoire\.$/, m => m[1] + ' is not responding: victory.'],
@@ -1307,9 +1713,9 @@ EN_RX.push(
   [/^(🪶|🛡️|🏛️) (.+) \((.+)\)$/, m => m[1] + ' ' + WX(m[2]) + ' (' + WX(m[3]) + ')']
 );
 Object.assign(EN, {
-  "Campagne : 5 chapitres de 5 parties, un par difficulté. Chef d’une jeune faction, tu t’imposes face aux clans locaux, puis tu rencontres les Méditerranéens, les Nordiques et les Amérindiens avant de conquérir le monde. Chaque partie se débloque en gagnant la précédente ; les bulles d’explication sont intégrées aux premières parties. Une victoire en moins de 3:20 donne une étoile.": "Campaign: 5 chapters of 5 games, one per difficulty. As the leader of a young faction, you assert yourself against the local clans, then meet the Mediterraneans, the Northmen and the Native Americans before conquering the world. Each game unlocks when you win the previous one; explanation bubbles are built into the first games. A win in under 3:20 earns a star.",
+  "Campagne : après 5 niveaux de tutoriel, choisis sur la carte du monde où implanter ta faction (Europe du Nord, bassin méditerranéen ou Amérique centrale et du Sud). Chaque zone compte deux peuples de 8 niveaux chacun (2 faciles sans civilisation, puis 6 où tu incarnes ce peuple) et une finale de 4 niveaux difficiles. Une zone terminée ouvre les zones voisines. Une étoile par niveau gagné à temps": "Campaign: after 5 tutorial levels, choose on the world map where to settle your faction (Northern Europe, the Mediterranean basin or Central and South America). Each zone has two peoples with 8 levels each (2 easy ones without a civilization, then 6 where you play as that people) and a final of 4 hard levels. A finished zone opens the neighboring zones. One star per level won in time",
   "Cadres des parties : vert pour une victoire, rouge pour une défaite, gris si la partie n’a pas encore été jouée ; dans les défis, or, argent ou bronze pour ta place dans le top 3 en ligne. Sur la grille de campagne, le filigrane indique les bâtiments spéciaux, les emblèmes les civilisations adverses et la bande de couleur le paysage.": "Game frames: green for a win, red for a loss, grey if not played yet; in challenges, gold, silver or bronze for your place in the online top 3. On the campaign grid, the watermark shows the special buildings, the emblems the opposing civilizations and the coloured strip the landscape.",
-  "Personnalisation : 21 skins de tours se débloquent avec les étoiles de campagne (tous à 20 étoiles) ; les 6 tours de civilisation sont disponibles dès le départ (attribuées automatiquement à ta civilisation, sauf si tu décoches « Skin de tour automatique ») et les 6 tours de victoire se débloquent en terminant le chapitre de leur civilisation. On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Customization: 21 tower skins unlock with campaign stars (all at 20 stars); the 6 civilization towers are available from the start (given automatically to your civilization unless you uncheck “Automatic tower skin”) and the 6 victory towers unlock by finishing their civilization's chapter. It also manages your account (Login and code), music, speed and the online leaderboard. The flag at the top of the menu switches the language (French or English).",
+  "Personnalisation : 21 skins de tours se débloquent avec les étoiles de campagne (tous à 46 étoiles) ; les 6 tours de civilisation sont disponibles dès le départ (attribuées automatiquement à ta civilisation, sauf si tu décoches « Skin de tour automatique ») et les 6 tours de victoire se débloquent en terminant la campagne de leur peuple. On y gère aussi le compte (Login et code), la musique, la vitesse et le classement en ligne. Le drapeau en haut du menu change la langue (français ou anglais).": "Customization: 21 tower skins unlock with campaign stars (all at 46 stars); the 6 civilization towers are available from the start (given automatically to your civilization unless you uncheck “Automatic tower skin”) and the 6 victory towers unlock by finishing their people’s campaign. It also manages your account (Login and code), music, speed and the online leaderboard. The flag at the top of the menu switches the language (French or English).",
   "Défis : deux défis du jour (Normal et Difficile), renouvelés chaque jour à minuit (heure de Paris), quinze défis du mois (5 Normal, 10 Difficile) et des défis à créer. Les défis du jour et du mois sont les mêmes pour tout le monde ; chaque carte indique les civilisations à affronter. Toute partie se partage par un lien qui l’ouvre directement.": "Challenges: two daily challenges (Normal and Hard), renewed every day at midnight (Paris time), fifteen monthly challenges (5 Normal, 10 Hard) and challenges you create. Daily and monthly challenges are the same for everyone; each card shows the civilizations you will face. Any game can be shared with a link that opens it directly.",
   "Tableau des scores (bouton en bas de Défis) : médailles (or, argent, bronze) des défis du jour des 7 derniers jours, et des défis du mois en cours. Classement comme aux Jeux olympiques. La campagne n’a pas de classement en ligne.": "Leaderboard (button at the bottom of Challenges): medals (gold, silver, bronze) from the daily challenges of the last 7 days, and from the current month’s challenges. Ranked like the Olympic Games. The campaign has no online ranking.",
   "Civilisations (onglet à l’arbre de technologies) : Amérindiens (Mayas ou Aztèques), Nordiques (Vikings ou Celtes) ou Méditerranéens (Égyptiens ou Romains), chacune avec sa fresque autour de la carte. Chacune a un pouvoir passif permanent, un pouvoir de civilisation (disponible après 25 s de partie ; la carte se teinte en bleu pour la vitesse ou en rouge pour la puissance) et un pouvoir divin, chacun utilisable une fois par partie avec les boutons en bas de l’écran. Le choix se fait aussi avant chaque partie. En campagne, les civilisations s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles, et chaque ordinateur a aussi une civilisation.": "Civilizations (tech-tree tab): Native Americans (Maya or Aztecs), Northmen (Vikings or Celts) or Mediterraneans (Egyptians or Romans), each with its own fresco around the map. Each has a permanent passive power, a civilization power (available after 25 s of play; the map turns blue for speed or red for strength) and a divine power, each usable once per game with the buttons at the bottom of the screen. You can also choose before each game. In the campaign, civilizations open up chapter by chapter; in challenges, all are available, and each computer has a civilization too.",
@@ -1370,11 +1776,11 @@ Object.assign(EN, {
   "Les Égyptiens font grandir leurs tours plus vite avec Grands bâtisseurs : attaque-les avant qu’elles ne soient pleines.": "The Egyptians make their towers grow faster with Master Builders: attack them before they fill up.",
   "Leur pouvoir divin, Anubis, tue toutes tes unités en mouvement pendant 3 s : quand ils remplissent leurs tours, évite de lancer toutes tes troupes en même temps.": "Their divine power, Anubis, kills all your moving units for 3 s: when they fill up their towers, avoid launching all your troops at once.",
   "Les Celtes augmentent la production de leurs tours de 50 % avec Guèdes. Leur pouvoir divin, Toutatis, fait tomber le ciel sur une zone.": "The Celts boost their towers’ production by 50% with Woad. Their divine power, Toutatis, makes the sky fall on an area.",
-  "Tu peux maintenant adopter une civilisation, Romains ou Égyptiens, dans l’encart de lancement de chaque partie.": "You can now adopt a civilization, Romans or Egyptians, in the launch panel of each game.",
+  "Dans chaque peuple, les deux premiers niveaux se jouent sans civilisation ; à partir du 3e, tu incarnes ce peuple et ses pouvoirs s’affichent en bas de l’écran.": "In each people’s campaign, the first two levels are played without a civilization; from the 3rd on, you play as that people and its powers appear at the bottom of the screen.",
   "Les Vikings produisent des Berserkers (2/2 avec 1 d’armure) : tes unités classiques ne peuvent pas les blesser. Tes blindés et des tours bien garnies les arrêtent.": "The Vikings produce Berserkers (2/2 with 1 armour): your regular units cannot hurt them. Your armoured units and well-garrisoned towers stop them.",
   "Leur pouvoir divin, Loki, peut voler une de tes tours classiques avec toute sa garnison.": "Their divine power, Loki, can steal one of your regular towers with its whole garrison.",
   "Les Mayas accélèrent leurs troupes et produisent davantage quand ils attaquent sur plusieurs fronts : ils frappent loin et vite.": "The Maya speed up their troops and produce more when attacking on several fronts: they strike far and fast.",
-  "Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours. Les civilisations nordiques te sont maintenant ouvertes.": "Their divine power, Tezcatlipoca, halves the garrison of three of your towers. The Northern civilizations are now open to you.",
+  "Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours.": "Their divine power, Tezcatlipoca, halves the garrison of three of your towers.",
   "Les Aztèques produisent des guerriers jaguars (2/2) qui encaissent un combat de plus que tes unités.": "The Aztecs produce jaguar warriors (2/2) who survive one more fight than your units.",
   "Leur pouvoir divin, Quetzalcoatl, ajoute 30 défenseurs à deux de leurs tours.": "Their divine power, Quetzalcoatl, adds 30 defenders to two of their towers.",
   "Dernier chapitre : toutes les civilisations peuvent se dresser contre toi, et tu peux choisir la tienne parmi toutes. Bonne conquête !": "Final chapter: any civilization may rise against you, and you can choose yours from all of them. Good conquest!"
@@ -2173,7 +2579,7 @@ function openShared(id) {
   if (history.replaceState) history.replaceState(null, '', location.pathname + location.search);
   const L = campaignPlan().find(x => x.id === id);
   if (L) {
-    if (!tierUnlocked(L.ti)) { showTab('campaign'); toast('Ce niveau (' + TIERS[campTi(L.ti)].name + ' ' + L.k + ') n’est pas encore débloqué pour toi.'); return; }
+    if (!levelOpen(L.n)) { showTab('campaign'); toast('Ce niveau (' + L.title + ') n’est pas encore débloqué pour toi.'); return; }
     preCampaign(L.n); return;
   }
   const ch = decodeChallenge(id);
@@ -2751,10 +3157,11 @@ function pullMine() {
   const mine = key ? allPlayers[key] : null;
   if (!mine) return;
   const best = campBest(); let changed = false;
+  setTimeout(syncZones, 0);                        // zones déduites des niveaux gagnés sur un autre appareil
   for (const id of Object.keys(mine)) {
     const t = +mine[id];
-    if (/^C1-/.test(id)) {
-      if (best[id] == null || t < best[id] - 0.05) { best[id] = t; if (progress.camp.lost) delete progress.camp.lost[id]; changed = true; }
+    if (/^C2-/.test(id)) {
+      if (best[id] == null || t < best[id] - 0.05) { best[id] = t; delete camp2().lost[id]; changed = true; }
     } else {
       const m = summary(id).mine;
       if (m && m.status === 'réussi' && m.total <= t + 0.05) continue;
@@ -2972,11 +3379,11 @@ const TUTO_SETS = {
   egypte: [{ text: 'Les Égyptiens font grandir leurs tours plus vite avec Grands bâtisseurs : attaque-les avant qu’elles ne soient pleines.', target: firstFoe },
     { text: 'Leur pouvoir divin, Anubis, tue toutes tes unités en mouvement pendant 3 s : quand ils remplissent leurs tours, évite de lancer toutes tes troupes en même temps.', target: null }],
   celte: [{ text: 'Les Celtes augmentent la production de leurs tours de 50 % avec Guèdes. Leur pouvoir divin, Toutatis, fait tomber le ciel sur une zone.', target: firstFoe },
-    { text: 'Tu peux maintenant adopter une civilisation, Romains ou Égyptiens, dans l’encart de lancement de chaque partie.', target: null }],
+    { text: 'Dans chaque peuple, les deux premiers niveaux se jouent sans civilisation ; à partir du 3e, tu incarnes ce peuple et ses pouvoirs s’affichent en bas de l’écran.', target: null }],
   viking: [{ text: 'Les Vikings produisent des Berserkers (2/2 avec 1 d’armure) : tes unités classiques ne peuvent pas les blesser. Tes blindés et des tours bien garnies les arrêtent.', target: firstFoe },
     { text: 'Leur pouvoir divin, Loki, peut voler une de tes tours classiques avec toute sa garnison.', target: null }],
   maya: [{ text: 'Les Mayas accélèrent leurs troupes et produisent davantage quand ils attaquent sur plusieurs fronts : ils frappent loin et vite.', target: firstFoe },
-    { text: 'Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours. Les civilisations nordiques te sont maintenant ouvertes.', target: null }],
+    { text: 'Leur pouvoir divin, Tezcatlipoca, divise par 2 la garnison de trois de tes tours.', target: null }],
   azte: [{ text: 'Les Aztèques produisent des guerriers jaguars (2/2) qui encaissent un combat de plus que tes unités.', target: firstFoe },
     { text: 'Leur pouvoir divin, Quetzalcoatl, ajoute 30 défenseurs à deux de leurs tours.', target: null }],
   world: [{ text: 'Dernier chapitre : toutes les civilisations peuvent se dresser contre toi, et tu peux choisir la tienne parmi toutes. Bonne conquête !', target: null }]
@@ -3028,12 +3435,12 @@ $('btnTutoRules').onclick = () => preCampaign(1, true);   // la campagne intègr
 let preStart = null;
 // Sélecteur de civilisation et civilisations adverses de la partie (foes : liste [civ, faction] ou null)
 function renderPreCiv(foes, allowed) {
-  const sel = $('preCivSel'), ok = f => !allowed || allowed.includes(f);
-  sel.innerHTML = '<option value="">Aucune civilisation</option>'
+  const sel = $('preCivSel'), ok = f => !allowed || allowed.includes(f), forced = preForced(allowed);
+  sel.innerHTML = (forced ? '' : '<option value="">Aucune civilisation</option>')
     + Object.keys(CIVS).map(k => Object.keys(CIVS[k].factions).filter(ok).map(f => `<option value="${k}:${f}">${CIVS[k].icon} ${CIVS[k].factions[f].name} (${CIVS[k].name})</option>`).join('')).join('');
-  sel.disabled = !!allowed && !allowed.length;
+  sel.disabled = !!allowed && allowed.length <= 1 && (!allowed.length || preCivRequired);
   const cur = custom.civ ? custom.civ + ':' + (custom.fac || Object.keys(CIVS[custom.civ].factions)[0]) : '';
-  sel.value = cur && ok(cur.split(':')[1]) ? cur : '';
+  sel.value = cur && ok(cur.split(':')[1]) ? cur : forced ? FAC_CIV[allowed[0]] + ':' + allowed[0] : '';
   preAllowed = allowed;
   $('preFoes').textContent = foes && foes.length
     ? 'Adversaires : ' + foes.map(([k, f], i) => NAMES[i + 1] + ' — ' + CIVS[k].factions[f].name + ' (' + CIVS[k].name + ')').join(', ')
@@ -3045,8 +3452,11 @@ $('preCivSel').addEventListener('change', e => {
   if (custom.skin === 'civ') custom.skin = 'Bastion';
   store.set('bastions.custom', custom); applyCustom();
 });
-let preAllowed = null;
-function showPre({ title, chips, specials, id, mine, note, start, foes, allowed, campaign }) {
+let preAllowed = null, preCivRequired = false;
+// Campagne : faction imposée (niveaux où le joueur incarne la faction) ou choix obligatoire entre deux (finale)
+const preForced = allowed => !!allowed && allowed.length > 0 && preCivRequired;
+function showPre({ title, chips, specials, id, mine, note, start, foes, allowed, campaign, civRequired }) {
+  preCivRequired = !!civRequired;
   renderPreCiv(foes, allowed);
   $('preAcct').classList.add('hidden');
   $('preRecRow').classList.toggle('hidden', !!campaign);   // la campagne n'a plus de classement en ligne
@@ -3071,12 +3481,12 @@ $('btnPreBack').onclick = hidePre;
 function preCampaign(n, forceTuto) {
   const L = campaignPlan()[n - 1], t = campBest()[L.id], cfg = campaignLevel(n);
   showPre({
-    title: TIERS[campTi(L.ti)].name + ' — ' + L.title,
-    chips: ['1v' + L.opp, 'Chapitre ' + (L.ti + 1), LANDS[L.land].name],
+    title: L.title,
+    chips: ['1v' + L.opp, TIERS[campTi(L.ti)].name, L.fac ? facName(L.fac) : L.zone ? zoneName(L.zone) : 'Tutoriel', LANDS[L.land].name],
     specials: L.specials, id: L.id, campaign: true,
     mine: t == null ? none('Pas encore gagné') : fmtTime(t) + '<small>' + (t < STAR_TIME ? '★ étoile obtenue' : 'pas encore d’étoile') + '</small>',
-    note: (L.k === 1 ? CHAPTERS[L.ti].story + ' ' : '') + 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
-    foes: cfg.aiCivs, allowed: cfg.allowed,
+    note: (L.intro ? L.intro + ' ' : '') + 'Gagne en moins de ' + fmtTime(STAR_TIME) + ' pour obtenir l’étoile.',
+    foes: cfg.aiCivs, allowed: cfg.allowed, civRequired: cfg.civRequired || (cfg.allowed.length === 1 && !!L.fac && L.k > 2),
     start: () => { startCampaign(n); if (L.tuto && (forceTuto || t == null)) startTuto(TUTO_SETS[L.tuto]); }
   });
   // Début de campagne : pseudonyme et code du joueur (la partie peut aussi se jouer sans compte)
@@ -3563,7 +3973,7 @@ function drawPath(a, b, o) {
 
 /* ================= Skins de tours (déblocables avec les étoiles de campagne) ================= */
 // 15 skins ; tout est débloqué à 45 étoiles, soit 60 % des 75 étoiles de la campagne
-const SKINS = [                                     // 21 skins communs illustrés ; tout est débloqué à 20 étoiles
+const SKINS = [                                     // 21 skins communs illustrés ; paliers recalculés plus bas (tous à 70 % des étoiles)
   { name: "Bastion", stars: 0, sprite: 'bastion' },
   { name: "Tour de guet", stars: 1, sprite: 'guet' },
   { name: "Donjon", stars: 2, sprite: 'donjon' },
@@ -3594,13 +4004,15 @@ const FAC_SKINS = [
 ];
 // Tours de victoire : débloquées en terminant le chapitre de campagne de leur civilisation
 const VIC_SKINS = [
-  { name: 'Catapulte', sprite: 'v_rome', chapter: 1, civ: true }, { name: 'Pyramide dorée', sprite: 'v_egypte', chapter: 1, civ: true },
-  { name: 'Trébuchet', sprite: 'v_celte', chapter: 2, civ: true }, { name: 'Drakkar', sprite: 'v_viking', chapter: 2, civ: true },
-  { name: 'Aigle d’or', sprite: 'v_maya', chapter: 3, civ: true }, { name: 'Jaguar d’or', sprite: 'v_azte', chapter: 3, civ: true }
+  { name: 'Catapulte', sprite: 'v_rome', fac: 'rome', civ: true }, { name: 'Pyramide dorée', sprite: 'v_egypte', fac: 'egypte', civ: true },
+  { name: 'Trébuchet', sprite: 'v_celte', fac: 'celte', civ: true }, { name: 'Drakkar', sprite: 'v_viking', fac: 'viking', civ: true },
+  { name: 'Aigle d’or', sprite: 'v_maya', fac: 'maya', civ: true }, { name: 'Jaguar d’or', sprite: 'v_azte', fac: 'azte', civ: true }
 ];
+// Skins classiques : un palier d'étoiles régulier, tous débloqués à 70 % des étoiles de la campagne
+const SKIN_STAR_MAX = Math.round(CAMPAIGN_SIZE * 0.7);
+SKINS.forEach((k, i) => { k.stars = Math.round(i * SKIN_STAR_MAX / (SKINS.length - 1)); });
 const ALL_SKINS = SKINS.concat(FAC_SKINS, VIC_SKINS);
-const chapterDone = ti => campaignPlan().slice(ti * TIER_LEVELS, (ti + 1) * TIER_LEVELS).every(L => campBest()[L.id] != null);
-const skinOpen = k => k.chapter != null ? chapterDone(k.chapter) : totalStars() >= k.stars;
+const skinOpen = k => k.fac ? facDone(k.fac) : totalStars() >= k.stars;
 const LEGACY_SKIN = { name: 'Bastion', wall: 'stone', roof: 'crenel' };   // dessin de secours (tour de tir, image non chargée)
 
 
@@ -4455,7 +4867,7 @@ function toast(msg) {
 }
 function nextExists() {
   if (!current) return false;
-  if (current.kind === 'campaign') return current.index < CAMPAIGN_SIZE;   // niveau suivant (ouvert par la victoire)
+  if (current.kind === 'campaign') return nextCampN(current.index) != null;   // niveau suivant du groupe (ouvert par la victoire)
   if (current.kind === 'defi') return current.index + 1 < current.entry.challenge.games.length && current.entry.status === 'en cours';
   return false;
 }
@@ -4470,19 +4882,23 @@ function endGame(win) {
   let text = win ? 'Plus aucun adversaire sur la carte.' : 'Ta dernière tour est tombée.';
   let onlineId = null, onlineTime = 0;
   if (!win && current.kind === 'campaign') {        // défaite mémorisée pour le cadre rouge (tant que le niveau n'est pas gagné)
-    progress.camp.lost = progress.camp.lost || {};
-    progress.camp.lost[current.cfg.id] = true;
+    camp2().lost[current.cfg.id] = true;
     saveProgress();
+    text = campaignPlan()[current.index - 1].lose;
   }
   if (win && current.kind === 'campaign') {
-    const id = current.cfg.id, ti = campaignPlan()[current.index - 1].ti, best = campBest(), prev = best[id];
-    const nextLocked = ti + 1 < TIERS.length && !tierUnlocked(ti + 1);
+    const id = current.cfg.id, L = campaignPlan()[current.index - 1], best = campBest(), prev = best[id];
+    const before = { fac: L.fac && facDone(L.fac), fin: L.zone && zoneFacsDone(L.zone), zone: L.zone && zoneDone(L.zone), tuto: campTutoDone() };
     const sc = scoreClock();
     if (prev == null || sc < prev) best[id] = sc;
     saveProgress();
-    text = 'Victoire en ' + fmtTime(sc) + (sc < STAR_TIME ? ' : étoile gagnée !' : '. Termine en moins de ' + fmtTime(STAR_TIME) + ' pour gagner l’étoile.');
+    text = L.win + ' Victoire en ' + fmtTime(sc) + (sc < STAR_TIME ? ' : étoile gagnée !' : '. Termine en moins de ' + fmtTime(STAR_TIME) + ' pour gagner l’étoile.');
     if (prev != null && sc >= prev) text += ' Ton meilleur temps : ' + fmtTime(prev) + '.';
-    if (nextLocked && tierUnlocked(ti + 1)) text += ' Chapitre ' + (ti + 2) + ' (' + TIERS[campTi(ti + 1)].name + ') débloqué !';
+    // déblocages
+    if (L.fac && !before.fac && facDone(L.fac)) text += ' Campagne des ' + facName(L.fac) + ' terminée : tour de victoire débloquée !';
+    if (L.zone && !before.fin && zoneFacsDone(L.zone)) text += ' La finale ' + zoneName(L.zone) + ' est ouverte !';
+    if (L.zone && !before.zone && zoneDone(L.zone) && zoneChoices().length) text += ' Choisis ta prochaine destination sur la carte du monde.';
+    if (!before.tuto && campTutoDone()) text += ' Choisis sur la carte du monde où implanter ta faction.';
     onlineId = id; onlineTime = sc;
   } else if (current.kind === 'defi') {
     const e = current.entry, n = e.challenge.games.length;
@@ -4557,30 +4973,71 @@ const ICONS = {
   artillery: '<svg viewBox="0 0 24 24"><path d="M6 13h12v9H6z M4.5 13a7.5 7 0 0 1 15 0z"/><path d="M11 8.6l9.2-5.3 1.1 1.9-9.2 5.3z"/></svg>'
 };
 const starSvg = cls => `<svg viewBox="0 0 24 24"${cls ? ` class="${cls}"` : ''}><path d="${STAR_PATH}"/></svg>`;
+// Carte du monde stylisée : zones explorées, zones proposées (cliquables) et zones encore inaccessibles
+const WORLD_POS = { nord: [53, 13], med: [55, 27], amer: [25, 37] };
+function worldMap() {
+  const ch = zoneChoices(), zs = camp2().zones;
+  const land = 'M6 10 Q14 4 26 6 L33 9 Q34 15 30 19 L27 24 Q22 26 19 24 L14 22 Q8 18 6 10 Z'
+    + ' M19 27 Q23 26 27 29 L33 34 Q36 38 33 44 L29 52 Q26 55 24 51 L22 43 Q19 36 19 27 Z'
+    + ' M46 9 Q52 5 60 7 L62 12 Q60 17 57 20 L50 21 Q46 17 46 9 Z'
+    + ' M47 24 Q54 22 61 25 L64 32 Q62 40 57 47 L54 50 Q51 46 50 40 L47 32 Q45 27 47 24 Z'
+    + ' M62 8 Q74 4 88 7 L95 13 Q93 22 86 27 L78 30 Q70 31 64 26 L62 18 Z'
+    + ' M82 41 Q88 39 92 42 L91 47 Q86 49 82 46 Z';
+  let g = '';
+  for (const z of ZONE_ORDER) {
+    const [x, y] = WORLD_POS[z], can = ch.includes(z), been = zs.includes(z), done = been && zoneDone(z);
+    const cls = can ? 'wz can' : been ? 'wz been' : 'wz off';
+    g += `<g class="${cls}" data-zone="${can ? z : ''}" role="${can ? 'button' : 'img'}" aria-label="${zoneName(z)}">`
+      + `<circle cx="${x}" cy="${y}" r="${can ? 4.2 : 3.4}"></circle>`
+      + `<text x="${x}" y="${y + 1.3}" text-anchor="middle" class="wi">${done ? '✓' : been ? '⚑' : can ? '?' : '🔒'}</text>`
+      + `<text x="${x}" y="${y + (z === 'nord' ? -5.2 : 7.6)}" text-anchor="middle" class="wl">${zoneName(z)}</text></g>`;
+  }
+  return `<svg class="world" viewBox="0 0 100 58" role="group" aria-label="Carte du monde"><rect width="100" height="58" rx="3" class="sea"></rect>`
+    + `<path d="${land}" class="land"></path>${g}</svg>`;
+}
+function campButton(L, best, lostSet) {
+  const t = best[L.id], done = t != null, star = done && t < STAR_TIME, lost = !done && lostSet[L.id], can = levelOpen(L.n);
+  const cls = done ? 'won' : lost ? 'lost' : '';
+  const wm = L.specials.length ? `<span class="wm${L.specials.length > 1 ? ' all' : ''}">${L.specials.map(k => ICONS[k]).join('')}</span>` : '';
+  const foes = L.civs.length ? `<span class="foes">${L.civs.map(f => CIVS[FAC_CIV[f]].factions[f].power.icon).join('')}</span>` : '';
+  return `<button data-n="${L.n}" class="${cls}"${can ? '' : ' disabled'}`
+    + ` aria-label="${L.title}, ${TIERS[campTi(L.ti)].name}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${star ? ', étoile' : ''}">`
+    + wm + foes + (star ? `<span class="pf">${starSvg('')}</span>` : '')
+    + `<span class="n">${L.k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
+    + `<span class="land" style="background:${LANDS[L.land].ground}"></span></button>`;
+}
+function campBlock(title, lv, best, lostSet, note, cols) {
+  const wins = lv.filter(L => best[L.id] != null).length, stars = lv.filter(L => best[L.id] < STAR_TIME).length;
+  return `<div class="tierhead"><strong>${title}</strong><span>${wins}/${lv.length} victoires, ${stars} ★</span></div>`
+    + (note ? `<p class="sub story">${note}</p>` : '')
+    + `<div class="tiergrid" style="grid-template-columns:repeat(${cols || lv.length},minmax(0,1fr))">${lv.map(L => campButton(L, best, lostSet)).join('')}</div>`;
+}
 function renderCampaign() {
-  const best = campBest(), plan = campaignPlan(), lostSet = progress.camp.lost || {};
-  let html = '';
-  CHAPTERS.forEach((C, ti) => {
-    const open = tierUnlocked(ti), lv = plan.slice(ti * TIER_LEVELS, (ti + 1) * TIER_LEVELS);
-    const wins = lv.filter(L => best[L.id] != null).length, stars = lv.filter(L => best[L.id] < STAR_TIME).length;
-    html += `<div class="tierhead${open ? '' : ' locked'}"><strong>Chapitre ${ti + 1} — ${C.theme}</strong><span>`
-      + (open ? TIERS[campTi(ti)].name + ', ' + wins + '/' + TIER_LEVELS + ' victoires, ' + stars + ' ★' : '🔒 ' + TIERS[campTi(ti)].name) + '</span></div>'
-      + (open ? `<p class="sub story">${C.story}</p>` : '') + '<div class="tiergrid">';
-    for (const L of lv) {
-      const t = best[L.id], done = t != null, star = done && t < STAR_TIME, lost = !done && lostSet[L.id], can = levelOpen(L.n);
-      const cls = done ? 'won' : lost ? 'lost' : '';
-      const wm = L.specials.length ? `<span class="wm${L.specials.length > 1 ? ' all' : ''}">${L.specials.map(k => ICONS[k]).join('')}</span>` : '';
-      const foes = L.civs.length ? `<span class="foes">${L.civs.map(f => CIVS[FAC_CIV[f]].factions[f].power.icon).join('')}</span>` : '';
-      html += `<button data-n="${L.n}" class="${cls}"${can ? '' : ' disabled'}`
-        + ` aria-label="${TIERS[campTi(ti)].name} niveau ${L.k}, 1 contre ${L.opp}${done ? ', gagné en ' + fmtTime(t) : lost ? ', perdu' : ''}${star ? ', étoile' : ''}">`
-        + wm + foes + (star ? `<span class="pf">${starSvg('')}</span>` : '')
-        + `<span class="n">${L.k}</span>` + (done ? `<span class="t">${fmtTime(t)}</span>` : `<span class="t">1v${L.opp}</span>`)
-        + `<span class="land" style="background:${LANDS[L.land].ground}"></span></button>`;
-    }
-    html += '</div>';
+  const best = campBest(), plan = campaignPlan(), lostSet = camp2().lost, zs = camp2().zones;
+  let html = campBlock('Tutoriel', plan.filter(L => L.group === 'tuto'), best, lostSet, STORY.tuto1[1], 5);
+  if (campTutoDone()) {
+    const ch = zoneChoices();
+    html += `<div class="tierhead"><strong>Carte du monde</strong><span>${zs.length}/3 zones</span></div>`
+      + `<p class="sub story">${ch.length ? (zs.length ? 'Zone terminée : choisis ta prochaine destination.' : 'Choisis où implanter ta faction.')
+        : zs.length === 3 && zs.every(zoneDone) ? 'Le monde entier reconnaît ton autorité.' : 'Termine la zone en cours pour voyager plus loin.'}</p>`
+      + worldMap();
+  }
+  zs.forEach((z, i) => {
+    const prev = i ? zs.slice(0, i).filter(e => ZONES[e].next.includes(z)).pop() : null;
+    html += `<h3 class="zonehead">${zoneName(z)}</h3><p class="sub story">${prev ? TRAVEL_TXT[prev + '>' + z] : ZONE_TXT[z][1]}</p>`;
+    for (const f of ZONES[z].facs)
+      html += campBlock(CIVS[FAC_CIV[f]].factions[f].power.icon + ' ' + facName(f), plan.filter(L => L.group === f), best, lostSet, '', 4);
+    const fin = plan.filter(L => L.group === z + 'F');
+    html += campBlock('Finale — ' + zoneName(z), fin, best, lostSet, zoneFacsDone(z) ? '' : '🔒 Termine les campagnes des ' + ZONES[z].facs.map(facName).join(' et des ') + ' pour ouvrir la finale.', 4);
   });
   $('campGrid').innerHTML = html;
 }
+// Récit affiché lors du choix d'une zone ou d'un voyage
+function showStory(title, text) {
+  $('storyTitle').textContent = title; $('storyText').textContent = text;
+  $('story').classList.remove('hidden');
+}
+$('btnStoryOk').onclick = () => $('story').classList.add('hidden');
 
 function toMenu(tab) {
   if (isMulti() && state === 'play') { netSend({ t: 'quit' }); endMatch(false, 'abandon'); }   // duel quitté : perdu
@@ -4733,11 +5190,12 @@ function openTab(name) {
 }));
 $('btnFree').onclick = startFree;
 $('campGrid').addEventListener('click', e => {
+  const zb = e.target.closest('[data-zone]'); if (zb && zb.dataset.zone) { chooseZone(zb.dataset.zone); return; }
   const b = e.target.closest('button[data-n]');
   if (b && !b.disabled) preCampaign(+b.dataset.n);
 });
 $('btnNext').onclick = () => {
-  if (current.kind === 'campaign') preCampaign(current.index + 1);
+  if (current.kind === 'campaign') preCampaign(nextCampN(current.index));
   else if (current.kind === 'defi') {
     if (current.entry.status === 'échoué') resumeAttempt(current.entry);   // rejouer la partie perdue
     else playDefi(current.entry, current.index + 1);
@@ -4853,7 +5311,7 @@ function renderCustom() {
   $('optCounts').checked = countsOn;
   [...$('segSpeed').children].forEach((b, i) => b.classList.toggle('on', i === speedIdx));
   const card = (item, i, on, kind) => {
-    const locked = !skinOpen(item), need = item.chapter != null ? 'Chapitre ' + (item.chapter + 1) : item.stars + ' ★ requises';
+    const locked = !skinOpen(item), need = item.fac ? 'Campagne ' + facName(item.fac) : item.stars + ' ★ requises';
     return `<button class="card${on ? ' on' : ''}${locked ? ' locked' : ''}${item.civ ? ' civskin' : ''}" data-${kind}="${i}"${locked ? ' aria-disabled="true"' : ''}`
       + ` aria-label="${item.name}${locked ? ', ' + need : ''}"><canvas></canvas><span>${item.name}</span>`
       + (locked ? `<span class="lock">${need}</span>` : '') + '</button>';
@@ -4867,7 +5325,7 @@ function pickCustom(kind, i) {
   {
     const item = ALL_SKINS[+i]; if (!item) return;
     if (!skinOpen(item)) {
-      toast(item.chapter != null ? 'Termine le chapitre ' + (item.chapter + 1) + ' de la campagne pour débloquer « ' + item.name + ' »'
+      toast(item.fac ? 'Termine la campagne des ' + facName(item.fac) + ' pour débloquer « ' + item.name + ' »'
         : 'Encore ' + (item.stars - st) + ' étoile' + (item.stars - st > 1 ? 's' : '') + ' pour débloquer « ' + item.name + ' »');
       return;
     }
@@ -4993,7 +5451,12 @@ function makeCiv(key, fac, lvl, power, god) {
 function civStart() {
   clearPowerNotices();
   const m = myCiv(), allowed = current && current.cfg ? current.cfg.allowed : null;
-  civs = []; civs[0] = m && (!allowed || allowed.includes(m.fac)) ? makeCiv(m.key, m.fac, 3, true, true) : null; civ = civs[0];
+  civs = []; civs[0] = m && (!allowed || allowed.includes(m.fac)) ? makeCiv(m.key, m.fac, 3, true, true) : null;
+  // campagne : faction imposée au joueur, ou choix obligatoire en finale (première faction par défaut)
+  const cc = current && current.kind === 'campaign' ? current.cfg : null;
+  if (cc && allowed && allowed.length && !civs[0] && (cc.civRequired || (allowed.length === 1 && campaignPlan()[current.index - 1].k > 2)))
+    civs[0] = makeCiv(FAC_CIV[allowed[0]], allowed[0], 3, true, true);
+  civ = civs[0];
   if (current && current.cfg && current.cfg.aiCivs) {   // campagne : civilisations des ordinateurs fixées par le niveau
     for (const p of players) if (!p.human && current.cfg.aiCivs[p.id - 1]) {
       const [k, f] = current.cfg.aiCivs[p.id - 1];
@@ -5646,7 +6109,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261115_15';
+const APP_VERSION = '20261115_20';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
