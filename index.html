@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261116_02)
+     Fichier  : index.html (paquet GitHub Pages, version 20261117_02)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
@@ -1539,6 +1539,7 @@ const EN_RX = [
   [/^Ton meilleur temps reste (\S+)\.$/, m => 'Your best time remains ' + m[1] + '.'],
   [/^Difficulté « (.+) » débloquée !$/, m => 'Difficulty \u201c' + WX(m[1]) + '\u201d unlocked!'],
   [/^Pouvoir : (.+)$/, m => 'Power: ' + WX(m[1])],
+  [/^Progression de campagne récupérée : (\d+) niveaux?$/, m => 'Campaign progress recovered: ' + m[1] + (m[1] === '1' ? ' level' : ' levels')],
   [/^Finale — (.+)$/, m => 'Final — ' + WX(m[1])], [/^Campagne (.+)$/, m => WX(m[1]) + ' campaign'],
   [/^Campagne des (.+) terminée : tour de victoire débloquée !$/, m => WX(m[1]) + ' campaign complete: victory tower unlocked!'],
   [/^La finale (.+) est ouverte !$/, m => 'The ' + WX(m[1]) + ' final is open!'],
@@ -3160,13 +3161,23 @@ function pullMine() {
   const key = Object.keys(allPlayers).find(l => l.toLowerCase() === account.login.toLowerCase());
   const mine = key ? allPlayers[key] : null;
   if (!mine) return;
-  const best = campBest(); let changed = false;
-  setTimeout(syncZones, 0);                        // zones déduites des niveaux gagnés sur un autre appareil
+  const best = campBest(); let changed = false, campGot = 0;
+  // campagne d'abord (ses lignes sont les plus récentes du tableau), indépendamment des défis
   for (const id of Object.keys(mine)) {
     const t = +mine[id];
-    if (/^C2-/.test(id)) {
-      if (best[id] == null || t < best[id] - 0.05) { best[id] = t; delete camp2().lost[id]; changed = true; }
-    } else {
+    if (!/^C2-/.test(id) || !isFinite(t) || t <= 0) continue;
+    if (best[id] == null) campGot++;
+    if (best[id] == null || t < best[id] - 0.05) { best[id] = t; delete camp2().lost[id]; changed = true; }
+  }
+  if (changed) {
+    saveProgress(); syncZones();                   // zones déduites des niveaux gagnés sur un autre appareil
+    if (menuTab === 'campaign' && !$('menu').classList.contains('hidden')) renderCampaign();
+    if (campGot) toast('Progression de campagne récupérée : ' + campGot + (campGot > 1 ? ' niveaux' : ' niveau'));
+  }
+  for (const id of Object.keys(mine)) {
+    const t = +mine[id];
+    if (/^C[12]-/.test(id)) continue;             // campagne (déjà traitée) et ancienne campagne
+    try {
       const m = summary(id).mine;
       if (m && m.status === 'réussi' && m.total <= t + 0.05) continue;
       const ch = decodeChallenge(id); if (!ch) continue;
@@ -3175,7 +3186,7 @@ function pullMine() {
         times: Array.from({ length: n }, (_, i) => i < n - 1 ? part : Math.round((t - part * (n - 1)) * 10) / 10),
         status: 'réussi', pseudo: account.login, retries: 0 });
       changed = true;
-    }
+    } catch (e) {}                                 // une ligne illisible n'interrompt pas la récupération
   }
   if (changed) { saveProgress(); saveHist(); applyCustom(); }
 }
@@ -5167,6 +5178,7 @@ function openTab(name) {
   $('board').classList.add('hidden');
   showTab(name);
   document.querySelector('#menu .panel').scrollTop = 0;
+  if (name === 'campaign' && account) fetchAll();  // joueur connecté : avancement relu en ligne (au plus toutes les 20 s)
 }
 // Glisser vers la gauche ou la droite : onglet voisin (Campagne, Défis, Multi)
 (() => {
@@ -6111,7 +6123,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261116_02';
+const APP_VERSION = '20261117_02';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
