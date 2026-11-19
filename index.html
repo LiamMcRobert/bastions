@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261119_05)
+     Fichier  : index.html (paquet GitHub Pages, version 20261119_07)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
@@ -925,9 +925,9 @@ function campaignPlan() {
         add({ key: z + 'F' + (i + 1), group: g, zone: z, k: i + 1, ti: 2, opp: DUO_OPP[i], specials: DUO_SPEC[i].slice(), civs: cv,
           land: FAC_LANDS[cv[0]][i % 2], id, seed: CAMP_SEED[id] });
       });
-    } else for (let k = 1; k <= 8; k++) {           // peuple : 2 niveaux en Facile, puis 6 en Normal
+    } else for (let k = 1; k <= 8; k++) {           // peuple : Normal (les 2 premiers niveaux des Égyptiens en Facile)
       const id = 'C2-1' + FAC_ORDER.indexOf(g) + k;
-      add({ key: g + k, group: g, zone: zoneOf(g), fac: g, k, ti: k <= 2 ? 1 : 2, opp: FAC_OPP[k - 1], specials: FAC_SPEC[k - 1].slice(),
+      add({ key: g + k, group: g, zone: zoneOf(g), fac: g, k, ti: k <= 2 && g === 'egypte' ? 1 : 2, opp: FAC_OPP[k - 1], specials: FAC_SPEC[k - 1].slice(),
         civs: Array(FAC_OPP[k - 1]).fill(g), land: FAC_LANDS[g][k % 2], tuto: k === 1 ? g : null, id, seed: CAMP_SEED[id] });
     }
   }
@@ -6335,7 +6335,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261119_05';
+const APP_VERSION = '20261119_07';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
