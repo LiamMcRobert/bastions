@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261120_13)
+     Fichier  : index.html (paquet GitHub Pages, version 20261120_15)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
@@ -302,6 +302,11 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   pointer-events:none;transition:opacity .25s}
 #toast{opacity:0;bottom:70px}
 #toast.show{opacity:1}
+#mpDot{position:fixed;z-index:25;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;pointer-events:none;
+  background:var(--c);box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 35%,transparent),0 0 18px var(--c);animation:mpblink .7s ease-in-out infinite alternate}
+#mpDot.hidden{display:none}
+@keyframes mpblink{from{opacity:1;transform:scale(1)}to{opacity:.15;transform:scale(1.35)}}
+#mpCiv .civlist{max-height:46vh}
 .carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:2px 18px 8px;scrollbar-width:none;
   -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .carousel::-webkit-scrollbar{display:none}
@@ -461,6 +466,16 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
   <div id="toast" class="msg"></div>
   <div id="powerNotices" aria-live="polite"></div>
   <div id="countdown" class="hidden" aria-live="assertive"></div>
+  <div id="mpDot" class="hidden"></div>
+  <div id="mpCiv" class="overlay hidden">
+    <div class="panel">
+      <h2>Choisis ta civilisation</h2>
+      <p class="sub">L’autre joueur ne voit pas ton choix. Temps restant : <strong id="mpTimer">25 s</strong></p>
+      <div id="mpCivList" class="civlist"></div>
+      <button id="mpCivOk" class="primary">Valider</button>
+      <p class="sub hidden" id="mpCivWait">En attente de l’autre joueur…</p>
+    </div>
+  </div>
 
   <!-- ===== Menu principal ===== -->
   <div id="menu" class="overlay">
@@ -1084,6 +1099,7 @@ const EN = {
 "Tours possédées": "Towers owned",
 "Nombre de tours de chaque joueur, affiché en haut de l’écran pendant les parties.": "Number of towers per player, shown at the top of the screen during games.",
 "Chronomètre": "Timer",
+"Choisis ta civilisation": "Choose your civilization", "L’autre joueur ne voit pas ton choix. Temps restant :": "The other player cannot see your choice. Time left:", "Choix validé": "Choice confirmed", "En attente de l’autre joueur…": "Waiting for the other player…",
 "🔗 Partager mon temps": "🔗 Share my time", "Bats mon temps": "Beat my time", "sur cette partie de Bastions !": "on this Bastions game!",
 "Romains et Égyptiens": "Romans and Egyptians", "Celtes et Vikings": "Celts and Vikings", "Mayas et Aztèques": "Maya and Aztecs",
   "L’ambassade romaine": "The Roman embassy",
@@ -1727,6 +1743,7 @@ const EN_RX = [
   [/^Ton meilleur temps reste (\S+)\.$/, m => 'Your best time remains ' + m[1] + '.'],
   [/^Difficulté « (.+) » débloquée !$/, m => 'Difficulty \u201c' + WX(m[1]) + '\u201d unlocked!'],
   [/^Pouvoir : (.+)$/, m => 'Power: ' + WX(m[1])],
+  [/^L’autre joueur ne voit pas ton choix\. Temps restant : (.+)$/, m => 'The other player cannot see your choice. Time left: ' + m[1]],
   [/^Révolte : (.+)$/, m => 'Revolt: ' + WX(m[1])],
   [/^⏱ Temps à battre : ([\d:]+)( \((.+)\))?\. (.*)$/, m => '⏱ Time to beat: ' + m[1] + (m[3] ? ' (' + m[3] + ')' : '') + '. ' + tr(m[4])],
   [/^Progression de campagne récupérée : (\d+) niveaux?$/, m => 'Campaign progress recovered: ' + m[1] + (m[1] === '1' ? ' level' : ' levels')],
@@ -3124,7 +3141,7 @@ function hostMatch(name) {
   const peer = net.peer = new Peer(randomPeerId(), peerOpts());
   peer.on('open', async id => {
     const F = net.form;
-    const d = await apiPost({ action: 'mhost', login: account.login, pin: account.pin, peer: id, name: net.name, civ: civPairLetter(myCivPair()),
+    const d = await apiPost({ action: 'mhost', login: account.login, pin: account.pin, peer: id, name: net.name, civ: '',
       priv: F.priv, mode: F.coop ? 'coop' : 'duel', diff: F.coop ? F.diff : 2 });
     if (!d || !d.ok) { net.msg = 'Impossible d’inscrire la partie au salon.'; netClose(); renderMulti(); return; }
     net.timers.push(setInterval(() => { if (net.mode === 'hosting') apiPost({ action: 'mping', login: account.login, pin: account.pin, peer: id }); }, 30000));
@@ -3139,9 +3156,9 @@ function hostMatch(name) {
       apiPost({ action: 'mclose', login: account.login, pin: account.pin, peer: peer.id, reason: 'commencée' });
       const cfg = multiCfg((Math.random() * 2 ** 31) >>> 0, net.form.coop, net.form.diff);
       net.matchId = peer.id + '-' + Date.now();
-      c.send({ t: 'start', cfg: Object.assign({}, cfg, { flip: !cfg.coop, oppCiv: myCivPair() }), host: account.login, matchId: net.matchId });
+      c.send({ t: 'start', cfg: Object.assign({}, cfg, { flip: !cfg.coop, oppCiv: null }), host: account.login, matchId: net.matchId });
       netWire(c);
-      startMatch('host', Object.assign({}, cfg, { oppCiv: net.opp.civ }));
+      startMatch('host', Object.assign({}, cfg, { oppCiv: null }));
     });
   });
   peer.on('error', () => { if (net.mode === 'hosting') { cancelMulti(); net.msg = 'Service de connexion indisponible.'; renderMulti(); } });
@@ -3155,7 +3172,7 @@ function joinMatch(entry, pin) {
   const fail = msg => { if (net.mode !== 'joining') return; net.msg = msg; netClose(); renderMulti(); pollMulti(); };
   net.timers.push(setTimeout(() => fail('Connexion impossible : essayez tous les deux en Wi-Fi, ou l’un en Wi-Fi et l’autre en 4G.'), 15000));
   peer.on('open', () => {
-    const c = peer.connect(entry.peer, { reliable: true, metadata: { login: account.login, civ: myCivPair(), pin: pin || '' } });
+    const c = peer.connect(entry.peer, { reliable: true, metadata: { login: account.login, civ: null, pin: pin || '' } });
     net.conn = c;
     c.on('data', m => {
       if (m && m.t === 'busy') fail('Partie déjà commencée.');
@@ -3186,7 +3203,9 @@ function multiCfg(seed, coop, diff) {
 }
 function startMatch(role, cfg) {
   net.role = role; net.mode = 'playing'; net.ended = false; net.ev = []; net.lastRecv = performance.now(); net.snapT = 0; net.gp = null;
-  net.G = cfg.G || 1; net.coop = !!cfg.coop; net.countdown = 5;   // 5 s de compte à rebours avant le lancement
+  net.G = cfg.G || 1; net.coop = !!cfg.coop; net.countdown = 0;
+  // avant la partie : aperçu de la carte (5 s), choix secret des civilisations (25 s au plus), puis compte à rebours (5 s)
+  net.phase = 'preview'; net.phaseT = MP_PREVIEW; net.choice = myCivPair(); net.ready = false; net.oppChoice = null; net.oppReady = false; net.mine = null;
   multiPolling(false);
   current = { kind: 'multi', cfg, label: cfg.coop ? 'Coopération' : 'Multijoueur' };
   net.speedBack = speedIdx; speedIdx = 0;          // vitesse ×1 imposée
@@ -3195,7 +3214,7 @@ function startMatch(role, cfg) {
   // surveillance : adversaire silencieux ou parti
   net.timers.push(setInterval(() => {
     if (!isMulti() || state !== 'play') return;
-    if (role === 'guest') netSend({ t: 'ping' });
+    netSend({ t: 'ping' });                        // signe de vie dans les deux sens (aussi pendant le choix)
     if (performance.now() - net.lastRecv > NET_TIMEOUT) {
       if (net.coop && role === 'host') { if (!net.allyGone) { net.allyGone = true; announcePower((net.opp ? net.opp.login : 'Ton allié') + ' a quitté la partie', net.G); } }
       else endMatch(!net.coop, 'déconnexion');      // coopération : l'hôte parti, la partie s'arrête
@@ -3210,6 +3229,67 @@ function netWire(c) {
     endMatch(!net.coop, 'déconnexion');
   });
 }
+// ---- Avant la partie : aperçu de la carte puis choix secret des civilisations
+const MP_PREVIEW = 5, MP_CHOICE = 25;
+const validPair = c => Array.isArray(c) && CIVS[c[0]] && CIVS[c[0]].factions[c[1]] ? c : null;
+function mpPhaseTick(dt) {
+  net.phaseT -= dt;
+  if (net.phase === 'preview') {
+    mpDot(true);
+    if (net.phaseT <= 0) { mpDot(false); net.phase = 'civ'; net.phaseT = MP_CHOICE; mpShowPick(); }
+  } else if (net.phase === 'civ') {
+    $('mpTimer').textContent = Math.max(0, Math.ceil(net.phaseT)) + ' s';
+    // l'hôte lance quand les deux ont validé, ou à la fin du temps
+    if (net.role === 'host' && ((net.ready && net.oppReady) || net.phaseT <= 0)) {
+      const h = validPair(net.choice), g = validPair(net.oppChoice);
+      netSend({ t: 'go', h, g }); mpApplyGo(h, g);
+    }
+  }
+}
+// Point clignotant de la couleur du joueur sur sa tour de départ
+function mpDot(on) {
+  const el = $('mpDot');
+  if (!on) { el.classList.add('hidden'); return; }
+  const t = towers.find(x => x.owner === 0); if (!t) return;
+  const r = cv.getBoundingClientRect();
+  el.style.left = (r.left + VIEW.ox + t.x * VIEW.k) + 'px'; el.style.top = (r.top + VIEW.oy + t.y * VIEW.k) + 'px';
+  el.style.setProperty('--c', COLORS[0]); el.classList.remove('hidden');
+}
+function mpShowPick() {
+  const opts = [null].concat(FAC_ORDER.map(f => [FAC_CIV[f], f]));
+  $('mpCivList').innerHTML = opts.map(c => {
+    const v = c ? c.join(':') : '', on = (net.choice ? net.choice.join(':') : '') === v;
+    return `<button type="button" data-v="${v}" class="${on ? 'on' : ''}">${c ? banIco(c[1]).replace('class="banico"', 'class="banico big"') : '<span class="nociv"></span>'}`
+      + `<span>${c ? CIVS[c[0]].factions[c[1]].name + ' (' + CIVS[c[0]].name + ')' : 'Aucune civilisation'}</span></button>`;
+  }).join('');
+  $('mpCivOk').disabled = false; $('mpCivOk').textContent = 'Valider';
+  $('mpCivWait').classList.add('hidden'); $('mpCiv').classList.remove('hidden');
+}
+function mpSendChoice() { if (net.role === 'guest') netSend({ t: 'civ', c: net.choice, r: net.ready }); }
+$('mpCivList').addEventListener('click', e => {
+  const b = e.target.closest('[data-v]'); if (!b || net.ready) return;
+  net.choice = b.dataset.v ? b.dataset.v.split(':') : null;
+  $('mpCivList').querySelectorAll('[data-v]').forEach(x => x.classList.toggle('on', x === b));
+  mpSendChoice();
+});
+$('mpCivOk').onclick = () => {
+  if (net.ready) return;
+  net.ready = true; mpSendChoice();
+  $('mpCivOk').disabled = true; $('mpCivOk').textContent = 'Choix validé';
+  $('mpCivWait').classList.remove('hidden');
+};
+// Civilisations des deux joueurs connues : elles s'appliquent, puis compte à rebours de 5 s
+function mpApplyGo(hostCiv, guestCiv) {
+  if (!isMulti() || net.phase === 'run') return;
+  const mine = validPair(net.role === 'host' ? hostCiv : guestCiv), theirs = validPair(net.role === 'host' ? guestCiv : hostCiv);
+  civs[0] = mine ? makeCiv(mine[0], mine[1], 3, true, true) : null; civ = civs[0];
+  civs[net.G] = theirs ? makeCiv(theirs[0], theirs[1], 3, true, true) : null;
+  net.mine = mine; if (net.opp) net.opp.civ = theirs;
+  $('mpCiv').classList.add('hidden'); mpDot(false);
+  net.phase = 'run'; net.countdown = 5;
+  if (typeof applyCustom === 'function') applyCustom();
+  renderPowers();
+}
 // ---- Hôte : ordres de l'invité (son numéro de joueur est 1)
 function hostMsg(m) {
   if (!m || state !== 'play') return;
@@ -3223,6 +3303,8 @@ function hostMsg(m) {
       const sel = Array.isArray(m.sel) ? { sel: m.sel.map(i => towers[i]).filter(Boolean) } : m.point ? { point: fromNorm(m.point) } : {};
       applyGod(sel, G);
     }
+  } else if (m.t === 'civ') {                    // choix de l'invité (secret : seul l'hôte le reçoit, sans l'afficher)
+    net.oppChoice = Array.isArray(m.c) ? m.c : null; net.oppReady = !!m.r;
   } else if (m.t === 'quit') {
     if (net.coop) { announcePower((net.opp ? net.opp.login : 'Ton allié') + ' a quitté la partie', G); net.allyGone = true; }   // coopération : on continue
     else endMatch(true, 'abandon');
@@ -3257,6 +3339,7 @@ function guestMsg(m) {
   if (!m) return;
   if (m.t === 'end') { if (!net.ended) endMatch(net.coop ? m.hostWin : !m.hostWin, m.reason || 'normal', true); return; }   // coopération : même issue
   if (m.t === 'quit') { endMatch(!net.coop, 'abandon'); return; }
+  if (m.t === 'go') { mpApplyGo(m.h, m.g); return; }   // choix des deux joueurs : la partie peut commencer
   if (m.t !== 's' || state !== 'play') return;
   const now = performance.now(), gap = Math.max(0.02, (now - (net.lastSnap || now - 100)) / 1000);
   net.lastSnap = now; clock = m.c;
@@ -3302,7 +3385,7 @@ function endMatch(win, reason, fromHost) {
   if (net.role === 'host') netSend({ t: 'end', hostWin: win, reason });
   if (account && net.opp && !net.coop) {           // la coopération ne compte pas dans le classement multijoueur
     const host = net.role === 'host' ? account.login : net.opp.login, guest = net.role === 'host' ? net.opp.login : account.login;
-    const mine = civPairLetter(myCivPair()), theirs = civPairLetter(net.opp.civ);
+    const mine = civPairLetter(net.mine), theirs = civPairLetter(net.opp.civ);
     apiPost({ action: 'mresult', login: account.login, pin: account.pin, match: { id: net.matchId, host, guest,
       winner: win ? account.login : net.opp.login, hostCiv: net.role === 'host' ? mine : theirs, guestCiv: net.role === 'host' ? theirs : mine,
       time: Math.round(scoreClock() * 10) / 10, reason } });
@@ -5405,6 +5488,7 @@ function addPath(a, b) {
 const ptOf = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - VIEW.ox) / VIEW.k, y: (e.clientY - r.top - VIEW.oy) / VIEW.k }; };
 
 cv.addEventListener('pointerdown', e => {
+  if (net.role && net.phase && net.phase !== 'run') return;   // multijoueur : pas d'ordre avant le lancement
   if (pick) { const p = ptOf(e); pickTap(p.x, p.y); return; }   // pouvoir divin : tours ou endroit touchés
   if (state === 'play' && paused && !tuto) { setPaused(false); return; }   // toucher l'écran sort de la pause
   if (state !== 'play' || paused || drag) return;
@@ -5541,7 +5625,8 @@ musicSync();
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (state === 'play' && net.role && net.countdown > 0) {   // multijoueur : compte à rebours avant le lancement
+  if (state === 'play' && net.role && net.phase && net.phase !== 'run') mpPhaseTick(dt);   // aperçu, choix des civilisations
+  else if (state === 'play' && net.role && net.countdown > 0) {   // multijoueur : compte à rebours avant le lancement
     net.countdown -= dt;
     const n = Math.ceil(net.countdown), el = $('countdown');
     el.textContent = n > 0 ? n : 'Go !'; el.classList.toggle('hidden', n <= 0 && net.countdown < -0.6);
@@ -6397,7 +6482,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261120_13';
+const APP_VERSION = '20261120_15';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
