@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ============================================================
-     Fichier  : index.html (paquet GitHub Pages, version 20261120_09)
+     Fichier  : index.html (paquet GitHub Pages, version 20261120_13)
      Créé le  : 25 octobre 2026
      But      : Jeu de conquête de tours (1 joueur vs 1 à 3 IA)
                 Campagne de 65 niveaux (tutoriel, puis 3 zones du monde), défis du mois, défis par identifiant,
@@ -302,6 +302,21 @@ pre{overflow-x:auto;background:var(--field);border-radius:10px;padding:10px;font
   pointer-events:none;transition:opacity .25s}
 #toast{opacity:0;bottom:70px}
 #toast.show{opacity:1}
+.carousel{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:2px 18px 8px;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.carousel::-webkit-scrollbar{display:none}
+.carousel .dcard{flex:0 0 86%;scroll-snap-align:center;margin:0}
+.dcard .dl1{display:flex;align-items:center;gap:6px;margin:0 0 6px}
+.dcard .dl1 .chip{padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.06);font-weight:700;font-size:13px}
+.dcard .dl1 .ddate{margin-left:auto;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:#3c4350;color:#fff}
+.dcard .dl2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px}
+.dcard .dl2 .specs{margin:0}
+.dcard .dfoes{display:flex;gap:6px}
+.dcard .dfoes .banico{height:32px;width:32px;vertical-align:middle}
+.dcard .prebox{margin:0 0 6px}
+.dcard .hbtns{display:flex;gap:8px}
+.dcard .hbtns button{flex:1;margin:0}
+.dcard .hbtns button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .banico{height:1.3em;width:1.3em;vertical-align:-.3em;display:inline-block;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .banico.big{height:30px;width:30px;vertical-align:middle}
 .civpick{width:100%;display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 12px;border:1px solid var(--line);border-radius:12px;
@@ -514,8 +529,9 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
       <section id="tab-free" class="hidden">
         <div id="defiNew">
         <p class="lbl" style="margin-top:0">Défis du jour</p>
-        <div id="dailyList"></div>
-        <button class="ghost" id="btnMonth" style="margin-top:16px">Défis du mois (15)</button>
+        <div id="dailyList" class="carousel"></div>
+        <p class="lbl">Défis du mois</p>
+        <div id="monthList" class="carousel"></div>
         <button class="ghost" id="btnDefiNew" aria-expanded="false">Créer un défi</button>
         <div id="defiCreate" class="hidden">
         <p class="lbl">Nombre d’adversaires</p>
@@ -539,10 +555,6 @@ body.multi #btnPause, body.multi #btnSpeed{display:none}
         <button class="ghost" id="btnHist">Mes défis créés et joués</button>
         </div>
         <button class="ghost" id="btnBoardDefi" style="margin-top:16px">Tableau des scores</button>
-        </div>
-        <div id="defiMonth" class="hidden">
-          <button class="ghost" id="btnMonthBack" style="margin-top:0">Retour aux défis du jour</button>
-          <div id="monthList"></div>
         </div>
         <div id="defiHist" class="hidden">
           <button class="ghost" id="btnHistBack" style="margin-top:0">Retour au défi</button>
@@ -1789,7 +1801,7 @@ Object.assign(EN, {
   'Drakar': 'Longship', 'Château de cartes': 'House of cards', 'prêt': 'ready', 'utilisé': 'used', 'Annuler': 'Cancel', 'Valider': 'Confirm',
   'Tour de tir': 'Fire tower', 'Caserne': 'Barracks'
 });
-const CIV_COND_EN = s => s.replace(/^(\d+) dégâts infligés par tes tours et unités \(aux tours et unités adverses\)$/, '$1 damage dealt by your towers and units (to enemy towers and units)').replace(/^(\d+) de tes tours à 10 défenseurs ou plus en même temps$/, '$1 of your towers at 10 defenders or more at the same time')
+const CIV_COND_EN = s => s.replace(/^(\d+) dégâts infligés par tes tours et unités$/, '$1 damage dealt by your towers and units').replace(/^(\d+) de tes tours à 10 défenseurs ou plus en même temps$/, '$1 of your towers at 10 defenders or more at the same time')
   .replace(/^(\d+) de tes tours à garnison maximale pendant au moins 5 s$/, '$1 of your towers at full garrison for at least 5 s')
   .replace(/^(\d+) de tes unités perdues \(au combat ou dans tes tours\)$/, '$1 of your units lost (in battle or in your towers)')
   .replace(/^(\d+) de tes tours à 40 défenseurs ou plus en même temps$/, '$1 of your towers at 40 defenders or more at the same time');
@@ -1810,6 +1822,9 @@ EN_RX.push(
   [/^Skin réservé : (.+)$/, m => 'Reserved skin: ' + WX(m[1])],
   [/^(\S+) (.+?) : (\d+ s : .+?)( \(35 ★\))?$/, m => EN[m[2]] && EN[m[3]] ? m[1] + ' ' + EN[m[2]] + ': ' + EN[m[3]] + (m[4] || '') : null],
   [/^✨ (.+?) : (.+)\. Condition : (.+?)( \(50 ★\))?$/, m => '✨ ' + WX(m[1]) + ': ' + WX(m[2]) + '. Condition: ' + CIV_COND_EN(m[3]) + (m[4] || '')],
+  [/^✨ (.+?) : (.+)$/, m => '✨ ' + WX(m[1]) + ': ' + WX(m[2])],
+  [/^Condition du pouvoir divin : (.+)$/, m => 'Divine power condition: ' + CIV_COND_EN(m[1])],
+  [/^Passif : (.+)$/, m => 'Passive: ' + CIV_PASSIVE_EN(m[1])],
   [/^(\d+) s$/, m => m[1] + ' s'],
   [/^(.+) : (.+) !$/, m => { if (!EN[m[1]]) return null; const k = Object.keys(EN).find(x => x.replace(/^\d+ s : /, '') === m[2]);
     return WX(m[1]) + ': ' + (EN[m[2]] || (k ? EN[k] : m[2]).replace(/^\d+ s: /, '')) + '!'; }],
@@ -1875,6 +1890,7 @@ Object.assign(EN, {
   'Prend possession d’une tour standard adverse de 50 défenseurs maximum avec sa population': 'Takes over a standard enemy tower of at most 50 defenders, with its population',
   'Prend possession d’une tour adverse classique (pas un bâtiment spécial) avec sa population': 'Takes over a regular enemy tower (not a special building) with its population',
   'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites': 'The sky falls where you tap (a circle half the screen across): enemy towers\u2019 population is halved, enemy units are destroyed',
+  'Le ciel tombe à l’endroit touché : population des tours adverses divisée par 2, unités adverses détruites': 'The sky falls where you tap: enemy towers\u2019 population is halved, enemy units are destroyed',
   'Tue la moitié des unités adverses : celles les plus proches de l’endroit touché (la zone s’ajuste à leur dispersion)': 'Kills half of the enemy units: those closest to where you tap (the area adjusts to how spread out they are)',
   'Tue toutes les unités adverses hors des tours, sur toute la carte, pendant 3 s': 'Kills every enemy unit outside the towers, across the whole map, for 3 s',
   'Change une de tes tours classiques en caserne pleine': 'Turns one of your regular towers into a full barracks'
@@ -1950,7 +1966,7 @@ Object.assign(EN, {
   "Scores des défis du mois": "Monthly challenge scores",
   "Enregistrement de ton temps…": "Saving your time…",
   "Temps enregistré dans ton compte.": "Time saved to your account.",
-  "Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie. En campagne, les civilisations que tu peux adopter s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles.": "Each civilization has a permanent passive power, a civilization power and a divine power, each usable once per game. In the campaign, the civilizations you can adopt open up chapter by chapter; in challenges, all are available.",
+  "Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie.": "Each civilization has a permanent passive power, a civilization power and a divine power, each usable once per game.",
   "Nouveau : la super-tour, marquée d’une étoile dorée. Elle monte jusqu’à 80 défenseurs et produit 20 % de plus que les autres tours. Prends-la avant l’adversaire !": "New: the super tower, marked with a golden star. It holds up to 80 defenders and produces 20% more than other towers. Take it before your opponent!",
   "Nouveau : la tour de tir. En plus de produire, elle tire sur les unités et les tours adverses dans son cercle en pointillés.": "New: the shooting tower. As well as producing, it fires at enemy units and towers within its dotted circle.",
   "Nouveau : la caserne. Quand elle envoie des troupes, ce sont des blindés (attaque 10, vie 10). Sans chemin, elle se remplit comme une tour classique.": "New: the barracks. When it sends troops, they are armoured units (attack 10, life 10). Without a path, it fills up like a regular tower.",
@@ -2789,8 +2805,22 @@ const mineHtml = (best, n) => !best ? none('Pas encore joué')
   : best.times.length + '/' + n + '<small>manche' + (best.times.length > 1 ? 's' : '') + ' gagnée' + (best.times.length > 1 ? 's' : '') + '</small>';
 const boxHtml = (id, best, n) => `<div class="prebox"><div><span>Top 3 en ligne</span><strong>${podiumHtml(id)}</strong></div>`
   + `<div><span>Ton meilleur</span><strong>${mineHtml(best, n)}</strong></div></div>`;
-// Défis du jour : trois cartes en tête de l'onglet
+// Carte compacte d'un défi (jour ou mois) : difficulté, adversaires et date ; tours et civilisations affrontées ;
+// scores ; Jouer, ou Rejouer et Partager (lien avec son meilleur temps)
 function defiCard(full, badge, ch) {
+  const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
+  const cls = won ? rankClass(ch.id, true) : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
+  const g = ch.games[0], foes = aiCivsFor(g.seed, g.opponents);
+  return `<div class="hist dcard${cls}">
+      <div class="dl1"><span class="chip">${TIERS[ch.difficulty].name}</span><span class="chip">1v${g.opponents}</span><span class="ddate">${badge}</span></div>
+      <div class="dl2"><span class="specs">${specIcons(ch)}</span><span class="dfoes">${foes.map(([k, f]) => banIco(f)).join('')}</span></div>
+      ${boxHtml(ch.id, best, ch.games.length)}
+      <div class="hbtns">${S.latest && canResume(S.latest) ? `<button data-resume="${S.latest.id}">Reprendre</button>` : ''}`
+      + (S.list.length ? `<button data-daily="${ch.id}" data-label="${full}">Rejouer</button><button data-share="${escapeHtml(ch.id)}"${won ? ` data-t="${best.total}"` : ''}>Partager</button>`
+                       : `<button class="primary" data-daily="${ch.id}" data-label="${full}">Jouer</button>`) + `</div>
+    </div>`;
+}
+function defiCardOld(full, badge, ch) {
   const S = summary(ch.id), best = S.mine, won = best && best.status === 'réussi';
   const cls = won ? rankClass(ch.id, true) : S.list.some(x => x.status === 'échoué') ? ' lose' : '';
   return `<div class="hist${cls}">
@@ -2803,20 +2833,20 @@ function defiCard(full, badge, ch) {
 }
 function renderMonthly() {
   const list = monthlyChallenges(), m = list[0].month.split('-').reverse().join('/');
-  $('monthList').innerHTML = [2, 3].map(d => `<p class="lbl">${TIERS[d].name}</p>`
-    + list.filter(x => x.ch.difficulty === d).map(x => defiCard('Défi du mois, ' + x.label, m, x.ch)).join('')).join('');
+  $('monthList').innerHTML = list.map(x => defiCard('Défi du mois, ' + x.label, m, x.ch)).join('');
 }
 function renderDaily() {
   $('dailyList').innerHTML = dailyChallenges().map(({ label, day, ch }) => defiCard('Défi du jour, ' + label, day.split('-').reverse().join('/'), ch)).join('');
 }
 function renderDefiTab() {
-  renderDaily();
-  if (!$('defiMonth').classList.contains('hidden')) renderMonthly();
+  // la position de défilement des carrousels est conservée lors des rafraîchissements
+  const sx = [$('dailyList').scrollLeft, $('monthList').scrollLeft];
+  renderDaily(); renderMonthly();
+  $('dailyList').scrollLeft = sx[0]; $('monthList').scrollLeft = sx[1];
   const ids = dailyChallenges().map(x => x.ch.id).concat(monthlyChallenges().map(x => x.ch.id));
-  fetchRecords(ids).then(ok => { if (ok) { renderDaily(); if (!$('defiMonth').classList.contains('hidden')) renderMonthly(); } });
+  fetchRecords(ids).then(ok => { if (ok) { const s2 = [$('dailyList').scrollLeft, $('monthList').scrollLeft];
+    renderDaily(); renderMonthly(); $('dailyList').scrollLeft = s2[0]; $('monthList').scrollLeft = s2[1]; } });
 }
-$('btnMonth').onclick = () => { $('defiNew').classList.add('hidden'); $('defiMonth').classList.remove('hidden'); renderMonthly(); renderDefiTab(); };
-$('btnMonthBack').onclick = () => { $('defiMonth').classList.add('hidden'); $('defiNew').classList.remove('hidden'); renderDefiTab(); };
 // Historique : une carte par défi (essais regroupés). Cadre vert : réussi avec le meilleur temps connu ;
 // jaune : réussi sans battre le record en ligne ; rouge : jamais réussi ; gris : abandonné ou en cours
 function renderHist() {
@@ -2868,7 +2898,7 @@ function onDefiClick(e) {
   const sh = e.target.closest('[data-share]'), dy = e.target.closest('[data-daily]');
   if (rs) { const x = findEntry(rs.dataset.resume); if (x && canResume(x)) preDefi(x.challenge, x.source, null, x); }
   if (rp) { const x = findEntry(rp.dataset.replay); if (x) preDefi(x.challenge, x.source); }
-  if (sh) shareId(sh.dataset.share);
+  if (sh) shareId(sh.dataset.share, sh.dataset.t ? +sh.dataset.t : undefined);   // avec le meilleur temps s'il est connu
   if (dy) { const ch = decodeChallenge(dy.dataset.daily); if (ch) preDefi(ch, /mois/.test(dy.dataset.label) ? 'du mois' : 'du jour', dy.dataset.label); }
 }
 $('histList').addEventListener('click', onDefiClick);
@@ -5436,30 +5466,13 @@ document.querySelector('#menu .menuhead').addEventListener('click', e => {
 // Onglet choisi par le joueur : retour à l'accueil de l'onglet (sortie des défis du mois, de l'historique,
 // du tableau des scores) et en haut de la page
 function openTab(name) {
-  if (name === 'free') { $('defiMonth').classList.add('hidden'); $('defiHist').classList.add('hidden'); $('defiNew').classList.remove('hidden'); }
+  if (name === 'free') { $('defiHist').classList.add('hidden'); $('defiNew').classList.remove('hidden'); }
   $('board').classList.add('hidden');
   showTab(name);
   document.querySelector('#menu .panel').scrollTop = 0;
   if (name === 'campaign' && account) fetchAll();  // joueur connecté : avancement relu en ligne (au plus toutes les 20 s)
 }
-// Glisser vers la gauche ou la droite : onglet voisin (Campagne, Défis, Multi)
-(() => {
-  const panel = document.querySelector('#menu .panel');
-  let sx = 0, sy = 0, on = false;
-  panel.addEventListener('touchstart', e => {
-    if (e.touches.length !== 1 || e.target.closest('textarea,input')) { on = false; return; }
-    on = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-  }, { passive: true });
-  panel.addEventListener('touchend', e => {
-    if (!on) return; on = false;
-    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // geste surtout horizontal
-    const order = ['campaign', 'free', 'multi'], i = order.indexOf(menuTab);
-    if (i < 0) return;
-    if (dx < 0 && i < order.length - 1) openTab(order[i + 1]);
-    else if (dx > 0 && i > 0) openTab(order[i - 1]);
-  }, { passive: true });
-})();
+// (navigation entre onglets par glissement supprimée : les carrousels de défis se font glisser)
 ['segOpp', 'segDiff', 'segGames'].forEach(id => $(id).addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   [...$(id).children].forEach(x => x.classList.toggle('on', x === b));
@@ -5632,21 +5645,20 @@ function renderCivs() {
   const noCiv = !CIVS[custom.civ];
   $('optFresco').checked = !custom.noFresco && !noCiv; $('optFresco').disabled = noCiv;
   $('optFrescoRow').classList.toggle('off', noCiv);
-  $('civNote').textContent = 'Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie. '
-    + 'En campagne, les civilisations que tu peux adopter s’ouvrent au fil des chapitres ; dans les défis, toutes sont disponibles.';
+  $('civNote').textContent = 'Chaque civilisation a un pouvoir passif permanent, un pouvoir de civilisation et un pouvoir divin, chacun utilisable une fois par partie.';
   $('civGrid').innerHTML = Object.keys(CIVS).map(k => {
-    const c = CIVS[k], on = custom.civ === k && open;
+    const c = CIVS[k], on = custom.civ === k && open, g0 = Object.values(c.factions)[0].god;   // même condition pour les deux peuples
     const facs = Object.keys(c.factions).map(fk => {
       const f = c.factions[fk], fon = on && (custom.fac || Object.keys(c.factions)[0]) === fk;
       return `<button class="fac${fon ? ' on' : ''}" data-civ="${k}" data-fac="${fk}"${open ? '' : ' disabled'}>`
         + `<strong>${banIco(fk)} ${f.name}</strong><span class="intro">${FAC_INTRO[fk]}</span>`
         + `<span class="pw">${f.power.icon} ${f.power.name} : ${f.power.desc}</span>`
-        + `<span class="pw">✨ ${f.god.name} : ${f.god.desc}. Condition : ${GOD_COND[f.god.cond](f.god.need)}</span></button>`;
+        + `<span class="pw">✨ ${f.god.name} : ${f.god.desc}</span></button>`;
     }).join('');
     return `<div class="civ${on ? ' on' : ''}"><div class="civhead">${c.icon} <strong>${c.name}</strong></div>`
       + `<p class="sub intro">${CIV_INTRO[k]}</p>`
       + `<p class="sub"><span>Passif : ${c.passive(c.pct[2])}</span>`
-      + `<span>Skins : ${FAC_SKINS.concat(VIC_SKINS).filter(x => FAC_CIV[x.sprite.replace('v_', '')] === k).map(x => x.name).join(', ')}</span></p><div class="facs">${facs}</div></div>`;
+      + `<span>Condition du pouvoir divin : ${GOD_COND[g0.cond](g0.need)}</span></p><div class="facs">${facs}</div></div>`;
   }).join('') + `<button class="ghost" data-civ=""${custom.civ ? '' : ' disabled'}>Aucune civilisation</button>`;
 }
 $('optFresco').addEventListener('change', e => { custom.noFresco = !e.target.checked; store.set('bastions.custom', custom); });
@@ -5686,7 +5698,7 @@ const CIVS = {
       viking: { name: 'Vikings', power: { name: 'Berserkers', icon: '🪓', dur: 15, kind: 'force', desc: '15 s : tes tours (hors casernes) produisent 25 % moins vite des unités de puissance 2, invincibles face aux unités de puissance 1' },
         god: { name: 'Loki', desc: 'Prend possession d’une tour standard adverse de 50 défenseurs maximum avec sa population', cond: 'damage', need: 600, pick: { n: 1, who: 'enemy', regular: true, maxStock: 50 } } },
       celte: { name: 'Celtes', power: { name: 'Guèdes', icon: '🌿', dur: 15, kind: 'speed', desc: '15 s : production de tes tours +50 % (hors casernes)' },
-        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché (cercle d’un demi-écran de diamètre) : population des tours adverses divisée par 2, unités adverses détruites', cond: 'damage', need: 600, pick: { point: true } } } } },
+        god: { name: 'Toutatis', desc: 'Le ciel tombe à l’endroit touché : population des tours adverses divisée par 2, unités adverses détruites', cond: 'damage', need: 600, pick: { point: true } } } } },
   med: { name: 'Méditerranéens', icon: '🏛️', pct: [12, 12, 12],
     passive: p => '+' + p + ' % de production pour une tour qui renforce une de tes tours de moins de 40 défenseurs',
     factions: {
@@ -5698,7 +5710,7 @@ const CIVS = {
 const GOD_COND = {
   own10: n => n + ' de tes tours à 10 défenseurs ou plus en même temps',
   dead: n => n + ' de tes unités perdues (au combat ou dans tes tours)',
-  damage: n => n + ' dégâts infligés par tes tours et unités (aux tours et unités adverses)',
+  damage: n => n + ' dégâts infligés par tes tours et unités',
   full6: n => n + ' de tes tours à garnison maximale pendant au moins 5 s'
 };
 const civLevel = st => st >= 45 ? 3 : st >= 30 ? 2 : st >= 15 ? 1 : 0;
@@ -6385,7 +6397,7 @@ $('btnPlay').disabled = false;
 /* ================= Mise à jour automatique (version hébergée sur GitHub Pages) =================
    À l'ouverture, le jeu lit l'en-tête de la version publiée (quelques Ko). Si elle est plus récente,
    il la télécharge avec une barre de progression, puis se relance. Hors ligne : on joue avec la version actuelle. */
-const APP_VERSION = '20261120_09';
+const APP_VERSION = '20261120_13';
 async function checkUpdate() {
   if (location.protocol !== 'https:' || !('serviceWorker' in navigator)) return;   // fichier local : pas de vérification
   const box = $('upd'), txt = $('updText'), off = $('btnOffline'), play = $('btnPlay');
